@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 import 'package:laundryan/widgets/wardrobe_icons.dart';
+import 'package:laundryan/widgets/widgets.dart';
 
 class WardrobeDetailScreen extends StatefulWidget {
   const WardrobeDetailScreen({super.key});
@@ -72,7 +73,22 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
         actions: [
           IconButton.filled(
             icon: const Icon(Icons.delete),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () async {
+              final confirmed = await DeleteConfirmSheet.show(
+                context,
+                itemIcon: Icons.checkroom_outlined,
+                itemName: _nameController.text.isEmpty
+                    ? 'Item Pakaian'
+                    : _nameController.text,
+                categoryLabel: selectedCategory,
+                totalQuantity: _quantity,
+                inWardrobeQuantity: _quantity,
+                inUseQuantity: 0,
+              );
+              if (confirmed == true && context.mounted) {
+                Navigator.pop(context);
+              }
+            },
             style: IconButton.styleFrom(
               fixedSize: const Size(40, 40),
               backgroundColor: AppColors.dangerTint,
