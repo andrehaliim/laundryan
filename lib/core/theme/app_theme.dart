@@ -94,6 +94,16 @@ class AppTheme {
         unselectedItemColor: AppColors.richBlack.withValues(alpha: 0.4),
         type: BottomNavigationBarType.fixed,
       ),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          backgroundColor: AppColors.backgroundIconButton,
+          foregroundColor: AppColors.foregroundIconButton,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      )
     );
   }
 }

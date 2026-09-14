@@ -29,4 +29,8 @@ class AppColors {
 
   // Border subtle — richBlack 8-10% sesuai design.md
   static Color get borderSubtle => richBlack.withValues(alpha: 0.08);
+
+    // UI
+  static const backgroundIconButton = Color(0xFFF3F2FF);
+  static const foregroundIconButton = Color(0xFF002A53);
 }

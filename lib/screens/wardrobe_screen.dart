@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
+import 'package:laundryan/screens/wardrobe_detail_screen.dart';
+import 'package:laundryan/widgets/widgets.dart';
 
 class WardrobeScreen extends StatelessWidget {
   const WardrobeScreen({super.key});
@@ -10,6 +13,8 @@ class WardrobeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -25,55 +30,114 @@ class WardrobeScreen extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: null, // disabled dulu, belum ada data buat dicari
-            disabledColor: AppColors.richBlack.withValues(alpha: 0.3),
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Kelola semua pakaian favoritmu di sini.'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  _EmptyStateCard(onAddPressed: () {}),
-                  const SizedBox(height: 24),
-                  const _BenefitsSection(),
-                  const SizedBox(height: 16),
-                  const _TipMicroCard(),
-                  const SizedBox(height: 80), // spasi buat FAB
-                ],
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: _FilledState(),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const WardrobeDetailScreen(),
             ),
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: FloatingActionButton.extended(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text('Item Baru'),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Item Baru'),
+      ),
+    );
+  }
+}
+
+class _FilledState extends StatelessWidget {
+  const _FilledState();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.richBlack.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Cari Pakaian di lemari...',
+                    hintStyle: textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ),
               ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 8),
+        WardrobeFilterChips(),
+        const SizedBox(height: 8),
+        Expanded(
+          child: GridView.builder(
+            itemCount: 10,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+            ),
+            itemBuilder: (context, index) {
+              return WardrobeItemCard(
+                icon: HugeIcons.strokeRoundedJoggerPants,
+                name: 'Celana Jeans',
+                quantityOwned: 2,
+                quantityInUse: 1,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _EmptyStateCard(onAddPressed: () {}),
+        const SizedBox(height: 24),
+        const _BenefitsSection(),
+        const SizedBox(height: 16),
+        const _TipMicroCard(),
+        const SizedBox(height: 80),
+      ],
     );
   }
 }
@@ -95,7 +159,7 @@ class _EmptyStateCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16), // radius-card
         boxShadow: [
           BoxShadow(
-            color: AppColors.richBlack.withValues(alpha: 0.05),
+            color: AppColors.richBlack.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
