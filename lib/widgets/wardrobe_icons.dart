@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 
 class ClothingCategory {
   final String name;
   final String label;
-  final IconData icon;
+  final List<List<dynamic>> icon;
 
   const ClothingCategory({
     required this.name,
@@ -17,42 +18,42 @@ const clothingCategories = [
   ClothingCategory(
     name: 'Kaos / T-Shirt',
     label: 'Kaos',
-    icon: Icons.checkroom_outlined,
+    icon: HugeIcons.strokeRoundedShirt01,
   ),
   ClothingCategory(
     name: 'Kemeja',
     label: 'Kemeja',
-    icon: Icons.business_center_outlined,
+    icon: HugeIcons.strokeRoundedKurta,
   ),
   ClothingCategory(
     name: 'Celana Panjang',
-    label: 'Celana Pjg',
-    icon: Icons.straighten_outlined,
+    label: 'C. Panjang',
+    icon: HugeIcons.strokeRoundedJoggerPants,
   ),
   ClothingCategory(
     name: 'Celana Pendek',
-    label: 'Pendek',
-    icon: Icons.short_text_outlined,
+    label: 'C. Pendek',
+    icon: HugeIcons.strokeRoundedBoxer,
   ),
   ClothingCategory(
     name: 'Jaket / Hoodie',
     label: 'Jaket',
-    icon: Icons.wb_sunny_outlined,
+    icon: HugeIcons.strokeRoundedHoodie,
   ),
   ClothingCategory(
     name: 'Kaos Kaki',
     label: 'Kaos Kaki',
-    icon: Icons.snowshoeing_outlined,
+    icon: HugeIcons.strokeRoundedSocks,
   ),
   ClothingCategory(
     name: 'Pakaian Dalam',
-    label: 'Undies',
-    icon: Icons.dry_cleaning_outlined,
+    label: 'Underwear',
+    icon: HugeIcons.strokeRoundedUnderpants01,
   ),
   ClothingCategory(
-    name: 'Handuk / Linen',
-    label: 'Handuk',
-    icon: Icons.layers_outlined,
+    name: 'Lainnya',
+    label: 'Other',
+    icon: HugeIcons.strokeRoundedHanger,
   ),
 ];
 
@@ -156,8 +157,7 @@ class _CategoryItem extends StatelessWidget {
                       // Icon circle
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
-                        width: 40,
-                        height: 40,
+                        padding: const EdgeInsets.all(6),
                         margin: const EdgeInsets.only(bottom: 4),
                         decoration: BoxDecoration(
                           color: isSelected
@@ -167,9 +167,10 @@ class _CategoryItem extends StatelessWidget {
                               : AppColors.backgroundIconButton,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          category.icon,
-                          size: 24,
+                        child: HugeIcon(
+                          icon: category.icon,
+                          size: 32,
+                          strokeWidth: 1.5,
                           color: isSelected
                               ? AppColors.offWhite
                               : AppColors.royalBlue,
