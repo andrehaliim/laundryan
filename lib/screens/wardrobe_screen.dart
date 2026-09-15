@@ -7,11 +7,25 @@ import 'package:laundryan/screens/wardrobe_detail_screen.dart';
 import 'package:laundryan/widgets/wardrobe_icons.dart';
 import 'package:laundryan/widgets/widgets.dart';
 
-class WardrobeScreen extends ConsumerWidget {
+class WardrobeScreen extends ConsumerStatefulWidget {
   const WardrobeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WardrobeScreen> createState() => _WardrobeScreenState();
+}
+
+class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final itemsAsync = ref.watch(wardrobeItemsStreamProvider);
     final textTheme = Theme.of(context).textTheme;
 
@@ -29,7 +43,9 @@ class WardrobeScreen extends ConsumerWidget {
             itemsAsync.when(
               data: (items) => Text(
                 '${items.length} Pakaian Terdaftar',
-                style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
@@ -41,9 +57,27 @@ class WardrobeScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: itemsAsync.when(
-            data: (items) => items.isEmpty
-                ? const _EmptyState()
-                : _FilledState(items: items),
+            data: (items) {
+              if (items.isEmpty) return const _EmptyState();
+
+              final filteredItems = _searchQuery.isEmpty
+                  ? items
+                  : items
+                        .where(
+                          (item) => item.name.toLowerCase().contains(
+                            _searchQuery.toLowerCase(),
+                          ),
+                        )
+                        .toList();
+
+              return _FilledState(
+                items: filteredItems,
+                searchController: _searchController,
+                onSearchChanged: (value) =>
+                    setState(() => _searchQuery = value),
+                isSearching: _searchQuery.isNotEmpty,
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('Error: $error')),
           ),
@@ -66,9 +100,20 @@ class WardrobeScreen extends ConsumerWidget {
 }
 
 class _FilledState extends StatelessWidget {
-  const _FilledState({required this.items});
+  const _FilledState({
+    required this.items,
+    required this.searchController,
+    required this.onSearchChanged,
+    required this.isSearching,
+  });
 
   final List<WardrobeItem> items;
+
+  final TextEditingController searchController;
+
+  final ValueChanged<String> onSearchChanged;
+
+  final bool isSearching;
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +137,27 @@ class _FilledState extends StatelessWidget {
                   ],
                 ),
                 child: TextField(
+                  controller: searchController,
                   decoration: InputDecoration(
                     hintText: 'Cari Pakaian di lemari...',
                     hintStyle: textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
                     prefixIcon: const Icon(Icons.search),
+                    suffixIcon: isSearching
+                        ? IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              searchController.clear();
+                              onSearchChanged('');
+                            },
+                            style: const ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : null,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -106,6 +166,7 @@ class _FilledState extends StatelessWidget {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
+                  onChanged: onSearchChanged,
                 ),
               ),
             ),
@@ -115,39 +176,76 @@ class _FilledState extends StatelessWidget {
         WardrobeFilterChips(),
         const SizedBox(height: 8),
         Expanded(
-          child: GridView.builder(
-            itemCount: items.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-            ),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              final category = clothingCategories.firstWhere(
-                (c) => c.name == item.iconName,
-                orElse: () => clothingCategories.last,
-              );
+          child: items.isEmpty
+              ? _NoSearchResults(query: searchController.text)
+              : GridView.builder(
+                  itemCount: items.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    final category = clothingCategories.firstWhere(
+                      (c) => c.name == item.iconName,
+                      orElse: () => clothingCategories.last,
+                    );
 
-              return WardrobeItemCard(
-                icon: category.icon,
-                name: item.name,
-                quantityOwned: item.quantityOwned,
-                quantityInUse: 0,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          WardrobeDetailScreen(existingItem: item),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                    return WardrobeItemCard(
+                      icon: category.icon,
+                      name: item.name,
+                      quantityOwned: item.quantityOwned,
+                      quantityInUse: 0,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WardrobeDetailScreen(existingItem: item),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
         ),
       ],
+    );
+  }
+}
+
+class _NoSearchResults extends StatelessWidget {
+  const _NoSearchResults({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 48,
+              color: AppColors.textSecondary,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Tidak ada hasil untuk "$query"',
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
