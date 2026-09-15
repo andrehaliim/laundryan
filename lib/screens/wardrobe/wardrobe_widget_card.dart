@@ -65,7 +65,9 @@ class WardrobeCard extends ConsumerWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.successTint,
+                      color: hasQuantityInUse
+                          ? AppColors.warningTint
+                          : AppColors.successTint,
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -92,7 +94,7 @@ class WardrobeCard extends ConsumerWidget {
               ),
               itemsAsync.when(
                 data: (items) => Text(
-                  '${items.length} di lemari',
+                  '$quantityOwned di lemari',
                   style: textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),

@@ -286,51 +286,6 @@ class _WardrobeDetailScreenState extends ConsumerState<WardrobeAddEditScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Kategori Sistem — synced dgn icon grid di atas
-                      Text(
-                        'Kategori Sistem',
-                        style: textTheme.labelMedium?.copyWith(
-                          color: AppColors.royalBlue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedCategory,
-                        icon: const Icon(Icons.unfold_more, size: 20),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: AppColors.backgroundIconButton,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 4,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        items: clothingCategories
-                            .map(
-                              (c) => DropdownMenuItem(
-                                value: c.name,
-                                child: Text(
-                                  c.name,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.richBlack,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value == null) return;
-                          setState(() => selectedCategory = value);
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
                       // Catatan Varian / Warna (opsional)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
