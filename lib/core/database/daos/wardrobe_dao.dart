@@ -1,11 +1,13 @@
 import 'package:drift/drift.dart';
+
 import '../app_database.dart';
 import '../tables/wardrobe_items.dart';
 
 part 'wardrobe_dao.g.dart';
 
 @DriftAccessor(tables: [WardrobeItems])
-class WardrobeDao extends DatabaseAccessor<AppDatabase> with _$WardrobeDaoMixin {
+class WardrobeDao extends DatabaseAccessor<AppDatabase>
+    with _$WardrobeDaoMixin {
   WardrobeDao(super.db);
 
   // Reactive stream — dipakai di Wardrobe screen biar auto-update pas quantity berubah
@@ -39,5 +41,13 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase> with _$WardrobeDaoMixin 
     await (update(wardrobeItems)..where((t) => t.id.equals(itemId))).write(
       WardrobeItemsCompanion(quantityOwned: Value(newQty)),
     );
+  }
+
+  Future<WardrobeItem?> findByNameIgnoreCase(String name) async {
+    final items = await select(wardrobeItems).get();
+    for (final item in items) {
+      if (item.name.toLowerCase() == name.toLowerCase()) return item;
+    }
+    return null;
   }
 }

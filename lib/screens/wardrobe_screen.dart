@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:laundryan/core/database/app_database.dart';
+import 'package:laundryan/core/providers/wardrobe_providers.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 import 'package:laundryan/screens/wardrobe_detail_screen.dart';
+import 'package:laundryan/widgets/wardrobe_icons.dart';
 import 'package:laundryan/widgets/widgets.dart';
 
-class WardrobeScreen extends StatelessWidget {
+class WardrobeScreen extends ConsumerWidget {
   const WardrobeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final itemsAsync = ref.watch(wardrobeItemsStreamProvider);
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -22,11 +26,13 @@ class WardrobeScreen extends StatelessWidget {
               'Wardrobe Saya',
               style: textTheme.titleLarge?.copyWith(color: AppColors.royalBlue),
             ),
-            Text(
-              '0 Pakaian Terdaftar',
-              style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+            itemsAsync.when(
+              data: (items) => Text(
+                '${items.length} Pakaian Terdaftar',
+                style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
           ],
         ),
@@ -34,7 +40,13 @@ class WardrobeScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: _FilledState(),
+          child: itemsAsync.when(
+            data: (items) => items.isEmpty
+                ? const _EmptyState()
+                : _FilledState(items: items),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(child: Text('Error: $error')),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -54,7 +66,9 @@ class WardrobeScreen extends StatelessWidget {
 }
 
 class _FilledState extends StatelessWidget {
-  const _FilledState();
+  const _FilledState({required this.items});
+
+  final List<WardrobeItem> items;
 
   @override
   Widget build(BuildContext context) {
@@ -102,18 +116,33 @@ class _FilledState extends StatelessWidget {
         const SizedBox(height: 8),
         Expanded(
           child: GridView.builder(
-            itemCount: 10,
+            itemCount: items.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
             ),
             itemBuilder: (context, index) {
+              final item = items[index];
+              final category = clothingCategories.firstWhere(
+                (c) => c.name == item.iconName,
+                orElse: () => clothingCategories.last,
+              );
+
               return WardrobeItemCard(
-                icon: HugeIcons.strokeRoundedJoggerPants,
-                name: 'Celana Jeans',
-                quantityOwned: 2,
-                quantityInUse: 1,
+                icon: category.icon,
+                name: item.name,
+                quantityOwned: item.quantityOwned,
+                quantityInUse: 0,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          WardrobeDetailScreen(existingItem: item),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -124,20 +153,22 @@ class _FilledState extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({super.key});
+  const _EmptyState();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _EmptyStateCard(onAddPressed: () {}),
-        const SizedBox(height: 24),
-        const _BenefitsSection(),
-        const SizedBox(height: 16),
-        const _TipMicroCard(),
-        const SizedBox(height: 80),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _EmptyStateCard(onAddPressed: () {}),
+          const SizedBox(height: 24),
+          const _BenefitsSection(),
+          const SizedBox(height: 16),
+          const _TipMicroCard(),
+          const SizedBox(height: 80),
+        ],
+      ),
     );
   }
 }

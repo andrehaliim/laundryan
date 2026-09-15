@@ -6,3 +6,4 @@ export 'session_card.dart';
 export 'wardrobe_item_card.dart';
 export 'wardrobe_filter_chips.dart';
 export 'delete_confirm_sheet.dart';
+export 'duplicate_item_dialog.dart';

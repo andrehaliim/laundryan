@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:laundryan/core/database/app_database.dart';
+import 'package:laundryan/core/providers/database_provider.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 import 'package:laundryan/widgets/wardrobe_icons.dart';
 import 'package:laundryan/widgets/widgets.dart';
 
-class WardrobeDetailScreen extends StatefulWidget {
-  const WardrobeDetailScreen({super.key});
+class WardrobeDetailScreen extends ConsumerStatefulWidget {
+  const WardrobeDetailScreen({super.key, this.existingItem});
+
+  final WardrobeItem? existingItem;
 
   @override
-  State<WardrobeDetailScreen> createState() => _WardrobeDetailScreenState();
+  ConsumerState<WardrobeDetailScreen> createState() =>
+      _WardrobeDetailScreenState();
 }
 
-class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
-    with SingleTickerProviderStateMixin {
-  String selectedCategory = 'Celana Panjang';
-  final _nameController = TextEditingController();
-  final _notesController = TextEditingController();
+class _WardrobeDetailScreenState extends ConsumerState<WardrobeDetailScreen> {
+  late String selectedCategory;
+  late final TextEditingController _nameController;
+  late final TextEditingController _notesController;
 
   int _quantity = 1;
   static const _minQty = 1;
   static const _maxQty = 99;
+
+  bool get _isEditMode => widget.existingItem != null;
 
   void _updateQuantity(int newVal) {
     setState(() => _quantity = newVal.clamp(_minQty, _maxQty));
@@ -27,6 +34,11 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
   @override
   void initState() {
     super.initState();
+    final existing = widget.existingItem;
+    selectedCategory = existing?.iconName ?? 'Celana Panjang';
+    _nameController = TextEditingController(text: existing?.name ?? '');
+    _notesController = TextEditingController();
+    _quantity = existing?.quantityOwned ?? 1;
   }
 
   @override
@@ -34,6 +46,89 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
     _nameController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _save() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nama pakaian wajib diisi')));
+      return;
+    }
+
+    final dao = ref.read(wardrobeDaoProvider);
+
+    if (_isEditMode) {
+      // Edit mode — langsung update, skip duplicate check
+      // (kalau user gak ganti nama ke nama lain yang udah ada)
+      await dao.updateItem(
+        widget.existingItem!
+            .copyWith(
+              name: name,
+              iconName: selectedCategory,
+              quantityOwned: _quantity,
+            )
+            .toCompanion(true),
+      );
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
+    final existing = await dao.findByNameIgnoreCase(name);
+    if (existing != null) {
+      final action = await DuplicateItemDialog.show(context, itemName: name);
+
+      switch (action) {
+        case DuplicateItemAction.merge:
+          await dao.incrementQuantity(existing.id, _quantity);
+          break;
+        case DuplicateItemAction.createNew:
+          await dao.insertItem(
+            WardrobeItemsCompanion.insert(
+              name: name,
+              iconName: selectedCategory,
+              quantityOwned: _quantity,
+            ),
+          );
+          break;
+        case DuplicateItemAction.cancel:
+          return;
+      }
+    } else {
+      await dao.insertItem(
+        WardrobeItemsCompanion.insert(
+          name: name,
+          iconName: selectedCategory,
+          quantityOwned: _quantity,
+        ),
+      );
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pakaian berhasil disimpan')),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> _delete() async {
+    final confirmed = await DeleteConfirmSheet.show(
+      context,
+      itemIcon: Icons.checkroom_outlined,
+      itemName: _nameController.text.isEmpty
+          ? 'Item Pakaian'
+          : _nameController.text,
+      categoryLabel: selectedCategory,
+      totalQuantity: _quantity,
+      inWardrobeQuantity: _quantity,
+      inUseQuantity: 0, // TODO: hitung dari SessionItems aktif pas Fase 5/6
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(wardrobeDaoProvider).deleteItem(widget.existingItem!.id);
+      if (mounted) Navigator.pop(context);
+    }
   }
 
   @override
@@ -44,7 +139,6 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
-
         leadingWidth: 56,
         leading: Center(
           child: IconButton(
@@ -53,12 +147,11 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
             style: IconButton.styleFrom(fixedSize: const Size(40, 40)),
           ),
         ),
-
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Tambah ke Wardrobe',
+              _isEditMode ? 'Edit Wardrobe' : 'Tambah ke Wardrobe',
               style: textTheme.titleLarge?.copyWith(color: AppColors.royalBlue),
             ),
             Text(
@@ -69,32 +162,17 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
             ),
           ],
         ),
-
         actions: [
-          IconButton.filled(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final confirmed = await DeleteConfirmSheet.show(
-                context,
-                itemIcon: Icons.checkroom_outlined,
-                itemName: _nameController.text.isEmpty
-                    ? 'Item Pakaian'
-                    : _nameController.text,
-                categoryLabel: selectedCategory,
-                totalQuantity: _quantity,
-                inWardrobeQuantity: _quantity,
-                inUseQuantity: 0,
-              );
-              if (confirmed == true && context.mounted) {
-                Navigator.pop(context);
-              }
-            },
-            style: IconButton.styleFrom(
-              fixedSize: const Size(40, 40),
-              backgroundColor: AppColors.dangerTint,
-              foregroundColor: AppColors.danger,
+          if (_isEditMode)
+            IconButton.filled(
+              icon: const Icon(Icons.delete),
+              onPressed: _delete,
+              style: IconButton.styleFrom(
+                fixedSize: const Size(40, 40),
+                backgroundColor: AppColors.dangerTint,
+                foregroundColor: AppColors.danger,
+              ),
             ),
-          ),
           const SizedBox(width: 8),
         ],
       ),
@@ -459,22 +537,9 @@ class _WardrobeDetailScreenState extends State<WardrobeDetailScreen>
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      final saved = await Future.delayed(
-                        const Duration(seconds: 1),
-                        () => true,
-                      );
-                      if (mounted && saved) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Pakaian berhasil disimpan'),
-                          ),
-                        );
-                        Navigator.pop(context);
-                      }
-                    },
+                    onPressed: _save,
                     child: Text(
-                      'Simpan ke Wardrobe',
+                      _isEditMode ? 'Update Wardrobe' : 'Simpan ke Wardrobe',
                       style: textTheme.titleMedium?.copyWith(
                         color: AppColors.offWhite,
                         fontWeight: FontWeight.bold,
