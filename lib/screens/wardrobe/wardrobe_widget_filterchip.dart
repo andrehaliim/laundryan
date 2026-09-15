@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
+import 'package:laundryan/screens/wardrobe/wardrobe_icons.dart';
 
 class WardrobeFilterChips extends StatefulWidget {
   const WardrobeFilterChips({super.key, this.onFilterChanged});
@@ -11,18 +12,16 @@ class WardrobeFilterChips extends StatefulWidget {
 }
 
 class _WardrobeFilterChipsState extends State<WardrobeFilterChips> {
-  static const List<WardrobeFilterOption> _options = [
-    WardrobeFilterOption(label: 'Semua', count: 28),
-    WardrobeFilterOption(
+  final List<WardrobeFilterOption> _options = [
+    const WardrobeFilterOption(label: 'Semua', count: 0),
+    const WardrobeFilterOption(
       label: 'Sedang Dicuci',
-      count: 14,
+      count: 0,
       showWarningDot: true,
     ),
-    WardrobeFilterOption(label: 'Kaos & Polo', count: 10),
-    WardrobeFilterOption(label: 'Kemeja', count: 5),
-    WardrobeFilterOption(label: 'Celana', count: 7),
-    WardrobeFilterOption(label: 'Jaket & Luaran', count: 3),
-    WardrobeFilterOption(label: 'Aksesoris', count: 3),
+    ...clothingCategories.map((c) {
+      return WardrobeFilterOption(label: c.name, count: 0);
+    }),
   ];
 
   int _selectedIndex = 0;

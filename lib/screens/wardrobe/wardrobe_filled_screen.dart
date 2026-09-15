@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:laundryan/core/database/app_database.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 import 'package:laundryan/screens/wardrobe/wardrobe_addedit_screen.dart';
@@ -6,7 +7,7 @@ import 'package:laundryan/screens/wardrobe/wardrobe_widget_filterchip.dart';
 import 'package:laundryan/screens/wardrobe/wardrobe_icons.dart';
 import 'package:laundryan/screens/wardrobe/wardrobe_widget_card.dart';
 
-class WardrobeFilledScreen extends StatelessWidget {
+class WardrobeFilledScreen extends ConsumerStatefulWidget {
   const WardrobeFilledScreen({
     super.key,
     required this.items,
@@ -19,6 +20,14 @@ class WardrobeFilledScreen extends StatelessWidget {
   final TextEditingController searchController;
   final ValueChanged<String> onSearchChanged;
   final bool isSearching;
+
+  @override
+  ConsumerState<WardrobeFilledScreen> createState() =>
+      _WardrobeFilledScreenState();
+}
+
+class _WardrobeFilledScreenState extends ConsumerState<WardrobeFilledScreen> {
+  String _filterQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -42,19 +51,19 @@ class WardrobeFilledScreen extends StatelessWidget {
                   ],
                 ),
                 child: TextField(
-                  controller: searchController,
+                  controller: widget.searchController,
                   decoration: InputDecoration(
                     hintText: 'Cari Pakaian di lemari...',
                     hintStyle: textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
                     prefixIcon: const Icon(Icons.search),
-                    suffixIcon: isSearching
+                    suffixIcon: widget.isSearching
                         ? IconButton(
                             icon: const Icon(Icons.close),
                             onPressed: () {
-                              searchController.clear();
-                              onSearchChanged('');
+                              widget.searchController.clear();
+                              widget.onSearchChanged('');
                             },
                             style: const ButtonStyle(
                               backgroundColor: WidgetStatePropertyAll(
@@ -71,49 +80,77 @@ class WardrobeFilledScreen extends StatelessWidget {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
-                  onChanged: onSearchChanged,
+                  onChanged: widget.onSearchChanged,
                 ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        WardrobeFilterChips(),
+        WardrobeFilterChips(
+          onFilterChanged: (value) => setState(() => _filterQuery = value),
+        ),
         const SizedBox(height: 8),
-        Expanded(
-          child: items.isEmpty
-              ? _NoSearchResults(query: searchController.text)
-              : GridView.builder(
-                  itemCount: items.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    final category = clothingCategories.firstWhere(
-                      (c) => c.name == item.iconName,
-                      orElse: () => clothingCategories.last,
-                    );
+        Builder(
+          builder: (context) {
+            final filteredItems =
+                _filterQuery.isEmpty ||
+                    _filterQuery == 'Semua' ||
+                    _filterQuery == 'Sedang Dicuci'
+                ? widget.items
+                : widget.items
+                      .where(
+                        (item) => item.iconName.toLowerCase().contains(
+                          _filterQuery.toLowerCase(),
+                        ),
+                      )
+                      .toList();
 
-                    return WardrobeCard(
-                      icon: category.icon,
-                      name: item.name,
-                      quantityOwned: item.quantityOwned,
-                      quantityInUse: 0,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                WardrobeAddEditScreen(existingItem: item),
-                          ),
-                        );
-                      },
-                    );
-                  },
+            if (filteredItems.isEmpty) {
+              return Expanded(
+                child: _NoSearchResults(
+                  query: widget.searchController.text.isNotEmpty
+                      ? widget.searchController.text
+                      : _filterQuery,
                 ),
+              );
+            }
+
+            return Expanded(
+              child: GridView.builder(
+                itemCount: filteredItems.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                ),
+                itemBuilder: (context, index) {
+                  final item = filteredItems[index];
+
+                  final category = clothingCategories.firstWhere(
+                    (c) => c.name == item.iconName,
+                    orElse: () => clothingCategories.last,
+                  );
+
+                  return WardrobeCard(
+                    icon: category.icon,
+                    name: item.name,
+                    quantityOwned: item.quantityOwned,
+                    quantityInUse: index,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              WardrobeAddEditScreen(existingItem: item),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
         ),
       ],
     );

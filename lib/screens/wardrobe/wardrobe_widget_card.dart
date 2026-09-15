@@ -20,6 +20,8 @@ class WardrobeCard extends ConsumerWidget {
   final int? quantityInUse;
   final VoidCallback? onTap;
 
+  bool get hasQuantityInUse => quantityInUse != null && quantityInUse! > 0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
@@ -42,6 +44,7 @@ class WardrobeCard extends ConsumerWidget {
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
@@ -52,26 +55,28 @@ class WardrobeCard extends ConsumerWidget {
                     child: HugeIcon(
                       icon: icon,
                       strokeWidth: 1.5,
-                      size: 30,
+                      size: 24,
                       color: AppColors.royalBlue,
                     ),
                   ),
-                  Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.warningTint,
+                      color: AppColors.successTint,
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      '$quantityInUse dicuci',
+                      hasQuantityInUse ? '$quantityInUse dicuci' : 'Available',
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.warning,
+                        color: hasQuantityInUse
+                            ? AppColors.warning
+                            : AppColors.success,
                         fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 2,
                     ),
                   ),
                 ],
@@ -81,14 +86,14 @@ class WardrobeCard extends ConsumerWidget {
                 name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: textTheme.titleMedium?.copyWith(
+                style: textTheme.titleLarge?.copyWith(
                   color: AppColors.royalBlue,
                 ),
               ),
               itemsAsync.when(
                 data: (items) => Text(
                   '${items.length} di lemari',
-                  style: textTheme.bodySmall?.copyWith(
+                  style: textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
