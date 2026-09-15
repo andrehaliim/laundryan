@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:laundryan/core/providers/wardrobe_providers.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 
-class WardrobeItemCard extends StatelessWidget {
-  const WardrobeItemCard({
+class WardrobeCard extends ConsumerWidget {
+  const WardrobeCard({
     super.key,
     required this.icon,
     required this.name,
@@ -19,12 +21,13 @@ class WardrobeItemCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final itemsAsync = ref.watch(wardrobeItemsStreamProvider);
 
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(12), // radius-card
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -82,13 +85,15 @@ class WardrobeItemCard extends StatelessWidget {
                   color: AppColors.royalBlue,
                 ),
               ),
-              Text(
-                '0 di lemari',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+              itemsAsync.when(
+                data: (items) => Text(
+                  '${items.length} di lemari',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
               Spacer(),
               Text(

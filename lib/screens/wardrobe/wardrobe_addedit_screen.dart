@@ -3,20 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:laundryan/core/database/app_database.dart';
 import 'package:laundryan/core/providers/database_provider.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
-import 'package:laundryan/widgets/wardrobe_icons.dart';
+import 'package:laundryan/screens/wardrobe/wardrobe_icons.dart';
 import 'package:laundryan/widgets/widgets.dart';
 
-class WardrobeDetailScreen extends ConsumerStatefulWidget {
-  const WardrobeDetailScreen({super.key, this.existingItem});
+class WardrobeAddEditScreen extends ConsumerStatefulWidget {
+  const WardrobeAddEditScreen({super.key, this.existingItem});
 
   final WardrobeItem? existingItem;
 
   @override
-  ConsumerState<WardrobeDetailScreen> createState() =>
+  ConsumerState<WardrobeAddEditScreen> createState() =>
       _WardrobeDetailScreenState();
 }
 
-class _WardrobeDetailScreenState extends ConsumerState<WardrobeDetailScreen> {
+class _WardrobeDetailScreenState extends ConsumerState<WardrobeAddEditScreen> {
   late String selectedCategory;
   late final TextEditingController _nameController;
   late final TextEditingController _notesController;

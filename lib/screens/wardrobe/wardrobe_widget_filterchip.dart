@@ -1,25 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 
-/// Data dummy satu filter chip — nanti gampang diganti sumbernya
-/// dari Drift query (COUNT per kategori / status) pas Fase 4.
-class WardrobeFilterOption {
-  const WardrobeFilterOption({
-    required this.label,
-    required this.count,
-    this.showWarningDot = false,
-  });
-
-  final String label;
-  final int count;
-
-  /// Dipakai khusus buat chip "Sedang Dicuci" — dot kuning kecil
-  /// sebelum label, nunjukin ini status bukan kategori biasa.
-  final bool showWarningDot;
-}
-
-/// Row filter chip horizontal-scroll buat Wardrobe screen.
-/// "Semua" & "Sedang Dicuci" wajib ada, sisanya kategori dummy.
 class WardrobeFilterChips extends StatefulWidget {
   const WardrobeFilterChips({super.key, this.onFilterChanged});
 
@@ -30,8 +11,6 @@ class WardrobeFilterChips extends StatefulWidget {
 }
 
 class _WardrobeFilterChipsState extends State<WardrobeFilterChips> {
-  // Dummy data — urutan "Semua" dan "Sedang Dicuci" di depan itu wajib,
-  // sisanya kategori pakaian contoh.
   static const List<WardrobeFilterOption> _options = [
     WardrobeFilterOption(label: 'Semua', count: 28),
     WardrobeFilterOption(
@@ -77,6 +56,18 @@ class _WardrobeFilterChipsState extends State<WardrobeFilterChips> {
       ),
     );
   }
+}
+
+class WardrobeFilterOption {
+  const WardrobeFilterOption({
+    required this.label,
+    required this.count,
+    this.showWarningDot = false,
+  });
+
+  final String label;
+  final int count;
+  final bool showWarningDot;
 }
 
 class _FilterChip extends StatelessWidget {

@@ -3,7 +3,7 @@ import 'package:laundryan/screens/main_screen.dart';
 import 'package:laundryan/screens/onboarding_screen.dart';
 import 'package:laundryan/screens/sessions_screen.dart';
 import 'package:laundryan/screens/splash_screen.dart';
-import 'package:laundryan/screens/wardrobe_screen.dart';
+import 'package:laundryan/screens/wardrobe/wardrobe_screen.dart';
 
 class AppRouter {
   AppRouter._();
