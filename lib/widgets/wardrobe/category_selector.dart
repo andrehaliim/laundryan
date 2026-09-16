@@ -1,67 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
+import 'package:laundryan/screens/wardrobe/wardrobe_category_model.dart';
 
-class ClothingCategory {
-  final String name;
-  final String label;
-  final List<List<dynamic>> icon;
-
-  const ClothingCategory({
-    required this.name,
-    required this.label,
-    required this.icon,
-  });
-}
-
-const clothingCategories = [
-  ClothingCategory(
-    name: 'Kaos / T-Shirt',
-    label: 'Kaos',
-    icon: HugeIcons.strokeRoundedShirt01,
-  ),
-  ClothingCategory(
-    name: 'Kemeja',
-    label: 'Kemeja',
-    icon: HugeIcons.strokeRoundedKurta,
-  ),
-  ClothingCategory(
-    name: 'Celana Panjang',
-    label: 'C. Panjang',
-    icon: HugeIcons.strokeRoundedJoggerPants,
-  ),
-  ClothingCategory(
-    name: 'Celana Pendek',
-    label: 'C. Pendek',
-    icon: HugeIcons.strokeRoundedBoxer,
-  ),
-  ClothingCategory(
-    name: 'Jaket / Hoodie',
-    label: 'Jaket',
-    icon: HugeIcons.strokeRoundedHoodie,
-  ),
-  ClothingCategory(
-    name: 'Kaos Kaki',
-    label: 'Kaos Kaki',
-    icon: HugeIcons.strokeRoundedSocks,
-  ),
-  ClothingCategory(
-    name: 'Pakaian Dalam',
-    label: 'Underwear',
-    icon: HugeIcons.strokeRoundedUnderpants01,
-  ),
-  ClothingCategory(
-    name: 'Lainnya',
-    label: 'Other',
-    icon: HugeIcons.strokeRoundedHanger,
-  ),
-];
-
-class ClothingCategorySelector extends StatelessWidget {
+class WardrobeCategorySelector extends StatelessWidget {
   final String selectedCategory;
-  final ValueChanged<ClothingCategory> onChanged;
+  final ValueChanged<WardrobeCategoryModel> onChanged;
 
-  const ClothingCategorySelector({
+  const WardrobeCategorySelector({
     super.key,
     required this.selectedCategory,
     required this.onChanged,
@@ -69,32 +15,61 @@ class ClothingCategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: clothingCategories.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 0.85,
-      ),
-      itemBuilder: (context, index) {
-        final category = clothingCategories[index];
-        final isSelected = category.name == selectedCategory;
+    final textTheme = Theme.of(context).textTheme;
 
-        return _CategoryItem(
-          category: category,
-          isSelected: isSelected,
-          onTap: () => onChanged(category),
-        );
-      },
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Pilih Jenis & Icon Pakaian',
+              style: textTheme.titleMedium?.copyWith(
+                color: AppColors.richBlack,
+              ),
+            ),
+            Text(
+              selectedCategory,
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: AppColors.tealBlue),
+            ),
+          ],
+        ),
+
+        Text(
+          'Pilih icon yang paling mewakili pakaian ini di lemari',
+          style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ),
+
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: wardrobeCategories.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 0.85,
+          ),
+          itemBuilder: (context, index) {
+            final category = wardrobeCategories[index];
+            final isSelected = category.name == selectedCategory;
+
+            return _CategoryItem(
+              category: category,
+              isSelected: isSelected,
+              onTap: () => onChanged(category),
+            );
+          },
+        ),
+      ],
     );
   }
 }
 
 class _CategoryItem extends StatelessWidget {
-  final ClothingCategory category;
+  final WardrobeCategoryModel category;
   final bool isSelected;
   final VoidCallback onTap;
 

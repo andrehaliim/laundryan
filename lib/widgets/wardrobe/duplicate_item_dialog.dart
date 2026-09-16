@@ -3,8 +3,6 @@ import 'package:laundryan/core/theme/app_colors.dart';
 
 enum DuplicateItemAction { merge, createNew, cancel }
 
-/// Dialog khusus buat kasus nama item duplikat (flow.md poin 10).
-/// 3 opsi: gabung ke item existing, buat entry baru, atau batal sepenuhnya.
 class DuplicateItemDialog extends StatelessWidget {
   const DuplicateItemDialog({super.key, required this.itemName});
 

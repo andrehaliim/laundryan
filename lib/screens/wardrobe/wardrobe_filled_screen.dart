@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:laundryan/core/database/app_database.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
+import 'package:laundryan/widgets/wardrobe/filter_chips.dart';
+import 'package:laundryan/widgets/wardrobe/widget_card.dart';
 import 'package:laundryan/screens/wardrobe/wardrobe_addedit_screen.dart';
-import 'package:laundryan/screens/wardrobe/wardrobe_widget_filterchip.dart';
-import 'package:laundryan/screens/wardrobe/wardrobe_icons.dart';
-import 'package:laundryan/screens/wardrobe/wardrobe_widget_card.dart';
+import 'package:laundryan/screens/wardrobe/wardrobe_category_model.dart';
 
 class WardrobeFilledScreen extends ConsumerStatefulWidget {
   const WardrobeFilledScreen({
@@ -127,12 +127,12 @@ class _WardrobeFilledScreenState extends ConsumerState<WardrobeFilledScreen> {
                 itemBuilder: (context, index) {
                   final item = filteredItems[index];
 
-                  final category = clothingCategories.firstWhere(
+                  final category = wardrobeCategories.firstWhere(
                     (c) => c.name == item.iconName,
-                    orElse: () => clothingCategories.last,
+                    orElse: () => wardrobeCategories.last,
                   );
 
-                  return WardrobeCard(
+                  return WardrobeWidgetCard(
                     icon: category.icon,
                     name: item.name,
                     quantityOwned: item.quantityOwned,

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 
-/// Bottom sheet konfirmasi hapus item Wardrobe.
-/// Nampilin info item + rincian alokasi (di lemari vs sedang dicuci)
-/// biar user paham konsekuensi sebelum benar-benar hapus.
-class DeleteConfirmSheet extends StatelessWidget {
-  const DeleteConfirmSheet({
+class WardrobeDeleteConfirmation extends StatelessWidget {
+  const WardrobeDeleteConfirmation({
     super.key,
     required this.itemIcon,
     required this.itemName,
@@ -22,11 +19,9 @@ class DeleteConfirmSheet extends StatelessWidget {
   final int totalQuantity;
   final int inWardrobeQuantity;
 
-  /// Jumlah unit yang lagi ada di sesi laundry berjalan (kalau ada).
   final int inUseQuantity;
   final String? inUseSessionLabel;
 
-  /// Return `true` kalau user konfirmasi hapus, `false`/`null` kalau batal.
   static Future<bool?> show(
     BuildContext context, {
     required IconData itemIcon,
@@ -42,7 +37,7 @@ class DeleteConfirmSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: AppColors.richBlack.withValues(alpha: 0.5),
-      builder: (_) => DeleteConfirmSheet(
+      builder: (_) => WardrobeDeleteConfirmation(
         itemIcon: itemIcon,
         itemName: itemName,
         categoryLabel: categoryLabel,
@@ -69,7 +64,6 @@ class DeleteConfirmSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             const SizedBox(height: 12),
             Container(
               width: 48,
@@ -81,7 +75,6 @@ class DeleteConfirmSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
               child: Row(
@@ -113,13 +106,11 @@ class DeleteConfirmSheet extends StatelessWidget {
             ),
             Container(height: 1, color: AppColors.borderSubtle),
 
-            // Body
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Item info card
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -173,7 +164,6 @@ class DeleteConfirmSheet extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  // Rincian alokasi
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -209,7 +199,6 @@ class DeleteConfirmSheet extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  // Warning box
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -243,7 +232,6 @@ class DeleteConfirmSheet extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // Actions
                   SizedBox(
                     width: double.infinity,
                     height: 48,

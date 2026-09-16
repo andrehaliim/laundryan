@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
-import 'package:laundryan/screens/wardrobe/wardrobe_icons.dart';
+import 'package:laundryan/screens/wardrobe/wardrobe_category_model.dart';
 
 class WardrobeFilterChips extends StatefulWidget {
   const WardrobeFilterChips({super.key, this.onFilterChanged});
@@ -19,7 +19,7 @@ class _WardrobeFilterChipsState extends State<WardrobeFilterChips> {
       count: 0,
       showWarningDot: true,
     ),
-    ...clothingCategories.map((c) {
+    ...wardrobeCategories.map((c) {
       return WardrobeFilterOption(label: c.name, count: 0);
     }),
   ];

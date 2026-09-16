@@ -4,8 +4,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/core/providers/wardrobe_providers.dart';
 import 'package:laundryan/core/theme/app_colors.dart';
 
-class WardrobeCard extends ConsumerWidget {
-  const WardrobeCard({
+class WardrobeWidgetCard extends ConsumerWidget {
+  const WardrobeWidgetCard({
     super.key,
     required this.icon,
     required this.name,
