@@ -57,6 +57,15 @@ class $WardrobeItemsTable extends WardrobeItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _detailMeta = const VerificationMeta('detail');
+  @override
+  late final GeneratedColumn<String> detail = GeneratedColumn<String>(
+    'detail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -75,6 +84,7 @@ class $WardrobeItemsTable extends WardrobeItems
     name,
     iconName,
     quantityOwned,
+    detail,
     createdAt,
   ];
   @override
@@ -119,6 +129,12 @@ class $WardrobeItemsTable extends WardrobeItems
     } else if (isInserting) {
       context.missing(_quantityOwnedMeta);
     }
+    if (data.containsKey('detail')) {
+      context.handle(
+        _detailMeta,
+        detail.isAcceptableOrUnknown(data['detail']!, _detailMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -150,6 +166,10 @@ class $WardrobeItemsTable extends WardrobeItems
         DriftSqlType.int,
         data['${effectivePrefix}quantity_owned'],
       )!,
+      detail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detail'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -168,12 +188,14 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
   final String name;
   final String iconName;
   final int quantityOwned;
+  final String? detail;
   final DateTime createdAt;
   const WardrobeItem({
     required this.id,
     required this.name,
     required this.iconName,
     required this.quantityOwned,
+    this.detail,
     required this.createdAt,
   });
   @override
@@ -183,6 +205,9 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
     map['name'] = Variable<String>(name);
     map['icon_name'] = Variable<String>(iconName);
     map['quantity_owned'] = Variable<int>(quantityOwned);
+    if (!nullToAbsent || detail != null) {
+      map['detail'] = Variable<String>(detail);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -193,6 +218,9 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
       name: Value(name),
       iconName: Value(iconName),
       quantityOwned: Value(quantityOwned),
+      detail: detail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detail),
       createdAt: Value(createdAt),
     );
   }
@@ -207,6 +235,7 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
       name: serializer.fromJson<String>(json['name']),
       iconName: serializer.fromJson<String>(json['iconName']),
       quantityOwned: serializer.fromJson<int>(json['quantityOwned']),
+      detail: serializer.fromJson<String?>(json['detail']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -218,6 +247,7 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
       'name': serializer.toJson<String>(name),
       'iconName': serializer.toJson<String>(iconName),
       'quantityOwned': serializer.toJson<int>(quantityOwned),
+      'detail': serializer.toJson<String?>(detail),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -227,12 +257,14 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
     String? name,
     String? iconName,
     int? quantityOwned,
+    Value<String?> detail = const Value.absent(),
     DateTime? createdAt,
   }) => WardrobeItem(
     id: id ?? this.id,
     name: name ?? this.name,
     iconName: iconName ?? this.iconName,
     quantityOwned: quantityOwned ?? this.quantityOwned,
+    detail: detail.present ? detail.value : this.detail,
     createdAt: createdAt ?? this.createdAt,
   );
   WardrobeItem copyWithCompanion(WardrobeItemsCompanion data) {
@@ -243,6 +275,7 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
       quantityOwned: data.quantityOwned.present
           ? data.quantityOwned.value
           : this.quantityOwned,
+      detail: data.detail.present ? data.detail.value : this.detail,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -254,13 +287,15 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
           ..write('name: $name, ')
           ..write('iconName: $iconName, ')
           ..write('quantityOwned: $quantityOwned, ')
+          ..write('detail: $detail, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, iconName, quantityOwned, createdAt);
+  int get hashCode =>
+      Object.hash(id, name, iconName, quantityOwned, detail, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -269,6 +304,7 @@ class WardrobeItem extends DataClass implements Insertable<WardrobeItem> {
           other.name == this.name &&
           other.iconName == this.iconName &&
           other.quantityOwned == this.quantityOwned &&
+          other.detail == this.detail &&
           other.createdAt == this.createdAt);
 }
 
@@ -277,12 +313,14 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
   final Value<String> name;
   final Value<String> iconName;
   final Value<int> quantityOwned;
+  final Value<String?> detail;
   final Value<DateTime> createdAt;
   const WardrobeItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.iconName = const Value.absent(),
     this.quantityOwned = const Value.absent(),
+    this.detail = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   WardrobeItemsCompanion.insert({
@@ -290,6 +328,7 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
     required String name,
     required String iconName,
     required int quantityOwned,
+    this.detail = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name),
        iconName = Value(iconName),
@@ -299,6 +338,7 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
     Expression<String>? name,
     Expression<String>? iconName,
     Expression<int>? quantityOwned,
+    Expression<String>? detail,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -306,6 +346,7 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
       if (name != null) 'name': name,
       if (iconName != null) 'icon_name': iconName,
       if (quantityOwned != null) 'quantity_owned': quantityOwned,
+      if (detail != null) 'detail': detail,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -315,6 +356,7 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
     Value<String>? name,
     Value<String>? iconName,
     Value<int>? quantityOwned,
+    Value<String?>? detail,
     Value<DateTime>? createdAt,
   }) {
     return WardrobeItemsCompanion(
@@ -322,6 +364,7 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
       name: name ?? this.name,
       iconName: iconName ?? this.iconName,
       quantityOwned: quantityOwned ?? this.quantityOwned,
+      detail: detail ?? this.detail,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -341,6 +384,9 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
     if (quantityOwned.present) {
       map['quantity_owned'] = Variable<int>(quantityOwned.value);
     }
+    if (detail.present) {
+      map['detail'] = Variable<String>(detail.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -354,6 +400,7 @@ class WardrobeItemsCompanion extends UpdateCompanion<WardrobeItem> {
           ..write('name: $name, ')
           ..write('iconName: $iconName, ')
           ..write('quantityOwned: $quantityOwned, ')
+          ..write('detail: $detail, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1086,6 +1133,7 @@ typedef $$WardrobeItemsTableCreateCompanionBuilder =
       required String name,
       required String iconName,
       required int quantityOwned,
+      Value<String?> detail,
       Value<DateTime> createdAt,
     });
 typedef $$WardrobeItemsTableUpdateCompanionBuilder =
@@ -1094,6 +1142,7 @@ typedef $$WardrobeItemsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> iconName,
       Value<int> quantityOwned,
+      Value<String?> detail,
       Value<DateTime> createdAt,
     });
 
@@ -1150,6 +1199,11 @@ class $$WardrobeItemsTableFilterComposer
 
   ColumnFilters<int> get quantityOwned => $composableBuilder(
     column: $table.quantityOwned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detail => $composableBuilder(
+    column: $table.detail,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1213,6 +1267,11 @@ class $$WardrobeItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1241,6 +1300,9 @@ class $$WardrobeItemsTableAnnotationComposer
     column: $table.quantityOwned,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get detail =>
+      $composableBuilder(column: $table.detail, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1303,12 +1365,14 @@ class $$WardrobeItemsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> iconName = const Value.absent(),
                 Value<int> quantityOwned = const Value.absent(),
+                Value<String?> detail = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => WardrobeItemsCompanion(
                 id: id,
                 name: name,
                 iconName: iconName,
                 quantityOwned: quantityOwned,
+                detail: detail,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -1317,12 +1381,14 @@ class $$WardrobeItemsTableTableManager
                 required String name,
                 required String iconName,
                 required int quantityOwned,
+                Value<String?> detail = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => WardrobeItemsCompanion.insert(
                 id: id,
                 name: name,
                 iconName: iconName,
                 quantityOwned: quantityOwned,
+                detail: detail,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

@@ -135,6 +135,7 @@ class _WardrobeFilledScreenState extends ConsumerState<WardrobeFilledScreen> {
                   return WardrobeWidgetCard(
                     icon: category.icon,
                     name: item.name,
+                    detail: item.detail ?? '',
                     quantityOwned: item.quantityOwned,
                     quantityInUse: index,
                     onTap: () {

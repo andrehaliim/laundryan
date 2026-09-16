@@ -9,6 +9,7 @@ class WardrobeWidgetCard extends ConsumerWidget {
     super.key,
     required this.icon,
     required this.name,
+    required this.detail,
     required this.quantityOwned,
     this.quantityInUse,
     this.onTap,
@@ -16,6 +17,7 @@ class WardrobeWidgetCard extends ConsumerWidget {
 
   final List<List<dynamic>> icon;
   final String name;
+  final String detail;
   final int quantityOwned;
   final int? quantityInUse;
   final VoidCallback? onTap;
@@ -55,7 +57,7 @@ class WardrobeWidgetCard extends ConsumerWidget {
                     child: HugeIcon(
                       icon: icon,
                       strokeWidth: 1.5,
-                      size: 24,
+                      size: 32,
                       color: AppColors.royalBlue,
                     ),
                   ),
@@ -92,22 +94,24 @@ class WardrobeWidgetCard extends ConsumerWidget {
                   color: AppColors.royalBlue,
                 ),
               ),
+              Text(
+                detail,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Spacer(),
               itemsAsync.when(
                 data: (items) => Text(
                   '$quantityOwned di lemari',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                  style: textTheme.titleSmall?.copyWith(
+                    color: AppColors.richBlack,
                   ),
                 ),
                 loading: () => const SizedBox.shrink(),
                 error: (_, _) => const SizedBox.shrink(),
-              ),
-              Spacer(),
-              Text(
-                'x$quantityOwned',
-                style: textTheme.titleLarge?.copyWith(
-                  color: AppColors.richBlack,
-                ),
               ),
             ],
           ),

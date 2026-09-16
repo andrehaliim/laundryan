@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:laundryan/core/database/app_database.dart';
@@ -30,7 +31,7 @@ class _WardrobeDetailScreenState extends ConsumerState<WardrobeAddEditScreen> {
     final existing = widget.existingItem;
     selectedCategory = existing?.iconName ?? 'Kaos / T-Shirt';
     _nameController = TextEditingController(text: existing?.name ?? '');
-    _notesController = TextEditingController();
+    _notesController = TextEditingController(text: existing?.detail ?? '');
     _quantity = existing?.quantityOwned ?? 1;
   }
 
@@ -59,6 +60,11 @@ class _WardrobeDetailScreenState extends ConsumerState<WardrobeAddEditScreen> {
               name: name,
               iconName: selectedCategory,
               quantityOwned: _quantity,
+              detail: Value(
+                _notesController.text.trim().isEmpty
+                    ? null
+                    : _notesController.text.trim(),
+              ),
             )
             .toCompanion(true),
       );
@@ -80,6 +86,11 @@ class _WardrobeDetailScreenState extends ConsumerState<WardrobeAddEditScreen> {
               name: name,
               iconName: selectedCategory,
               quantityOwned: _quantity,
+              detail: Value(
+                _notesController.text.trim().isEmpty
+                    ? null
+                    : _notesController.text.trim(),
+              ),
             ),
           );
           break;
@@ -92,6 +103,11 @@ class _WardrobeDetailScreenState extends ConsumerState<WardrobeAddEditScreen> {
           name: name,
           iconName: selectedCategory,
           quantityOwned: _quantity,
+          detail: Value(
+            _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
+          ),
         ),
       );
     }
