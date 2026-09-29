@@ -1,1 +1,26 @@
-{ "@@locale": "id" }
+{
+  "@@locale": "id",
+  "appName": "Laundryan",
+  "tagline": "Laundryan - Lacak cucianmu agar tidak ada yang hilang",
+  "onboardingTitle1": "Tambah, lacak, dan kelola pakaian Anda",
+  "onboardingTitle2": "Pantau cucian Anda dengan mudah",
+  "start": "Mulai",
+  "skip": "Lewati",
+  "sessions": "Sesi",
+  "wardrobe": "Lemari",
+  "settings": "Pengaturan",
+  "language": "Bahasa",
+  "theme": "Tema",
+  "english": "English",
+  "indonesian": "Indonesia",
+  "light": "Terang",
+  "dark": "Gelap",
+  "categoryTshirt": "Kaos",
+  "categoryShirt": "Kemeja",
+  "categoryOuterwear": "Outer",
+  "categoryLongPants": "Celana panjang",
+  "categoryShorts": "Celana pendek",
+  "categorySkirt": "Rok",
+  "categoryUnderwear": "Pakaian dalam",
+  "categorySocks": "Kaos kaki"
+}

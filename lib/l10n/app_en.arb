@@ -1,1 +1,26 @@
-{ "@@locale": "en" }
+{
+  "@@locale": "en",
+  "appName": "Laundryan",
+  "tagline": "Laundryan - Track your laundry so nothing gets lost",
+  "onboardingTitle1": "Add, track, and manage your clothes",
+  "onboardingTitle2": "Monitor your laundry with ease",
+  "start": "Start",
+  "skip": "Skip",
+  "sessions": "Sessions",
+  "wardrobe": "Wardrobe",
+  "settings": "Settings",
+  "language": "Language",
+  "theme": "Theme",
+  "english": "English",
+  "indonesian": "Indonesia",
+  "light": "Light",
+  "dark": "Dark",
+  "categoryTshirt": "T-shirt",
+  "categoryShirt": "Shirt",
+  "categoryOuterwear": "Outerwear",
+  "categoryLongPants": "Long pants",
+  "categoryShorts": "Shorts",
+  "categorySkirt": "Skirt",
+  "categoryUnderwear": "Underwear",
+  "categorySocks": "Socks"
+}

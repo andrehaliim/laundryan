@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:laundryan/l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,9 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     // TODO Step 4: ke Onboarding (pertama kali) atau Home
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => const Center(child: Text('Home')),
-      ),
+      MaterialPageRoute(builder: (_) => const Center(child: Text('Home'))),
     );
   }
 
@@ -44,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
           Image.asset('assets/splash/logo.png', width: 120),
           const SizedBox(height: 24),
           Text(
-            'Laundryan - Lacak cucianmu agar tidak ada yang hilang',
+            AppLocalizations.of(context)!.tagline,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
