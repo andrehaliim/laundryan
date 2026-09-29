@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
+import 'package:laundryan/providers/settings_provider.dart';
+import 'package:laundryan/screens/home_screen.dart';
+import 'package:laundryan/screens/onboarding_screen.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,9 +25,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _goNext() {
     if (!mounted) return;
-    // TODO Step 4: ke Onboarding (pertama kali) atau Home
+    final done = context.read<SettingsProvider>().onboardingDone;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const Center(child: Text('Home'))),
+      MaterialPageRoute(
+        builder: (_) => done ? const HomeScreen() : const OnboardingScreen(),
+      ),
     );
   }
 
