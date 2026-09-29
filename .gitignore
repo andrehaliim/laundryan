@@ -17,7 +17,9 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
 
 # Flutter / Dart
 .dart_tool/
