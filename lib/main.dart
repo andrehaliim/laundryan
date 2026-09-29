@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'data/app_database.dart';
 import 'screens/splash_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final db = AppDatabase();
+  final cats = await db.select(db.categories).get();
+  debugPrint('Jumlah kategori: ${cats.length}');
   runApp(const MyApp());
 }
 
