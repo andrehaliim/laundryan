@@ -69,8 +69,8 @@
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>NSCameraUsageDescription</key>
-			<string>Laundryan needs the camera to take photos of your clothes.</string>
+		<string>Laundryan needs the camera to take photos of your clothes.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-			<string>Laundryan needs photo access to pick pictures of your clothes.</string>
+		<string>Laundryan needs photo access to pick pictures of your clothes.</string>
 	</dict>
 </plist>
