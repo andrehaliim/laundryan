@@ -8,7 +8,6 @@ import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/screens/wardrobe_item_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
-import 'package:laundryan/widgets/category_sheet.dart';
 import 'package:laundryan/widgets/settings_button.dart';
 import 'package:provider/provider.dart';
 
@@ -89,15 +88,29 @@ class WardrobeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.wardrobe),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.category_outlined),
-            tooltip: l10n.categories,
-            onPressed: () => showCategorySheet(context),
-          ),
-          const SettingsButton(),
-        ],
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset('assets/icon/icon.png', height: 40),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.appName,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  l10n.wardrobe,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [const SettingsButton()],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: l10n.addWardrobe,
@@ -105,7 +118,47 @@ class WardrobeScreen extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Row(
+              children: [
+                Text(
+                  l10n.myWardrobe,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${items.length}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.items,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
@@ -129,19 +182,21 @@ class WardrobeScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(l10n.all),
-                      selected: selectedId == null,
-                      onSelected: (_) => wardrobe.setCategory(null),
+                    child: buildChip(
+                      context,
+                      l10n.all,
+                      selectedId == null,
+                      (_) => wardrobe.setCategory(null),
                     ),
                   ),
                   for (final c in categories)
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(categoryName(c, l10n)),
-                        selected: selectedId == c.id,
-                        onSelected: (_) => wardrobe.setCategory(c.id),
+                      child: buildChip(
+                        context,
+                        categoryName(c, l10n),
+                        selectedId == c.id,
+                        (_) => wardrobe.setCategory(c.id),
                       ),
                     ),
                 ],
@@ -151,6 +206,36 @@ class WardrobeScreen extends StatelessWidget {
           Expanded(child: body),
         ],
       ),
+    );
+  }
+
+  //chip style
+  Widget buildChip(
+    BuildContext context,
+    String label,
+    bool selected,
+    ValueChanged<bool>? onTap,
+  ) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: onTap,
+      selectedColor: Theme.of(context).colorScheme.primary,
+      labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+      ),
+      checkmarkColor: selected
+          ? Theme.of(context).colorScheme.onPrimary
+          : Theme.of(context).colorScheme.onSurface,
+      showCheckmark: false,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      side: BorderSide.none,
+      elevation: 3,
+      pressElevation: 4,
+      selectedShadowColor: Theme.of(context).colorScheme.onSurface
+          .withValues(alpha: 0.2),
+      shadowColor: Theme.of(context).colorScheme.onSurface
+          .withValues(alpha: 0.2),
     );
   }
 }

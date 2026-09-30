@@ -76,14 +76,34 @@ class SessionsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.sessions),
-        actions: const [SettingsButton()],
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset('assets/icon/icon.png', height: 40),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.appName,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  l10n.sessions,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [const SettingsButton()],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: l10n.addSession,
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddSessionScreen()),
-        ),
+        onPressed: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const AddSessionScreen())),
         child: const Icon(Icons.add),
       ),
       body: body,
@@ -111,9 +131,8 @@ class SessionCard extends StatelessWidget {
     final s = entry.session;
     final dateFmt = DateFormat.yMMMd(locale);
     final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
-    final subStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: scheme.onSurfaceVariant,
-        );
+    final subStyle = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(color: scheme.onSurfaceVariant);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -129,8 +148,10 @@ class SessionCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(s.placeName, style: subStyle),
               const SizedBox(height: 8),
-              Text('${l10n.dropOff}: ${dateFmt.format(s.dropOffDate)}',
-                  style: subStyle),
+              Text(
+                '${l10n.dropOff}: ${dateFmt.format(s.dropOffDate)}',
+                style: subStyle,
+              ),
               Text(
                 '${l10n.estimatedReady}: ${dateTimeFmt.format(s.estimatedReadyAt)}',
                 style: subStyle,
@@ -139,14 +160,13 @@ class SessionCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(l10n.totalItems(entry.totalItems),
-                        style: subStyle),
+                    child: Text(
+                      l10n.totalItems(entry.totalItems),
+                      style: subStyle,
+                    ),
                   ),
                   if (onVerify != null)
-                    FilledButton(
-                      onPressed: onVerify,
-                      child: Text(l10n.verify),
-                    ),
+                    FilledButton(onPressed: onVerify, child: Text(l10n.verify)),
                 ],
               ),
             ],

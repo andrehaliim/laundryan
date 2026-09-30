@@ -86,15 +86,15 @@ class AppTheme {
     final link = isLight ? const Color(0xFF0C6780) : s.primary;
     final inputBorder = isLight ? const Color(0xFFCBD5E1) : s.outlineVariant;
 
-    final family = GoogleFonts.poppins().fontFamily;
+    final family = GoogleFonts.plusJakartaSans().fontFamily;
 
     final base = ThemeData(
       brightness: s.brightness,
       fontFamily: family,
     ).textTheme.apply(bodyColor: s.onSurface, displayColor: s.onSurface);
 
-    TextStyle poppins(double size, FontWeight w, {double? height}) =>
-        GoogleFonts.poppins(
+    TextStyle plusJakartaSans(double size, FontWeight w, {double? height}) =>
+        GoogleFonts.plusJakartaSans(
           fontSize: size,
           fontWeight: w,
           height: height,
@@ -102,13 +102,13 @@ class AppTheme {
         );
 
     final text = base.copyWith(
-      headlineSmall: poppins(24, FontWeight.w700),
-      titleLarge: poppins(18, FontWeight.w600),
-      titleMedium: poppins(16, FontWeight.w600),
-      titleSmall: poppins(14, FontWeight.w600),
-      bodyMedium: poppins(14, FontWeight.w400, height: 1.5),
-      bodySmall: poppins(12, FontWeight.w400, height: 1.4),
-      labelSmall: poppins(11, FontWeight.w500),
+      headlineSmall: plusJakartaSans(24, FontWeight.w700),
+      titleLarge: plusJakartaSans(18, FontWeight.w600),
+      titleMedium: plusJakartaSans(16, FontWeight.w600),
+      titleSmall: plusJakartaSans(14, FontWeight.w600),
+      bodyMedium: plusJakartaSans(14, FontWeight.w400, height: 1.5),
+      bodySmall: plusJakartaSans(12, FontWeight.w400, height: 1.4),
+      labelSmall: plusJakartaSans(11, FontWeight.w500),
     );
 
     return ThemeData(
