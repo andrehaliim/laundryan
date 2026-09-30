@@ -16,9 +16,9 @@ class WardrobeScreen extends StatelessWidget {
   const WardrobeScreen({super.key});
 
   void _open(BuildContext context, [WardrobeEntry? entry]) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => WardrobeItemScreen(entry: entry)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => WardrobeItemScreen(entry: entry)));
   }
 
   @override
@@ -28,6 +28,14 @@ class WardrobeScreen extends StatelessWidget {
     final categories = context.watch<CategoryProvider>().categories;
     final scheme = Theme.of(context).colorScheme;
     final items = wardrobe.items;
+    final selectedId = categories.any((c) => c.id == wardrobe.categoryId)
+        ? wardrobe.categoryId
+        : null;
+    if (wardrobe.categoryId != null && selectedId == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => wardrobe.setCategory(null),
+      );
+    }
 
     Widget body;
     if (wardrobe.isEmpty) {
@@ -41,11 +49,15 @@ class WardrobeScreen extends StatelessWidget {
               color: scheme.outline,
             ),
             const SizedBox(height: 16),
-            Text(l10n.wardrobeEmpty,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.wardrobeEmpty,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 4),
-            Text(l10n.wardrobeEmptyHint,
-                style: TextStyle(color: scheme.onSurfaceVariant)),
+            Text(
+              l10n.wardrobeEmptyHint,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
           ],
         ),
       );
@@ -108,6 +120,34 @@ class WardrobeScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (!wardrobe.isEmpty)
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(l10n.all),
+                      selected: selectedId == null,
+                      onSelected: (_) => wardrobe.setCategory(null),
+                    ),
+                  ),
+                  for (final c in categories)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(categoryName(c, l10n)),
+                        selected: selectedId == c.id,
+                        onSelected: (_) => wardrobe.setCategory(c.id),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 8),
           Expanded(child: body),
         ],
       ),
@@ -176,9 +216,8 @@ class _ItemCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     l10n.available(entry.availableQty),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ],
               ),

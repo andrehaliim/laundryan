@@ -9,6 +9,8 @@ class WardrobeProvider extends ChangeNotifier {
   List<WardrobeEntry> _all = [];
   String _query = '';
   List<WardrobeEntry> get allItems => _all;
+  int? _categoryId;
+  int? get categoryId => _categoryId;
 
   WardrobeProvider(this._repo) {
     _sub = _repo.watchAll().listen((data) {
@@ -21,8 +23,12 @@ class WardrobeProvider extends ChangeNotifier {
 
   List<WardrobeEntry> get items {
     final q = _query.trim().toLowerCase();
-    if (q.isEmpty) return _all;
-    return _all.where((e) => e.item.name.toLowerCase().contains(q)).toList();
+    return _all.where((e) {
+      final matchCategory =
+          _categoryId == null || e.item.categoryId == _categoryId;
+      final matchName = q.isEmpty || e.item.name.toLowerCase().contains(q);
+      return matchCategory && matchName;
+    }).toList();
   }
 
   void setQuery(String q) {
@@ -36,14 +42,13 @@ class WardrobeProvider extends ChangeNotifier {
     required int totalQty,
     String? photoPath,
     String? note,
-  }) =>
-      _repo.add(
-        name: name,
-        categoryId: categoryId,
-        totalQty: totalQty,
-        photoPath: photoPath,
-        note: note,
-      );
+  }) => _repo.add(
+    name: name,
+    categoryId: categoryId,
+    totalQty: totalQty,
+    photoPath: photoPath,
+    note: note,
+  );
 
   Future<bool> update(
     int id, {
@@ -52,17 +57,21 @@ class WardrobeProvider extends ChangeNotifier {
     required int totalQty,
     String? photoPath,
     String? note,
-  }) =>
-      _repo.update(
-        id,
-        name: name,
-        categoryId: categoryId,
-        totalQty: totalQty,
-        photoPath: photoPath,
-        note: note,
-      );
+  }) => _repo.update(
+    id,
+    name: name,
+    categoryId: categoryId,
+    totalQty: totalQty,
+    photoPath: photoPath,
+    note: note,
+  );
 
   Future<bool> delete(int id) => _repo.delete(id);
+
+  void setCategory(int? id) {
+    _categoryId = id;
+    notifyListeners();
+  }
 
   @override
   void dispose() {

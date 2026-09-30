@@ -109,5 +109,6 @@
   "confirm": "Ya",
   "resolveHint": "Berlaku untuk seluruh {count} qty yang hilang",
   "permanentLostTitle": "Tandai hilang permanen?",
-  "permanentLostMessage": "Jumlah total item ini akan berkurang {count}."
+  "permanentLostMessage": "Jumlah total item ini akan berkurang {count}.",
+  "all": "Semua"
 }
