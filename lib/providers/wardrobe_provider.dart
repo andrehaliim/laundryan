@@ -8,6 +8,7 @@ class WardrobeProvider extends ChangeNotifier {
   StreamSubscription<List<WardrobeEntry>>? _sub;
   List<WardrobeEntry> _all = [];
   String _query = '';
+  List<WardrobeEntry> get allItems => _all;
 
   WardrobeProvider(this._repo) {
     _sub = _repo.watchAll().listen((data) {

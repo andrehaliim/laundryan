@@ -57,5 +57,26 @@
   "minQtyHint": "Can't go below {count} (in use or lost)",
   "@minQtyHint": {
     "placeholders": { "count": { "type": "int" } }
-  }
+  },
+  "addSession": "New session",
+  "sessionTitle": "Title",
+  "placeName": "Laundry name",
+  "placeAddress": "Address (optional)",
+  "placePhone": "WhatsApp number (optional)",
+  "dropOffDate": "Drop-off date",
+  "estimatedReady": "Estimated ready",
+  "reminder": "Reminder",
+  "reminderHint": "Notify 2 hours before it's ready",
+  "sessionItems": "Items",
+  "addItems": "Add items",
+  "noItemsSelected": "No items yet. Tap Add items.",
+  "maxQty": "Max {count}",
+  "@maxQty": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "done": "Done",
+  "startSession": "Start session",
+  "fieldRequired": "This field is required",
+  "estimateBeforeDropOff": "Estimated time can't be before the drop-off date",
+  "noWardrobeItems": "Your wardrobe is empty. Add items first."
 }

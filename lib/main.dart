@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 
 import 'data/app_database.dart';
 import 'data/category_repository.dart';
+import 'data/session_repository.dart';
 import 'data/wardrobe_repository.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/category_provider.dart';
+import 'providers/session_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/wardrobe_provider.dart';
 import 'screens/splash_screen.dart';
@@ -28,10 +30,10 @@ Future<void> main() async {
           create: (_) => CategoryProvider(CategoryRepository(db)),
         ),
         ChangeNotifierProvider(
-          create: (_) => CategoryProvider(CategoryRepository(db)),
+          create: (_) => WardrobeProvider(WardrobeRepository(db)),
         ),
         ChangeNotifierProvider(
-          create: (_) => WardrobeProvider(WardrobeRepository(db)),
+          create: (_) => SessionProvider(SessionRepository(db)),
         ),
       ],
       child: const MyApp(),
