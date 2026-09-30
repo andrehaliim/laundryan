@@ -78,5 +78,23 @@
   "startSession": "Start session",
   "fieldRequired": "This field is required",
   "estimateBeforeDropOff": "Estimated time can't be before the drop-off date",
-  "noWardrobeItems": "Your wardrobe is empty. Add items first."
+  "noWardrobeItems": "Your wardrobe is empty. Add items first.",
+    "sessionsEmpty": "No sessions yet",
+  "activeSessions": "Active sessions",
+  "noActiveSessions": "No active sessions",
+  "history": "History",
+  "noHistory": "No history yet",
+  "dropOff": "Drop-off",
+  "totalItems": "{count} items",
+  "@totalItems": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "verify": "Verify",
+  "sessionDetail": "Session detail",
+  "items": "Items",
+  "itemsLocked": "Items are locked while the session is active",
+  "cancelSession": "Cancel session",
+  "cancelSessionTitle": "Cancel this session?",
+  "cancelSessionMessage": "The session will be deleted permanently and all items become available again.",
+  "keepSession": "Keep"
 }
