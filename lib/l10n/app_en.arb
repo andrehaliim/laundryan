@@ -124,5 +124,44 @@
         "type": "String"
       }
     }
+  },
+  "verifyItems": "Verify items",
+  "finish": "Finish",
+  "checkAllHint": "Check all items to finish",
+  "returnedQty": "Returned",
+  "ofTotal": "of {total}",
+  "@ofTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "missingCount": "{count} missing",
+  "@missingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "missingStatus": "Status of missing items",
+  "statusLost": "Lost",
+  "statusSwapped": "Swapped",
+  "sessionFinished": "Session finished",
+  "allReturned": "All items came back safely",
+  "missingItems": "Missing items",
+  "chatWhatsapp": "Chat WhatsApp",
+  "whatsappFailed": "Can not open WhatsApp",
+  "waMessage": "Hello, for my laundry \"{title}\", these items did not come back:\n{items}",
+  "@waMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
   }
 }

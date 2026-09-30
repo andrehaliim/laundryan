@@ -86,5 +86,20 @@
   "cancelSessionMessage": "Sesi akan dihapus permanen dan semua item tersedia kembali.",
   "keepSession": "Tidak",
   "reminderTitle": "Cucian hampir selesai",
-  "reminderBody": "{title} di {place} diperkirakan selesai sekitar 2 jam lagi"
+  "reminderBody": "{title} di {place} diperkirakan selesai sekitar 2 jam lagi",
+  "verifyItems": "Verifikasi item",
+  "finish": "Selesai",
+  "checkAllHint": "Centang semua item untuk menyelesaikan",
+  "returnedQty": "Kembali",
+  "ofTotal": "dari {total}",
+  "missingCount": "{count} hilang",
+  "missingStatus": "Status item yang kurang",
+  "statusLost": "Hilang",
+  "statusSwapped": "Tertukar",
+  "sessionFinished": "Sesi selesai",
+  "allReturned": "Semua item kembali dengan aman",
+  "missingItems": "Item bermasalah",
+  "chatWhatsapp": "Chat WhatsApp",
+  "whatsappFailed": "Tidak bisa membuka WhatsApp",
+  "waMessage": "Halo, untuk cucian \"{title}\", item berikut belum kembali:\n{items}"
 }

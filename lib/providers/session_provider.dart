@@ -90,7 +90,8 @@ class SessionProvider extends ChangeNotifier {
       reminderEnabled: reminderEnabled,
       estimatedReadyAt: estimatedReadyAt,
     );
-    final place = _active
+    final place =
+        _active
             .where((e) => e.session.id == id)
             .firstOrNull
             ?.session
@@ -107,6 +108,11 @@ class SessionProvider extends ChangeNotifier {
 
   Future<void> cancel(int id) async {
     await _repo.cancel(id);
+    await NotificationService.cancel(id);
+  }
+
+  Future<void> complete(int id, List<ItemVerification> results) async {
+    await _repo.complete(id, results);
     await NotificationService.cancel(id);
   }
 

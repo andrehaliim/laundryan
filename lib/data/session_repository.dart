@@ -21,6 +21,19 @@ class SessionItemView {
   const SessionItemView(this.sessionItem, this.item);
 }
 
+class ItemVerification {
+  final int sessionItemId;
+  final int returnedQty;
+  final ItemStatus status;
+  final String? note;
+  const ItemVerification(
+    this.sessionItemId,
+    this.returnedQty,
+    this.status,
+    this.note,
+  );
+}
+
 class SessionRepository {
   final AppDatabase db;
   SessionRepository(this.db);
@@ -132,5 +145,24 @@ class SessionRepository {
           ..where((t) =>
               t.id.equals(id) & t.status.equalsValue(SessionStatus.active)))
         .go();
+  }
+
+    Future<void> complete(int sessionId, List<ItemVerification> results) {
+    return db.transaction(() async {
+      for (final r in results) {
+        await (db.update(db.sessionItems)
+              ..where((t) => t.id.equals(r.sessionItemId)))
+            .write(SessionItemsCompanion(
+          returnedQty: Value(r.returnedQty),
+          status: Value(r.status),
+          note: Value(r.note),
+        ));
+      }
+      await (db.update(db.sessions)..where((t) => t.id.equals(sessionId)))
+          .write(SessionsCompanion(
+        status: const Value(SessionStatus.completed),
+        completedAt: Value(DateTime.now()),
+      ));
+    });
   }
 }

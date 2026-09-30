@@ -4,6 +4,7 @@ import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/add_session_screen.dart';
+import 'package:laundryan/screens/checklist_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
 import 'package:laundryan/widgets/settings_button.dart';
 import 'package:provider/provider.dart';
@@ -45,8 +46,11 @@ class SessionsScreen extends StatelessWidget {
                   builder: (_) => SessionDetailScreen(sessionId: e.session.id),
                 ),
               ),
-              // TODO (Step 10): buka Checklist Session
-              onVerify: () {},
+              onVerify: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ChecklistScreen(sessionId: e.session.id),
+                ),
+              ),
             ),
           const SizedBox(height: 16),
           Text(l10n.history, style: titleStyle),
