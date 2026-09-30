@@ -23,5 +23,15 @@
   "categorySkirt": "Rok",
   "categoryUnderwear": "Pakaian dalam",
   "categorySocks": "Kaos kaki",
-  "next": "Lanjut"
+  "next": "Lanjut",
+  "categories": "Kategori",
+  "addCategory": "Tambah kategori",
+  "editCategory": "Ubah kategori",
+  "categoryName": "Nama kategori",
+  "icon": "Ikon",
+  "save": "Simpan",
+  "cancel": "Batal",
+  "delete": "Hapus",
+  "nameRequired": "Nama wajib diisi",
+  "categoryInUse": "Kategori ini masih dipakai item wardrobe"
 }

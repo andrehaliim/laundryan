@@ -3,7 +3,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'data/app_database.dart';
+import 'data/category_repository.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/category_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/splash_screen.dart';
 import 'utils/app_theme.dart';
@@ -18,6 +20,9 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider.value(value: settings),
         Provider<AppDatabase>.value(value: db),
+        ChangeNotifierProvider(
+          create: (_) => CategoryProvider(CategoryRepository(db)),
+        ),
       ],
       child: const MyApp(),
     ),

@@ -23,5 +23,15 @@
   "categorySkirt": "Skirt",
   "categoryUnderwear": "Underwear",
   "categorySocks": "Socks",
-  "next": "Next"
+  "next": "Next",
+  "categories": "Categories",
+  "addCategory": "Add category",
+  "editCategory": "Edit category",
+  "categoryName": "Category name",
+  "icon": "Icon",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "nameRequired": "Name is required",
+  "categoryInUse": "This category is still used by wardrobe items"
 }
