@@ -4,14 +4,18 @@ import 'package:provider/provider.dart';
 
 import 'data/app_database.dart';
 import 'data/category_repository.dart';
+import 'data/wardrobe_repository.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/category_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/wardrobe_provider.dart';
 import 'screens/splash_screen.dart';
 import 'utils/app_theme.dart';
+import 'utils/photo_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PhotoStorage.init();
   final settings = await SettingsProvider.load();
   final db = AppDatabase();
 
@@ -22,6 +26,12 @@ Future<void> main() async {
         Provider<AppDatabase>.value(value: db),
         ChangeNotifierProvider(
           create: (_) => CategoryProvider(CategoryRepository(db)),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CategoryProvider(CategoryRepository(db)),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => WardrobeProvider(WardrobeRepository(db)),
         ),
       ],
       child: const MyApp(),

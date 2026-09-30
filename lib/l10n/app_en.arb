@@ -33,5 +33,29 @@
   "cancel": "Cancel",
   "delete": "Delete",
   "nameRequired": "Name is required",
-  "categoryInUse": "This category is still used by wardrobe items"
+  "categoryInUse": "This category is still used by wardrobe items",
+  "searchHint": "Search by name",
+  "wardrobeEmpty": "Your wardrobe is empty",
+  "wardrobeEmptyHint": "Tap + to add your first item",
+  "noResults": "No items found",
+  "addWardrobe": "Add item",
+  "editWardrobe": "Edit item",
+  "itemName": "Item name",
+  "category": "Category",
+  "note": "Note (optional)",
+  "quantity": "Quantity",
+  "available": "{count} available",
+  "@available": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "takePhoto": "Take photo",
+  "chooseGallery": "Choose from gallery",
+  "removePhoto": "Remove photo",
+  "deleteItemTitle": "Delete item?",
+  "deleteItemMessage": "This item will be removed from your wardrobe.",
+  "itemInUse": "This item is used in a session, so it can't be deleted",
+  "minQtyHint": "Can't go below {count} (in use or lost)",
+  "@minQtyHint": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

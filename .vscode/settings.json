@@ -16,5 +16,8 @@
     "editor.rulers": [80]
   },
   "dart.previewFlutterUiGuides": true,
-  "dart.closingLabels": true
+  "dart.closingLabels": true,
+  "arb-editor.suppressedWarnings": [
+    "missing_metadata_for_key"
+  ]
 }
