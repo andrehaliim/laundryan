@@ -46,7 +46,11 @@
   "quantity": "Quantity",
   "available": "{count} available",
   "@available": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "takePhoto": "Take photo",
   "chooseGallery": "Choose from gallery",
@@ -56,7 +60,11 @@
   "itemInUse": "This item is used in a session, so it can't be deleted",
   "minQtyHint": "Can't go below {count} (in use or lost)",
   "@minQtyHint": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "addSession": "New session",
   "sessionTitle": "Title",
@@ -72,14 +80,18 @@
   "noItemsSelected": "No items yet. Tap Add items.",
   "maxQty": "Max {count}",
   "@maxQty": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "done": "Done",
   "startSession": "Start session",
   "fieldRequired": "This field is required",
   "estimateBeforeDropOff": "Estimated time can't be before the drop-off date",
   "noWardrobeItems": "Your wardrobe is empty. Add items first.",
-    "sessionsEmpty": "No sessions yet",
+  "sessionsEmpty": "No sessions yet",
   "activeSessions": "Active sessions",
   "noActiveSessions": "No active sessions",
   "history": "History",
@@ -87,7 +99,11 @@
   "dropOff": "Drop-off",
   "totalItems": "{count} items",
   "@totalItems": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "verify": "Verify",
   "sessionDetail": "Session detail",
@@ -96,5 +112,17 @@
   "cancelSession": "Cancel session",
   "cancelSessionTitle": "Cancel this session?",
   "cancelSessionMessage": "The session will be deleted permanently and all items become available again.",
-  "keepSession": "Keep"
+  "keepSession": "Keep",
+  "reminderTitle": "Laundry almost ready",
+  "reminderBody": "{title} at {place} should be ready in about 2 hours",
+  "@reminderBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

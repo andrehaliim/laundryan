@@ -84,5 +84,7 @@
   "cancelSession": "Batalkan sesi",
   "cancelSessionTitle": "Batalkan sesi ini?",
   "cancelSessionMessage": "Sesi akan dihapus permanen dan semua item tersedia kembali.",
-  "keepSession": "Tidak"
+  "keepSession": "Tidak",
+  "reminderTitle": "Cucian hampir selesai",
+  "reminderBody": "{title} di {place} diperkirakan selesai sekitar 2 jam lagi"
 }

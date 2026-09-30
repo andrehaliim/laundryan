@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:laundryan/utils/notification_service.dart';
 import 'package:provider/provider.dart';
 
 import 'data/app_database.dart';
@@ -18,6 +19,7 @@ import 'utils/photo_storage.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PhotoStorage.init();
+  await NotificationService.init();
   final settings = await SettingsProvider.load();
   final db = AppDatabase();
 
@@ -33,7 +35,10 @@ Future<void> main() async {
           create: (_) => WardrobeProvider(WardrobeRepository(db)),
         ),
         ChangeNotifierProvider(
-          create: (_) => SessionProvider(SessionRepository(db)),
+          create: (_) => SessionProvider(
+            SessionRepository(db),
+            () => settings.locale, // <- tambah
+          ),
         ),
       ],
       child: const MyApp(),
