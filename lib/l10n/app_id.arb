@@ -101,5 +101,13 @@
   "missingItems": "Item bermasalah",
   "chatWhatsapp": "Chat WhatsApp",
   "whatsappFailed": "Tidak bisa membuka WhatsApp",
-  "waMessage": "Halo, untuk cucian \"{title}\", item berikut belum kembali:\n{items}"
+  "waMessage": "Halo, untuk cucian \"{title}\", item berikut belum kembali:\n{items}",
+  "statusReturned": "Kembali",
+  "statusFound": "Ditemukan",
+  "statusPermanentlyLost": "Hilang permanen",
+  "completedAt": "Selesai pada",
+  "confirm": "Ya",
+  "resolveHint": "Berlaku untuk seluruh {count} qty yang hilang",
+  "permanentLostTitle": "Tandai hilang permanen?",
+  "permanentLostMessage": "Jumlah total item ini akan berkurang {count}."
 }

@@ -163,5 +163,27 @@
         "type": "String"
       }
     }
+  },
+  "statusReturned": "Returned",
+  "statusFound": "Found",
+  "statusPermanentlyLost": "Permanently lost",
+  "completedAt": "Completed",
+  "confirm": "Confirm",
+  "resolveHint": "Applies to all {count} missing pieces",
+  "@resolveHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permanentLostTitle": "Mark as permanently lost?",
+  "permanentLostMessage": "Total quantity of this item will be reduced by {count}.",
+  "@permanentLostMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

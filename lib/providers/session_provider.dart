@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/utils/notification_service.dart';
@@ -115,6 +116,9 @@ class SessionProvider extends ChangeNotifier {
     await _repo.complete(id, results);
     await NotificationService.cancel(id);
   }
+
+  Future<void> resolveLost(int sessionItemId, ItemStatus result) =>
+      _repo.resolveLost(sessionItemId, result);
 
   @override
   void dispose() {

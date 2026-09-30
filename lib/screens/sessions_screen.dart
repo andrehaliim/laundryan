@@ -5,6 +5,7 @@ import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/checklist_screen.dart';
+import 'package:laundryan/screens/history_detail_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
 import 'package:laundryan/widgets/settings_button.dart';
 import 'package:provider/provider.dart';
@@ -60,8 +61,15 @@ class SessionsScreen extends StatelessWidget {
               l10n.noHistory,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
-          // TODO (Step 11): tap kartu riwayat -> detail sesi selesai
-          for (final e in sessions.history) SessionCard(entry: e),
+          for (final e in sessions.history)
+            SessionCard(
+              entry: e,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => HistoryDetailScreen(sessionId: e.session.id),
+                ),
+              ),
+            ),
         ],
       );
     }

@@ -165,4 +165,38 @@ class SessionRepository {
       ));
     });
   }
+
+  /// Selesaikan item hilang/tertukar untuk seluruh qty hilang sekaligus.
+  /// ditemukan -> qty tersedia kembali otomatis (status tidak lagi mengunci).
+  /// hilangPermanen -> totalQty wardrobe berkurang sebesar lostQty.
+  Future<void> resolveLost(int sessionItemId, ItemStatus result) {
+    assert(result == ItemStatus.ditemukan ||
+        result == ItemStatus.hilangPermanen);
+    return db.transaction(() async {
+      final si = await (db.select(db.sessionItems)
+            ..where((t) => t.id.equals(sessionItemId)))
+          .getSingle();
+      if (si.status != ItemStatus.hilang &&
+          si.status != ItemStatus.tertukar) {
+        return;
+      }
+      final lostQty = si.quantity - (si.returnedQty ?? 0);
+
+      await (db.update(db.sessionItems)
+            ..where((t) => t.id.equals(sessionItemId)))
+          .write(SessionItemsCompanion(status: Value(result)));
+
+      if (result == ItemStatus.hilangPermanen) {
+        final w = await (db.select(db.wardrobeItems)
+              ..where((t) => t.id.equals(si.itemId)))
+            .getSingle();
+        await (db.update(db.wardrobeItems)
+              ..where((t) => t.id.equals(si.itemId)))
+            .write(WardrobeItemsCompanion(
+          totalQty: Value(w.totalQty - lostQty),
+          updatedAt: Value(DateTime.now()),
+        ));
+      }
+    });
+  }
 }
