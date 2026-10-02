@@ -5,6 +5,7 @@ import 'package:laundryan/data/wardrobe_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/screens/wardrobe_item_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
@@ -69,7 +70,7 @@ class WardrobeScreen extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 0.85,
+          childAspectRatio: 0.65,
         ),
         itemCount: items.length,
         itemBuilder: (_, i) {
@@ -129,32 +130,10 @@ class WardrobeScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        '${items.length}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.items,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
+                CountBadge(
+                  count: items.length,
+                  label: l10n.items,
+                  horizontalPadding: 12,
                 ),
               ],
             ),
@@ -256,6 +235,8 @@ class _ItemCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final file = PhotoStorage.file(entry.item.photoPath);
+    final cat = context.watch<CategoryProvider>().byId(entry.item.categoryId);
+    final catName = cat == null ? '' : categoryName(cat, l10n);
 
     final iconBox = Container(
       width: double.infinity,
@@ -268,47 +249,70 @@ class _ItemCard extends StatelessWidget {
       ),
     );
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: file == null
-                  ? iconBox
-                  : Image.file(
-                      file,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      cacheWidth: 400,
-                      errorBuilder: (_, _, _) => iconBox,
-                    ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.item.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.available(entry.availableQty),
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                ],
+    return SoftCard(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: file == null
+                    ? iconBox
+                    : Image.file(
+                        file,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        cacheWidth: 400,
+                        errorBuilder: (_, _, _) => iconBox,
+                      ),
               ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  catName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+                Text(
+                  entry.item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    CountBadge(
+                      count: 3,
+                      label: 'Available',
+                      mode: CountBadgeMode.tertiary,
+                      horizontalPadding:
+                          MediaQuery.sizeOf(context).width * 0.015,
+                    ),
+                    Spacer(),
+                    CountBadge(
+                      count: 5,
+                      label: 'in Wash',
+                      mode: CountBadgeMode.secondary,
+                      horizontalPadding:
+                          MediaQuery.sizeOf(context).width * 0.015,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -16,7 +16,8 @@ class CategoryProvider extends ChangeNotifier {
   }
 
   List<Category> get categories => _categories;
-
+  Category? byId(int id) => _categories.where((c) => c.id == id).firstOrNull;
+  
   Future<void> add(String name, String iconKey) => _repo.add(name, iconKey);
 
   Future<void> update(int id, {String? name, required String iconKey}) =>

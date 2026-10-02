@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/settings_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -37,6 +38,12 @@ class SettingsScreen extends StatelessWidget {
             ],
             selected: {settings.themeMode},
             onSelectionChanged: (s) => settings.setThemeMode(s.first),
+          ),
+          const SizedBox(height: 24),
+          IconButton(
+            icon: Icon(Icons.safety_check),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const TestScreen())),
           ),
         ],
       ),
