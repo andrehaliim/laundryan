@@ -195,26 +195,44 @@ class WardrobeScreen extends StatelessWidget {
     bool selected,
     ValueChanged<bool>? onTap,
   ) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: onTap,
-      selectedColor: Theme.of(context).colorScheme.primary,
-      labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isLight = scheme.brightness == Brightness.light;
+    final radius = BorderRadius.circular(20);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: isLight ? 0.01 : 0.3),
+            blurRadius: 3,
+          ),
+        ],
       ),
-      checkmarkColor: selected
-          ? Theme.of(context).colorScheme.onPrimary
-          : Theme.of(context).colorScheme.onSurface,
-      showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      side: BorderSide.none,
-      elevation: 3,
-      pressElevation: 4,
-      selectedShadowColor: Theme.of(context).colorScheme.onSurface
-          .withValues(alpha: 0.2),
-      shadowColor: Theme.of(context).colorScheme.onSurface
-          .withValues(alpha: 0.2),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: onTap,
+        showCheckmark: false,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        backgroundColor: theme.cardTheme.color,
+        selectedColor: scheme.primary,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        pressElevation: 0,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: radius),
+        side: BorderSide(
+          color: selected ? scheme.primary : scheme.outlineVariant,
+        ),
+        labelStyle: theme.textTheme.bodySmall?.copyWith(
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+          color: selected ? scheme.onPrimary : scheme.onSurface,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      ),
     );
   }
 }
