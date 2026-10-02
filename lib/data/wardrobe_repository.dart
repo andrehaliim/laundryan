@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value, Variable, BaseAggregate;
+import 'package:laundryan/data/enums.dart';
 
 import 'app_database.dart';
 
@@ -112,15 +113,26 @@ COALESCE((
     return true;
   }
 
-  /// false kalau item pernah dipakai di sesi (aktif maupun riwayat).
-  Future<bool> delete(int id) async {
-    final count = db.sessionItems.id.count();
-    final query = db.selectOnly(db.sessionItems)
-      ..addColumns([count])
-      ..where(db.sessionItems.itemId.equals(id));
-    final used = await query.map((r) => r.read(count)).getSingle();
-    if ((used ?? 0) > 0) return false;
-    await (db.delete(db.wardrobeItems)..where((t) => t.id.equals(id))).go();
-    return true;
+  /// false kalau item masih punya riwayat selain hilang permanen
+  /// (sesi aktif, hilang/tertukar belum selesai, kembali, ditemukan).
+  Future<bool> delete(int id) {
+    return db.transaction(() async {
+      final count = db.sessionItems.id.count();
+      final query = db.selectOnly(db.sessionItems)
+        ..addColumns([count])
+        ..where(db.sessionItems.itemId.equals(id))
+        ..where(
+          db.sessionItems.status.isNotIn([ItemStatus.hilangPermanen.name]),
+        );
+      final blocking = await query.map((r) => r.read(count)).getSingle();
+      if ((blocking ?? 0) > 0) return false;
+
+      // buang jejak hilang permanen biar FK restrict nggak menolak
+      await (db.delete(
+        db.sessionItems,
+      )..where((t) => t.itemId.equals(id))).go();
+      await (db.delete(db.wardrobeItems)..where((t) => t.id.equals(id))).go();
+      return true;
+    });
   }
 }
