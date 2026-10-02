@@ -118,7 +118,7 @@ class AppTheme {
       fontFamily: family,
       textTheme: text,
       appBarTheme: AppBarTheme(
-        backgroundColor: s.surface,
+        backgroundColor: isLight ? s.surfaceContainerLowest : s.surfaceContainer,
         foregroundColor: s.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,

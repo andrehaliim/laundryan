@@ -123,23 +123,6 @@ class WardrobeScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Row(
-              children: [
-                Text(
-                  l10n.myWardrobe,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const Spacer(),
-                CountBadge(
-                  count: items.length,
-                  label: l10n.items,
-                  horizontalPadding: 12,
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               onChanged: context.read<WardrobeProvider>().setQuery,
               decoration: InputDecoration(
@@ -163,7 +146,7 @@ class WardrobeScreen extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 8),
                     child: buildChip(
                       context,
-                      l10n.all,
+                      '${l10n.all} (${items.length})',
                       selectedId == null,
                       (_) => wardrobe.setCategory(null),
                     ),
