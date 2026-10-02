@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:laundryan/data/wardrobe_repository.dart';
 
+enum WardrobeSort { alphabetDesc, alphabetAsc }
+
 class WardrobeProvider extends ChangeNotifier {
   final WardrobeRepository _repo;
   StreamSubscription<List<WardrobeEntry>>? _sub;
@@ -23,12 +25,26 @@ class WardrobeProvider extends ChangeNotifier {
 
   List<WardrobeEntry> get items {
     final q = _query.trim().toLowerCase();
-    return _all.where((e) {
+    final list = _all.where((e) {
       final matchCategory =
           _categoryId == null || e.item.categoryId == _categoryId;
       final matchName = q.isEmpty || e.item.name.toLowerCase().contains(q);
       return matchCategory && matchName;
     }).toList();
+
+    switch (_sort) {
+      case WardrobeSort.alphabetDesc:
+        list.sort(
+          (a, b) =>
+              b.item.name.toLowerCase().compareTo(a.item.name.toLowerCase()),
+        );
+      case WardrobeSort.alphabetAsc:
+        list.sort(
+          (a, b) =>
+              a.item.name.toLowerCase().compareTo(b.item.name.toLowerCase()),
+        );
+    }
+    return list;
   }
 
   void setQuery(String q) {
@@ -72,6 +88,20 @@ class WardrobeProvider extends ChangeNotifier {
     _categoryId = id;
     notifyListeners();
   }
+
+  WardrobeSort _sort = WardrobeSort.alphabetAsc;
+  WardrobeSort get sort => _sort;
+
+  void setSort(WardrobeSort s) {
+    _sort = s;
+    notifyListeners();
+  }
+
+  void toggleSort() => setSort(
+    _sort == WardrobeSort.alphabetDesc
+        ? WardrobeSort.alphabetAsc
+        : WardrobeSort.alphabetDesc,
+  );
 
   @override
   void dispose() {

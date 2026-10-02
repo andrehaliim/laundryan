@@ -65,11 +65,11 @@ class WardrobeScreen extends StatelessWidget {
       body = Center(child: Text(l10n.noResults));
     } else {
       body = GridView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
           childAspectRatio: 0.65,
         ),
         itemCount: items.length,
@@ -123,16 +123,37 @@ class WardrobeScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              onChanged: context.read<WardrobeProvider>().setQuery,
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(28)),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: context.read<WardrobeProvider>().setQuery,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchHint,
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(28)),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                    ),
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: wardrobe.toggleSort,
+                  child: HugeIcon(
+                    icon: switch (wardrobe.sort) {
+                      WardrobeSort.alphabetDesc =>
+                        HugeIcons.strokeRoundedSortingZA01,
+                      WardrobeSort.alphabetAsc =>
+                        HugeIcons.strokeRoundedSortingAZ02,
+                    },
+                    size: 28,
+                  ),
+                ),
+              ],
             ),
           ),
           if (!wardrobe.isEmpty)
@@ -292,22 +313,44 @@ class _ItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CountBadge(
-                      count: 3,
-                      label: 'Available',
-                      mode: CountBadgeMode.tertiary,
-                      horizontalPadding:
-                          MediaQuery.sizeOf(context).width * 0.015,
+                    Text(
+                      entry.availableQty.toString(),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    Spacer(),
-                    CountBadge(
-                      count: 5,
-                      label: 'in Wash',
-                      mode: CountBadgeMode.secondary,
-                      horizontalPadding:
-                          MediaQuery.sizeOf(context).width * 0.015,
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedWardrobe01,
+                      size: 16,
+                      color: scheme.tertiary,
+                      strokeWidth: 2,
                     ),
+                    SizedBox(width: MediaQuery.sizeOf(context).width * 0.01),
+                    Text(
+                      entry.lockedQty.toString(),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedWashingMachine,
+                      size: 16,
+                      color: scheme.primary,
+                      strokeWidth: 2,
+                    ),
+                    SizedBox(width: MediaQuery.sizeOf(context).width * 0.01),
+                    Text(
+                      entry.missingQty.toString(),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedAlert01,
+                      size: 16,
+                      color: scheme.secondary,
+                      strokeWidth: 2,
+                    ),
+                    SizedBox(width: MediaQuery.sizeOf(context).width * 0.01),
                   ],
                 ),
               ],

@@ -4,9 +4,11 @@ import 'app_database.dart';
 
 class WardrobeEntry {
   final WardrobeItem item;
-  final int lockedQty;
-  const WardrobeEntry(this.item, this.lockedQty);
+  final int inWashQty;
+  final int missingQty;
+  const WardrobeEntry(this.item, this.inWashQty, this.missingQty);
 
+  int get lockedQty => inWashQty + missingQty;
   int get availableQty => item.totalQty - lockedQty;
 }
 
@@ -14,24 +16,31 @@ class WardrobeRepository {
   final AppDatabase db;
   WardrobeRepository(this.db);
 
-  // qty terkunci = qty di sesi aktif + qty hilang/tertukar yang belum diselesaikan
-  static const _locked = '''
+  // qty yang sedang di sesi aktif
+  static const _inWash = '''
 COALESCE((
-  SELECT SUM(CASE
-    WHEN s.status = 'active' THEN si.quantity
-    WHEN si.status IN ('hilang', 'tertukar')
-      THEN si.quantity - COALESCE(si.returned_qty, 0)
-    ELSE 0 END)
+  SELECT SUM(si.quantity)
+  FROM session_items si
+  JOIN sessions s ON s.id = si.session_id
+  WHERE si.item_id = w.id AND s.status = 'active'
+), 0)''';
+
+  // qty hilang/tertukar yang belum diselesaikan
+  static const _missing = '''
+COALESCE((
+  SELECT SUM(si.quantity - COALESCE(si.returned_qty, 0))
   FROM session_items si
   JOIN sessions s ON s.id = si.session_id
   WHERE si.item_id = w.id
+    AND s.status = 'completed'
+    AND si.status IN ('hilang', 'tertukar')
 ), 0)''';
 
   Stream<List<WardrobeEntry>> watchAll() {
     return db
         .customSelect(
-          'SELECT w.*, $_locked AS locked_qty FROM wardrobe_items w '
-          'ORDER BY w.name COLLATE NOCASE',
+          'SELECT w.*, $_inWash AS in_wash_qty, $_missing AS missing_qty '
+          'FROM wardrobe_items w ORDER BY w.name COLLATE NOCASE',
           readsFrom: {db.wardrobeItems, db.sessionItems, db.sessions},
         )
         .watch()
@@ -40,7 +49,8 @@ COALESCE((
               .map(
                 (r) => WardrobeEntry(
                   db.wardrobeItems.map(r.data),
-                  r.read<int>('locked_qty'),
+                  r.read<int>('in_wash_qty'),
+                  r.read<int>('missing_qty'),
                 ),
               )
               .toList(),
@@ -48,11 +58,14 @@ COALESCE((
   }
 
   Future<int> lockedQty(int id) async {
-    final row = await db.customSelect(
-      'SELECT $_locked AS locked_qty FROM wardrobe_items w WHERE w.id = ?',
-      variables: [Variable.withInt(id)],
-      readsFrom: {db.wardrobeItems, db.sessionItems, db.sessions},
-    ).getSingle();
+    final row = await db
+        .customSelect(
+          'SELECT $_inWash + $_missing AS locked_qty '
+          'FROM wardrobe_items w WHERE w.id = ?',
+          variables: [Variable.withInt(id)],
+          readsFrom: {db.wardrobeItems, db.sessionItems, db.sessions},
+        )
+        .getSingle();
     return row.read<int>('locked_qty');
   }
 
@@ -63,7 +76,9 @@ COALESCE((
     String? photoPath,
     String? note,
   }) async {
-    await db.into(db.wardrobeItems).insert(
+    await db
+        .into(db.wardrobeItems)
+        .insert(
           WardrobeItemsCompanion.insert(
             name: name,
             categoryId: categoryId,

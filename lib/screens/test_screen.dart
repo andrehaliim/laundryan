@@ -70,14 +70,12 @@ class SoftCard extends StatelessWidget {
 enum CountBadgeMode { primary, secondary, tertiary }
 
 class CountBadge extends StatelessWidget {
-  final int count;
   final String label;
   final CountBadgeMode mode;
   final double horizontalPadding;
 
   const CountBadge({
     super.key,
-    required this.count,
     required this.label,
     required this.horizontalPadding,
     this.mode = CountBadgeMode.primary,
@@ -102,7 +100,12 @@ class CountBadge extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text('$count $label', style: style),
+      child: Text(
+        label,
+        style: style,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
