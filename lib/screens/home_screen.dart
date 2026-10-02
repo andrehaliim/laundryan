@@ -70,6 +70,10 @@ class _FloatingNavBar extends StatelessWidget {
     final scheme = theme.colorScheme;
     final isLight = scheme.brightness == Brightness.light;
 
+    final alignX = items.length == 1
+        ? 0.0
+        : -1 + 2 * index / (items.length - 1);
+
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -84,17 +88,41 @@ class _FloatingNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          for (var i = 0; i < items.length; i++)
-            Expanded(
-              child: _NavItem(
-                data: items[i],
-                selected: i == index,
-                onTap: () => onTap(i),
+      child: SizedBox(
+        height: 52,
+        child: Stack(
+          children: [
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment(alignX, 0),
+              child: FractionallySizedBox(
+                widthFactor: 1 / items.length,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.primary,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
               ),
             ),
-        ],
+            Positioned.fill(
+              child: Row(
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    Expanded(
+                      child: _NavItem(
+                        data: items[i],
+                        selected: i == index,
+                        onTap: () => onTap(i),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -114,20 +142,15 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = selected ? scheme.onPrimary : scheme.onSurfaceVariant;
+    final target = selected ? scheme.onPrimary : scheme.onSurfaceVariant;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        height: 52,
-        decoration: BoxDecoration(
-          color: selected ? scheme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Row(
+      child: TweenAnimationBuilder<Color?>(
+        tween: ColorTween(end: target),
+        duration: const Duration(milliseconds: 300),
+        builder: (context, color, _) => Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(selected ? data.selectedIcon : data.icon, color: color),
@@ -135,9 +158,9 @@ class _NavItem extends StatelessWidget {
             Text(
               data.label,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: color,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  ),
+                color: color,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+              ),
             ),
           ],
         ),
