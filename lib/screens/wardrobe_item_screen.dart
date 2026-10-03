@@ -7,6 +7,7 @@ import 'package:laundryan/data/wardrobe_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/widgets/category_sheet.dart';
@@ -42,7 +43,8 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
     _originalPhoto = e?.item.photoPath;
     _photo = _originalPhoto;
     _qty = e?.item.totalQty ?? 1;
-    _categoryId = e?.item.categoryId ??
+    _categoryId =
+        e?.item.categoryId ??
         context.read<CategoryProvider>().categories.firstOrNull?.id;
   }
 
@@ -191,13 +193,42 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final categories = context.watch<CategoryProvider>().categories;
+    final selectedCat = categories
+        .where((c) => c.id == _categoryId)
+        .firstOrNull;
     final file = PhotoStorage.file(_photo);
     final locked = widget.entry?.lockedQty ?? 0;
 
-    final placeholder = Icon(
-      Icons.add_a_photo_outlined,
-      size: 36,
-      color: scheme.onSurfaceVariant,
+    final placeholder = Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add_a_photo_outlined, size: 36, color: scheme.onSurface),
+          const SizedBox(height: 8),
+          Text('Add Photo', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(
+            'Help laundry workers verify color and pattern (Optional)',
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.primary,
+              foregroundColor: scheme.onPrimary,
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => _pick(ImageSource.gallery),
+            icon: const Icon(Icons.add),
+            label: const Text('Upload'),
+          ),
+        ],
+      ),
     );
 
     return Scaffold(
@@ -220,130 +251,204 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () => _showPhotoOptions(l10n),
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.sizeOf(context).height / 4,
+                  child: SoftCard(
+                    child: file == null
+                        ? placeholder
+                        : Image.file(
+                            file,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => placeholder,
+                          ),
                   ),
-                  child: file == null
-                      ? placeholder
-                      : Image.file(
-                          file,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => placeholder,
-                        ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            TextFormField(
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Text(
+                  l10n.itemName,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  " *",
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(color: scheme.error),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            SoftTextField(
               controller: _name,
+              label: '',
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.itemName,
-                border: const OutlineInputBorder(),
-              ),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l10n.nameRequired : null,
             ),
             const SizedBox(height: 16),
             Row(
               children: [
+                Text(
+                  l10n.category,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  " *",
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(color: scheme.error),
+                ),
+                Spacer(),
+                GestureDetector(
+                  onTap: () => showCategorySheet(context),
+                  child: CountBadge(
+                    label: '+ Manage Categories',
+                    horizontalPadding: 8,
+                    mode: CountBadgeMode.normal,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: _categoryId,
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: l10n.category,
-                      border: const OutlineInputBorder(),
-                    ),
-                    items: [
+                  child: SoftDropdown<int>(
+                    value: _categoryId,
+                    entries: [
                       for (final c in categories)
-                        DropdownMenuItem(
+                        DropdownMenuEntry(
                           value: c.id,
-                          child: Row(
-                            children: [
-                              HugeIcon(
-                                icon: iconFor(c.iconKey),
-                                size: 20,
-                                color: scheme.primary,
-                              ),
-                              const SizedBox(width: 12),
-                              Flexible(
-                                child: Text(
-                                  categoryName(c, l10n),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                          label: categoryName(c, l10n),
+                          leadingIcon: HugeIcon(
+                            icon: iconFor(c.iconKey),
+                            size: 20,
+                            color: scheme.primary,
                           ),
                         ),
                     ],
-                    onChanged: (v) => setState(() => _categoryId = v),
+                    onSelected: (v) => setState(() => _categoryId = v),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.category_outlined),
-                  tooltip: l10n.categories,
-                  onPressed: () => showCategorySheet(context),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Text(
-                  l10n.quantity,
-                  style: Theme.of(context).textTheme.titleMedium,
+            SoftCard(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
                 ),
-                const Spacer(),
-                IconButton.filledTonal(
-                  icon: const Icon(Icons.remove),
-                  onPressed:
-                      _qty > _minQty ? () => setState(() => _qty--) : null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Owned Quantity',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      'How many identical pieces of this item do you have?',
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'Inventory count:',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                        Spacer(),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: scheme.outlineVariant),
+                            borderRadius: BorderRadius.circular(12),
+                            color: scheme.surface,
+                          ),
+                          child: Row(
+                            children: [
+                              IconButton.filledTonal(
+                                icon: const Icon(Icons.remove),
+                                onPressed: _qty > _minQty
+                                    ? () => setState(() => _qty--)
+                                    : null,
+                              ),
+                              SizedBox(
+                                width: 48,
+                                child: Text(
+                                  '$_qty',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                              IconButton.filledTonal(
+                                icon: const Icon(Icons.add),
+                                onPressed: () => setState(() => _qty++),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  width: 48,
-                  child: Text(
-                    '$_qty',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                IconButton.filledTonal(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => setState(() => _qty++),
-                ),
-              ],
+              ),
             ),
             if (locked > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   l10n.minQtyHint(locked),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
               ),
             const SizedBox(height: 16),
-            TextFormField(
+            Text(l10n.note, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            SoftTextField(
               controller: _note,
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.note,
-                alignLabelWithHint: true,
-                border: const OutlineInputBorder(),
-              ),
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => _save(l10n),
-              child: Text(l10n.save),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.surface,
+                      foregroundColor: scheme.onSurface,
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.primary,
+                      foregroundColor: scheme.onPrimary,
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () => _save(l10n),
+                    icon: Icon(Icons.check_circle_outline),
+                    label: Text(l10n.save),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
