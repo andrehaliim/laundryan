@@ -193,9 +193,6 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final categories = context.watch<CategoryProvider>().categories;
-    final selectedCat = categories
-        .where((c) => c.id == _categoryId)
-        .firstOrNull;
     final file = PhotoStorage.file(_photo);
     final locked = widget.entry?.lockedQty ?? 0;
 
@@ -206,10 +203,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
         children: [
           Icon(Icons.add_a_photo_outlined, size: 36, color: scheme.onSurface),
           const SizedBox(height: 8),
-          Text('Add Photo', style: Theme.of(context).textTheme.titleLarge),
+          Text(l10n.addPhoto, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(
-            'Help laundry workers verify color and pattern (Optional)',
+            l10n.addPhotoHint,
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
@@ -225,7 +222,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
             ),
             onPressed: () => _pick(ImageSource.gallery),
             icon: const Icon(Icons.add),
-            label: const Text('Upload'),
+            label: Text(l10n.upload),
           ),
         ],
       ),
@@ -304,7 +301,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                 GestureDetector(
                   onTap: () => showCategorySheet(context),
                   child: CountBadge(
-                    label: '+ Manage Categories',
+                    label: l10n.manageCategories,
                     horizontalPadding: 8,
                     mode: CountBadgeMode.normal,
                   ),
@@ -345,18 +342,18 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Owned Quantity',
+                      l10n.totalOwnedQty,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(
-                      'How many identical pieces of this item do you have?',
+                      l10n.totalOwnedQtyHint,
                       style: Theme.of(context).textTheme.bodyMedium
                           ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                     Row(
                       children: [
                         Text(
-                          'Inventory count:',
+                          l10n.inventoryCount,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: scheme.onSurfaceVariant),
                         ),

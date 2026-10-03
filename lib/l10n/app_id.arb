@@ -111,5 +111,12 @@
   "resolveHint": "Berlaku untuk seluruh {count} qty yang hilang",
   "permanentLostTitle": "Tandai hilang permanen?",
   "permanentLostMessage": "Jumlah total item ini akan berkurang {count}.",
-  "all": "Semua"
+  "all": "Semua",
+  "addPhoto": "Tambah Foto",
+  "addPhotoHint": "Bantu petugas laundry memverifikasi warna dan motif (Opsional)",
+  "upload": "Unggah",
+  "manageCategories": "+ Kelola Kategori",
+  "totalOwnedQty": "Total Jumlah Dimiliki",
+  "totalOwnedQtyHint": "Berapa banyak pakaian serupa yang kamu miliki?",
+  "inventoryCount": "Jumlah persediaan:"
 }

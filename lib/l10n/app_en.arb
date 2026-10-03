@@ -187,5 +187,12 @@
       }
     }
   },
-  "all": "All"
+  "all": "All",
+  "addPhoto": "Add Photo",
+  "addPhotoHint": "Help laundry workers verify color and pattern (Optional)",
+  "upload": "Upload",
+  "manageCategories": "+ Manage Categories",
+  "totalOwnedQty": "Total Owned Quantity",
+  "totalOwnedQtyHint": "How many identical pieces of this item do you have?",
+  "inventoryCount": "Inventory count:"
 }
