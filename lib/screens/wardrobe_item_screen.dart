@@ -221,8 +221,16 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
               ),
             ),
             onPressed: () => _pick(ImageSource.gallery),
-            icon: const Icon(Icons.add),
-            label: Text(l10n.upload),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedAdd01,
+              strokeWidth: 2,
+              size: Theme.of(context).textTheme.bodyMedium!.fontSize,
+            ),
+            label: Text(
+              l10n.upload,
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(color: scheme.onPrimary),
+            ),
           ),
         ],
       ),
@@ -301,7 +309,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                 GestureDetector(
                   onTap: () => showCategorySheet(context),
                   child: CountBadge(
-                    label: l10n.manageCategories,
+                    label: '+ ${l10n.manageCategories}',
                     horizontalPadding: 8,
                     mode: CountBadgeMode.normal,
                   ),
@@ -425,7 +433,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel),
+                    child: Text(
+                      l10n.cancel,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -441,8 +452,16 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                       ),
                     ),
                     onPressed: () => _save(l10n),
-                    icon: Icon(Icons.check_circle_outline),
-                    label: Text(l10n.save),
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      strokeWidth: 2,
+                      size: Theme.of(context).textTheme.titleMedium!.fontSize,
+                    ),
+                    label: Text(
+                      l10n.save,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(color: scheme.onPrimary),
+                    ),
                   ),
                 ),
               ],

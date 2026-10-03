@@ -191,8 +191,26 @@
   "addPhoto": "Add Photo",
   "addPhotoHint": "Help laundry workers verify color and pattern (Optional)",
   "upload": "Upload",
-  "manageCategories": "+ Manage Categories",
+  "manageCategories": "Manage Categories",
   "totalOwnedQty": "Total Owned Quantity",
   "totalOwnedQtyHint": "How many identical pieces of this item do you have?",
-  "inventoryCount": "Inventory count:"
+  "inventoryCount": "Inventory count:",
+  "manageCategoriesTitle": "Manage Categories",
+  "categoriesTab": "Categories ({count})",
+  "@categoriesTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activeCount": "{count} active",
+  "@activeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newCategory": "New Category"
 }

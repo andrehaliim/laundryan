@@ -115,8 +115,12 @@
   "addPhoto": "Tambah Foto",
   "addPhotoHint": "Bantu petugas laundry memverifikasi warna dan motif (Opsional)",
   "upload": "Unggah",
-  "manageCategories": "+ Kelola Kategori",
+  "manageCategories": "Kelola Kategori",
   "totalOwnedQty": "Total Jumlah Dimiliki",
   "totalOwnedQtyHint": "Berapa banyak pakaian serupa yang kamu miliki?",
-  "inventoryCount": "Jumlah persediaan:"
+  "inventoryCount": "Jumlah persediaan:",
+  "manageCategoriesTitle": "Kelola Kategori",
+  "categoriesTab": "Kategori ({count})",
+  "activeCount": "{count} aktif",
+  "newCategory": "Kategori Baru"
 }

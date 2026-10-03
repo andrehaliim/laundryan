@@ -33,6 +33,7 @@ class AppTheme {
     surfaceContainer: Color(0xFFEDF2F7),
     surfaceContainerHigh: Color(0xFFE8EEF4),
     surfaceContainerHighest: Color(0xFFE2E8F0),
+    inversePrimary: Color(0xFF0C6780),
   );
 
   static const _darkScheme = ColorScheme(
@@ -63,6 +64,7 @@ class AppTheme {
     surfaceContainer: Color(0xFF1A2027),
     surfaceContainerHigh: Color(0xFF202730),
     surfaceContainerHighest: Color(0xFF262E38),
+    inversePrimary: Color(0xFF0C6780),
   );
 
   static ThemeData get light => _build(_lightScheme);
@@ -118,7 +120,9 @@ class AppTheme {
       fontFamily: family,
       textTheme: text,
       appBarTheme: AppBarTheme(
-        backgroundColor: isLight ? s.surfaceContainerLowest : s.surfaceContainer,
+        backgroundColor: isLight
+            ? s.surfaceContainerLowest
+            : s.surfaceContainer,
         foregroundColor: s.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
