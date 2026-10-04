@@ -1,0 +1,22 @@
+import 'package:laundryan/data/app_database.dart';
+import 'package:laundryan/data/enums.dart';
+import 'package:laundryan/l10n/app_localizations.dart';
+
+extension SessionPhaseX on Session {
+  SessionPhase get phase {
+    if (status == SessionStatus.completed) return SessionPhase.verified;
+    final now = DateTime.now();
+    if (!now.isBefore(estimatedReadyAt)) return SessionPhase.pickup;
+    if (now.isBefore(createdAt.add(const Duration(minutes: 10)))) {
+      return SessionPhase.dropped;
+    }
+    return SessionPhase.washing;
+  }
+}
+
+String phaseLabel(SessionPhase p, AppLocalizations l10n) => switch (p) {
+  SessionPhase.dropped => l10n.phaseDropped,
+  SessionPhase.washing => l10n.phaseWashing,
+  SessionPhase.pickup => l10n.phasePickup,
+  SessionPhase.verified => l10n.phaseVerified,
+};

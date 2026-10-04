@@ -218,5 +218,12 @@
   },
   "newCategory": "New Category",
   "organizedItems": "Organized items",
-  "dragOrTapToEdit": "Drag or tap to edit"
+  "dragOrTapToEdit": "Drag or tap to edit",
+  "phaseDropped": "Dropped",
+  "phaseWashing": "Washing",
+  "phasePickup": "Pickup",
+  "phaseVerified": "Verified",
+  "notification": "Notification",
+  "statusOn": "ON",
+  "statusOff": "OFF"
 }

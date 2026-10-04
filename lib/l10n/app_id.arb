@@ -128,5 +128,12 @@
   "activeCount": "{count} aktif",
   "newCategory": "Kategori Baru",
   "organizedItems": "Item terorganisir",
-  "dragOrTapToEdit": "Tarik atau ketuk untuk mengubah"
+  "dragOrTapToEdit": "Tarik atau ketuk untuk mengubah",
+  "phaseDropped": "Dititipkan",
+  "phaseWashing": "Dicuci",
+  "phasePickup": "Siap diambil",
+  "phaseVerified": "Terverifikasi",
+  "notification": "Notifikasi",
+  "statusOn": "AKTIF",
+  "statusOff": "NONAKTIF"
 }

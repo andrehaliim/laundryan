@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/session_provider.dart';
@@ -7,6 +9,10 @@ import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/checklist_screen.dart';
 import 'package:laundryan/screens/history_detail_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
+import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/utils/session_phase.dart';
+import 'package:laundryan/widgets/pulse.dart';
+import 'package:laundryan/widgets/session_category_badges.dart';
 import 'package:laundryan/widgets/settings_button.dart';
 import 'package:provider/provider.dart';
 
@@ -129,10 +135,11 @@ class SessionCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();
     final s = entry.session;
-    final dateFmt = DateFormat.yMMMd(locale);
+    final dateFmt = DateFormat.yMMMMEEEEd(locale);
     final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
     final subStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
+    final phase = s.phase;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -144,35 +151,198 @@ class SessionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(s.title, style: Theme.of(context).textTheme.titleMedium),
+              Row(
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedWashingMachine,
+                    color: scheme.primary,
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    child: Text(
+                      s.title.isEmpty ? l10n.sessionTitle : s.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  CountBadge(
+                    label: phaseLabel(phase, l10n),
+                    horizontalPadding: 8,
+                    mode: CountBadgeMode.normal,
+                  ),
+                ],
+              ),
               const SizedBox(height: 2),
-              Text(s.placeName, style: subStyle),
+              Text(dateFmt.format(s.dropOffDate), style: subStyle),
+
               const SizedBox(height: 8),
-              Text(
-                '${l10n.dropOff}: ${dateFmt.format(s.dropOffDate)}',
-                style: subStyle,
+              SoftCardOutline(
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _statusIndicator(
+                      context: context,
+                      title: phaseLabel(SessionPhase.dropped, l10n),
+                      icon: HugeIcons.strokeRoundedPackageMoving,
+                      status: SessionPhase.dropped,
+                      current: s.phase,
+                    ),
+                    _statusIndicator(
+                      context: context,
+                      title: phaseLabel(SessionPhase.washing, l10n),
+                      icon: HugeIcons.strokeRoundedWashingMachine,
+                      status: SessionPhase.washing,
+                      current: s.phase,
+                    ),
+                    _statusIndicator(
+                      context: context,
+                      title: phaseLabel(SessionPhase.pickup, l10n),
+                      icon: HugeIcons.strokeRoundedShoppingBag02,
+                      status: SessionPhase.pickup,
+                      current: s.phase,
+                    ),
+                    _statusIndicator(
+                      context: context,
+                      title: phaseLabel(SessionPhase.verified, l10n),
+                      icon: HugeIcons.strokeRoundedTaskDone01,
+                      status: SessionPhase.verified,
+                      current: s.phase,
+                    ),
+                  ],
+                ),
               ),
-              Text(
-                '${l10n.estimatedReady}: ${dateTimeFmt.format(s.estimatedReadyAt)}',
-                style: subStyle,
-              ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      l10n.totalItems(entry.totalItems),
-                      style: subStyle,
+                      '${l10n.totalItems(entry.totalItems)} ${l10n.dropOff.toLowerCase()}',
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ),
-                  if (onVerify != null)
-                    FilledButton(onPressed: onVerify, child: Text(l10n.verify)),
                 ],
               ),
+              const SizedBox(height: 8),
+              SessionCategoryBadges(sessionId: s.id),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedClock01,
+                    color: scheme.primary,
+                    size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                    strokeWidth: 2,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('${l10n.estimatedReady}: ', style: subStyle),
+                  const Spacer(),
+                  Text(
+                    dateTimeFmt.format(s.estimatedReadyAt),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedNotification01,
+                    color: scheme.primary,
+                    size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                    strokeWidth: 2,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('${l10n.notification}: ', style: subStyle),
+                  const Spacer(),
+                  Text(
+                    s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: s.reminderEnabled ? scheme.tertiary : scheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              if (onVerify != null) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.primary,
+                      foregroundColor: scheme.onPrimary,
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: onVerify,
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      strokeWidth: 2,
+                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                    ),
+                    label: Text(
+                      l10n.verify,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(color: scheme.onPrimary),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _statusIndicator({
+    required BuildContext context,
+    required String title,
+    required List<List<dynamic>> icon,
+    required SessionPhase status,
+    required SessionPhase current,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final isCurrent = current == status;
+    final reached = current.index >= status.index;
+
+    final bg = isCurrent
+        ? scheme.primary
+        : reached
+        ? scheme.tertiary
+        : scheme.surfaceContainerHighest;
+    final fg = isCurrent
+        ? scheme.onPrimary
+        : reached
+        ? scheme.onTertiary
+        : scheme.outline;
+
+    final subStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: reached ? scheme.onSurface : scheme.onSurfaceVariant,
+      fontWeight: reached ? FontWeight.w600 : FontWeight.w400,
+    );
+
+    return Column(
+      children: [
+        Pulse(
+          active: isCurrent && status != SessionPhase.verified,
+          color: bg,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
+            child: HugeIcon(icon: icon, color: fg, size: 18),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(title, style: subStyle),
+      ],
     );
   }
 }
