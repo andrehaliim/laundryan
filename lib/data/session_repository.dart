@@ -12,7 +12,8 @@ class SessionItemInput {
 class SessionEntry {
   final Session session;
   final int totalItems;
-  const SessionEntry(this.session, this.totalItems);
+  final int missingQty;
+  const SessionEntry(this.session, this.totalItems, this.missingQty);
 }
 
 class SessionItemView {
@@ -82,8 +83,12 @@ class SessionRepository {
   Stream<List<SessionEntry>> _watch(SessionStatus status, String order) {
     return db
         .customSelect(
-          'SELECT s.*, COALESCE((SELECT SUM(si.quantity) FROM session_items si '
-          'WHERE si.session_id = s.id), 0) AS total_items '
+          'SELECT s.*, '
+          'COALESCE((SELECT SUM(si.quantity) FROM session_items si '
+          'WHERE si.session_id = s.id), 0) AS total_items, '
+          'COALESCE((SELECT SUM(si.quantity - COALESCE(si.returned_qty, 0)) '
+          'FROM session_items si WHERE si.session_id = s.id '
+          "AND si.status IN ('hilang', 'tertukar')), 0) AS missing_qty "
           'FROM sessions s WHERE s.status = ? ORDER BY $order',
           variables: [Variable.withString(status.name)],
           readsFrom: {db.sessions, db.sessionItems},
@@ -94,6 +99,7 @@ class SessionRepository {
               .map((r) => SessionEntry(
                     db.sessions.map(r.data),
                     r.read<int>('total_items'),
+                    r.read<int>('missing_qty'),
                   ))
               .toList(),
         );

@@ -52,10 +52,13 @@ class _SessionCategoryBadgesState extends State<SessionCategoryBadges> {
             scrollDirection: Axis.horizontal,
             children: [
               for (final e in data.entries)
-                CountBadge(
-                  label: '${e.value} ${_name(cats, e.key, l10n)}',
-                  horizontalPadding: 10,
-                  mode: CountBadgeMode.normal,
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: CountBadge(
+                    label: '${e.value} ${_name(cats, e.key, l10n)}',
+                    horizontalPadding: 10,
+                    mode: CountBadgeMode.normal,
+                  ),
                 ),
             ],
           ),

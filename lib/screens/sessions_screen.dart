@@ -60,7 +60,16 @@ class SessionsScreen extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 16),
-          Text(l10n.history, style: titleStyle),
+          Row(
+            children: [
+              Expanded(child: Text(l10n.history, style: titleStyle)),
+              Text(
+                'View All History (${sessions.history.length})',
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: scheme.onPrimaryContainer),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           if (sessions.history.isEmpty)
             Text(
@@ -68,7 +77,7 @@ class SessionsScreen extends StatelessWidget {
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
           for (final e in sessions.history)
-            SessionCard(
+            HistoryCard(
               entry: e,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
@@ -135,7 +144,6 @@ class SessionCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();
     final s = entry.session;
-    final dateFmt = DateFormat.yMMMMEEEEd(locale);
     final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
     final subStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
@@ -153,11 +161,6 @@ class SessionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedWashingMachine,
-                    color: scheme.primary,
-                  ),
-                  const SizedBox(width: 2),
                   Expanded(
                     child: Text(
                       s.title.isEmpty ? l10n.sessionTitle : s.title,
@@ -174,8 +177,12 @@ class SessionCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 2),
-              Text(dateFmt.format(s.dropOffDate), style: subStyle),
-
+              Text(
+                '${s.placeName} (${s.placeAddress ?? '-'})',
+                style: subStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 8),
               SoftCardOutline(
                 padding: EdgeInsets.all(8),
@@ -223,6 +230,13 @@ class SessionCard extends StatelessWidget {
                           ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ),
+                  if (s.placePhone != null)
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedWhatsapp,
+                      color: scheme.tertiary,
+                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                      strokeWidth: 2,
+                    ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -343,6 +357,75 @@ class SessionCard extends StatelessWidget {
         const SizedBox(height: 4),
         Text(title, style: subStyle),
       ],
+    );
+  }
+}
+
+class HistoryCard extends StatelessWidget {
+  final SessionEntry entry;
+  final VoidCallback? onTap;
+
+  const HistoryCard({super.key, required this.entry, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final locale = Localizations.localeOf(context).toString();
+    final s = entry.session;
+    final dateTimeFmt = DateFormat.MMMd(locale);
+    final subStyle = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(color: scheme.onSurfaceVariant);
+    final phase = s.phase;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      s.title.isEmpty ? l10n.sessionTitle : s.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  CountBadge(
+                    label: entry.missingQty > 0
+                        ? '${l10n.totalItems(entry.missingQty)} Swap/Missing'
+                        : 'Finished',
+                    horizontalPadding: 8,
+                    mode: entry.missingQty > 0
+                        ? CountBadgeMode.secondary
+                        : CountBadgeMode.tertiary,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${s.placeName} (${s.placeAddress ?? '-'})',
+                style: subStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                '${dateTimeFmt.format(s.dropOffDate)} - ${dateTimeFmt.format(s.completedAt!)}',
+                style: subStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
