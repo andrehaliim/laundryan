@@ -8,6 +8,7 @@ import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/checklist_screen.dart';
 import 'package:laundryan/screens/history_detail_screen.dart';
+import 'package:laundryan/screens/history_list_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/session_phase.dart';
@@ -63,11 +64,22 @@ class SessionsScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(l10n.history, style: titleStyle)),
-              Text(
-                'View All History (${sessions.history.length})',
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(color: scheme.onPrimaryContainer),
-              ),
+              if (sessions.history.isNotEmpty)
+                InkWell(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const HistoryListScreen(),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      l10n.viewAllHistory(sessions.history.length),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurface),
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 8),
@@ -76,7 +88,7 @@ class SessionsScreen extends StatelessWidget {
               l10n.noHistory,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
-          for (final e in sessions.history)
+          for (final e in sessions.history.take(3))
             HistoryCard(
               entry: e,
               onTap: () => Navigator.of(context).push(
@@ -147,172 +159,206 @@ class SessionCard extends StatelessWidget {
     final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
     final subStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
-    final phase = s.phase;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return StreamBuilder<int>(
+      stream: Stream.periodic(const Duration(seconds: 30), (i) => i),
+      builder: (_, _) {
+        final phase = s.phase;
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      s.title.isEmpty ? l10n.sessionTitle : s.title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          s.title.isEmpty ? l10n.sessionTitle : s.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      CountBadge(
+                        label: phaseLabel(phase, l10n),
+                        horizontalPadding: 8,
+                        mode: CountBadgeMode.normal,
+                      ),
+                    ],
                   ),
-                  CountBadge(
-                    label: phaseLabel(phase, l10n),
-                    horizontalPadding: 8,
-                    mode: CountBadgeMode.normal,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '${s.placeName} (${s.placeAddress ?? '-'})',
-                style: subStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              SoftCardOutline(
-                padding: EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _statusIndicator(
-                      context: context,
-                      title: phaseLabel(SessionPhase.dropped, l10n),
-                      icon: HugeIcons.strokeRoundedPackageMoving,
-                      status: SessionPhase.dropped,
-                      current: s.phase,
-                    ),
-                    _statusIndicator(
-                      context: context,
-                      title: phaseLabel(SessionPhase.washing, l10n),
-                      icon: HugeIcons.strokeRoundedWashingMachine,
-                      status: SessionPhase.washing,
-                      current: s.phase,
-                    ),
-                    _statusIndicator(
-                      context: context,
-                      title: phaseLabel(SessionPhase.pickup, l10n),
-                      icon: HugeIcons.strokeRoundedShoppingBag02,
-                      status: SessionPhase.pickup,
-                      current: s.phase,
-                    ),
-                    _statusIndicator(
-                      context: context,
-                      title: phaseLabel(SessionPhase.verified, l10n),
-                      icon: HugeIcons.strokeRoundedTaskDone01,
-                      status: SessionPhase.verified,
-                      current: s.phase,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${l10n.totalItems(entry.totalItems)} ${l10n.dropOff.toLowerCase()}',
-                      style: Theme.of(context).textTheme.titleSmall
-                          ?.copyWith(color: scheme.onSurfaceVariant),
-                    ),
-                  ),
-                  if (s.placePhone != null)
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedWhatsapp,
-                      color: scheme.tertiary,
-                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                      strokeWidth: 2,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SessionCategoryBadges(sessionId: s.id),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedClock01,
-                    color: scheme.primary,
-                    size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                    strokeWidth: 2,
-                  ),
-                  const SizedBox(width: 8),
-                  Text('${l10n.estimatedReady}: ', style: subStyle),
-                  const Spacer(),
+                  const SizedBox(height: 2),
                   Text(
-                    dateTimeFmt.format(s.estimatedReadyAt),
-                    style: Theme.of(context).textTheme.titleSmall,
+                    (s.placeAddress == null || s.placeAddress!.isEmpty)
+                        ? s.placeName
+                        : '${s.placeName} (${s.placeAddress})',
+                    style: subStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedNotification01,
-                    color: scheme.primary,
-                    size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                    strokeWidth: 2,
-                  ),
-                  const SizedBox(width: 8),
-                  Text('${l10n.notification}: ', style: subStyle),
-                  const Spacer(),
-                  Text(
-                    s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: s.reminderEnabled ? scheme.tertiary : scheme.error,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(height: 8),
+                  SoftCardOutline(
+                    padding: EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.dropped, l10n),
+                          icon: HugeIcons.strokeRoundedPackageMoving,
+                          status: SessionPhase.dropped,
+                          current: s.phase,
+                        ),
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.washing, l10n),
+                          icon: HugeIcons.strokeRoundedWashingMachine,
+                          status: SessionPhase.washing,
+                          current: s.phase,
+                        ),
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.pickup, l10n),
+                          icon: HugeIcons.strokeRoundedShoppingBag02,
+                          status: SessionPhase.pickup,
+                          current: s.phase,
+                        ),
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.verified, l10n),
+                          icon: HugeIcons.strokeRoundedTaskDone01,
+                          status: SessionPhase.verified,
+                          current: s.phase,
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              if (onVerify != null) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: scheme.primary,
-                      foregroundColor: scheme.onPrimary,
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${l10n.totalItems(entry.totalItems)} ${l10n.dropOff.toLowerCase()}',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ),
+                      if (s.placePhone != null)
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedWhatsapp,
+                          color: scheme.tertiary,
+                          size: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .fontSize,
+                          strokeWidth: 2,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SessionCategoryBadges(sessionId: s.id),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedCalendar01,
+                        color: scheme.primary,
+                        size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                        strokeWidth: 2,
+                      ),
+                      const SizedBox(width: 8),
+                      Text('${l10n.dropOffDate}: ', style: subStyle),
+                      const Spacer(),
+                      Text(
+                        DateFormat.yMMMd(locale).format(s.dropOffDate),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedClock01,
+                        color: scheme.primary,
+                        size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                        strokeWidth: 2,
+                      ),
+                      const SizedBox(width: 8),
+                      Text('${l10n.estimatedReady}: ', style: subStyle),
+                      const Spacer(),
+                      Text(
+                        dateTimeFmt.format(s.estimatedReadyAt),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedNotification01,
+                        color: scheme.primary,
+                        size: Theme.of(context).textTheme.titleLarge!.fontSize,
+                        strokeWidth: 2,
+                      ),
+                      const SizedBox(width: 8),
+                      Text('${l10n.notification}: ', style: subStyle),
+                      const Spacer(),
+                      Text(
+                        s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: s.reminderEnabled
+                              ? scheme.tertiary
+                              : scheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (onVerify != null) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: scheme.primary,
+                          foregroundColor: scheme.onPrimary,
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: onVerify,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                          strokeWidth: 2,
+                          size: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .fontSize,
+                        ),
+                        label: Text(
+                          l10n.verify,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: scheme.onPrimary),
+                        ),
                       ),
                     ),
-                    onPressed: onVerify,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                      strokeWidth: 2,
-                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                    ),
-                    label: Text(
-                      l10n.verify,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(color: scheme.onPrimary),
-                    ),
-                  ),
-                ),
-              ],
-            ],
+                  ],
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -376,7 +422,6 @@ class HistoryCard extends StatelessWidget {
     final dateTimeFmt = DateFormat.MMMd(locale);
     final subStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
-    final phase = s.phase;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -400,8 +445,8 @@ class HistoryCard extends StatelessWidget {
                   ),
                   CountBadge(
                     label: entry.missingQty > 0
-                        ? '${l10n.totalItems(entry.missingQty)} Swap/Missing'
-                        : 'Finished',
+                        ? l10n.swapMissing(entry.missingQty)
+                        : l10n.finishedLabel,
                     horizontalPadding: 8,
                     mode: entry.missingQty > 0
                         ? CountBadgeMode.secondary
@@ -411,7 +456,9 @@ class HistoryCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '${s.placeName} (${s.placeAddress ?? '-'})',
+                (s.placeAddress == null || s.placeAddress!.isEmpty)
+                    ? s.placeName
+                    : '${s.placeName} (${s.placeAddress})',
                 style: subStyle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

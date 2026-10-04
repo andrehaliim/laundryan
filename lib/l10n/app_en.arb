@@ -225,5 +225,22 @@
   "phaseVerified": "Verified",
   "notification": "Notification",
   "statusOn": "ON",
-  "statusOff": "OFF"
+  "statusOff": "OFF",
+  "finishedLabel": "Finished",
+  "swapMissing": "{count} swap/missing",
+  "@swapMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAllHistory": "View all ({count})",
+  "@viewAllHistory": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

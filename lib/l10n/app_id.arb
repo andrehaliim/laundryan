@@ -135,5 +135,15 @@
   "phaseVerified": "Terverifikasi",
   "notification": "Notifikasi",
   "statusOn": "AKTIF",
-  "statusOff": "NONAKTIF"
+  "statusOff": "NONAKTIF",
+  "finishedLabel": "Selesai",
+  "swapMissing": "{count} tertukar/hilang",
+  "@swapMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAllHistory": "Lihat semua ({count})"
 }
