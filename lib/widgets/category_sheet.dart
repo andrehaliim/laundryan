@@ -107,8 +107,8 @@ class _CategorySheetState extends State<CategorySheet> {
 
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
+      initialChildSize: 1.0,
+      minChildSize: 0.5,
       maxChildSize: 1.0,
       builder: (context, controller) => Container(
         decoration: BoxDecoration(
@@ -288,7 +288,7 @@ class _CategorySheetState extends State<CategorySheet> {
                   ),
                   child: HugeIcon(
                     icon: iconFor(c.iconKey),
-                    color: scheme.onPrimary,
+                    color: scheme.onPrimaryContainer,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -326,98 +326,128 @@ class _CategorySheetState extends State<CategorySheet> {
 
   Widget _buildForm(AppLocalizations l10n) {
     final scheme = Theme.of(context).colorScheme;
-    return SoftCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_formError != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                _formError!,
-                style: TextStyle(color: scheme.error),
-              ),
-            ),
-          SoftTextFieldOutline(
-            controller: _nameCtrl,
-            textCapitalization: TextCapitalization.sentences,
-            label: l10n.categoryName,
-            validator: (v) =>
-                v != null && v.trim().isNotEmpty ? null : l10n.nameRequired,
-            suffixIcon: Icon(Icons.label_outline_rounded),
-          ),
-          const SizedBox(height: 16),
-          Row(
+    return Column(
+      children: [
+        SoftCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.icon, style: Theme.of(context).textTheme.titleSmall),
-              Spacer(),
-              Text(
-                iconLabel(_iconKey, l10n),
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: scheme.inversePrimary),
+              if (_formError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    _formError!,
+                    style: TextStyle(color: scheme.error),
+                  ),
+                ),
+              SoftTextFieldOutline(
+                controller: _nameCtrl,
+                textCapitalization: TextCapitalization.sentences,
+                label: l10n.categoryName,
+                validator: (v) =>
+                    v != null && v.trim().isNotEmpty ? null : l10n.nameRequired,
+                suffixIcon: Icon(Icons.label_outline_rounded),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SoftCardOutline(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              const SizedBox(height: 16),
+              Row(
                 children: [
-                  for (final key in categoryIcons.keys)
-                    InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () => setState(() => _iconKey = key),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: key == _iconKey
-                                ? scheme.primary
-                                : Colors.transparent,
-                            width: key == _iconKey ? 2 : 1,
-                          ),
-                        ),
-                        child: HugeIcon(
-                          icon: iconFor(key),
-                          color: key == _iconKey
-                              ? scheme.primary
-                              : scheme.onSurfaceVariant,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    ),
+                  Text(
+                    l10n.icon,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Spacer(),
+                  Text(
+                    iconLabel(_iconKey, l10n),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: scheme.inversePrimary),
+                  ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => setState(() {
-                    _resetForm();
-                    _tab = 0;
-                  }),
-                  child: Text(l10n.cancel),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () => _save(l10n),
-                  child: Text(l10n.save),
+              const SizedBox(height: 8),
+              SoftCardOutline(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final key in categoryIcons.keys)
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => setState(() => _iconKey = key),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: key == _iconKey
+                                    ? scheme.primary
+                                    : Colors.transparent,
+                                width: key == _iconKey ? 2 : 1,
+                              ),
+                            ),
+                            child: HugeIcon(
+                              icon: iconFor(key),
+                              color: key == _iconKey
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.primary,
+              foregroundColor: scheme.onPrimary,
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => _save(l10n),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+              strokeWidth: 2,
+              size: Theme.of(context).textTheme.titleMedium!.fontSize,
+            ),
+            label: Text(
+              l10n.save,
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(color: scheme.onPrimary),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            style: ButtonStyle(
+              side: WidgetStateBorderSide.resolveWith(
+                (states) => BorderSide.none,
+              ),
+              backgroundColor: WidgetStateColor.resolveWith(
+                (states) => Colors.transparent,
+              ),
+            ),
+            onPressed: () => setState(() {
+              _resetForm();
+              _tab = 0;
+            }),
+            child: Text(l10n.cancel),
+          ),
+        ),
+      ],
     );
   }
 }

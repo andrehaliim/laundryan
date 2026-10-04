@@ -92,7 +92,10 @@ class CountBadge extends StatelessWidget {
       CountBadgeMode.primary => (scheme.primary, scheme.onPrimary),
       CountBadgeMode.secondary => (scheme.secondary, scheme.onSecondary),
       CountBadgeMode.tertiary => (scheme.tertiary, scheme.onTertiary),
-      CountBadgeMode.normal => (scheme.surfaceContainer, scheme.inversePrimary),
+      CountBadgeMode.normal => (
+        scheme.primaryContainer,
+        scheme.onPrimaryContainer,
+      ),
     };
 
     final style = Theme.of(context).textTheme.labelSmall
