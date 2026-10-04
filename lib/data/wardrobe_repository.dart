@@ -135,4 +135,12 @@ COALESCE((
       return true;
     });
   }
+
+  Future<int> countByCategory(int categoryId) async {
+    final count = db.wardrobeItems.id.count();
+    final query = db.selectOnly(db.wardrobeItems)
+      ..addColumns([count])
+      ..where(db.wardrobeItems.categoryId.equals(categoryId));
+    return await query.map((r) => r.read(count)).getSingle() ?? 0;
+  }
 }

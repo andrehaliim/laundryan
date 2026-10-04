@@ -23,6 +23,7 @@ class SoftCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double? height;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
 
   const SoftCard({
     super.key,
@@ -30,6 +31,7 @@ class SoftCard extends StatelessWidget {
     this.onTap,
     this.height,
     this.padding = EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
   });
 
   @override
@@ -42,6 +44,7 @@ class SoftCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: height,
+      margin: margin,
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
         borderRadius: radius,
@@ -264,6 +267,118 @@ class SoftDropdown<T> extends StatelessWidget {
               side: BorderSide(color: scheme.outlineVariant),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SoftCardOutline extends StatelessWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final double? height;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+
+  const SoftCardOutline({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.height,
+    this.padding = EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final radius = BorderRadius.circular(12);
+
+    return Container(
+      width: double.infinity,
+      height: height,
+      margin: margin,
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: radius,
+        border: Border.all(color: Colors.transparent),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+class SoftTextFieldOutline extends StatelessWidget {
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final int maxLines;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+
+  const SoftTextFieldOutline({
+    super.key,
+    this.controller,
+    this.label,
+    this.hint,
+    this.validator,
+    this.onChanged,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+    this.maxLines = 1,
+    this.prefixIcon,
+    this.suffixIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final radius = BorderRadius.circular(12);
+
+    OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: c, width: w),
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(borderRadius: radius),
+      child: TextFormField(
+        controller: controller,
+        validator: validator,
+        onChanged: onChanged,
+        keyboardType: keyboardType,
+        textCapitalization: textCapitalization,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          filled: true,
+          fillColor: scheme.primaryContainer.withValues(alpha: 0.4),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: border(Colors.transparent),
+          enabledBorder: border(Colors.transparent),
+          focusedBorder: border(scheme.primary, 2),
+          errorBorder: border(scheme.error),
+          focusedErrorBorder: border(scheme.error, 2),
         ),
       ),
     );

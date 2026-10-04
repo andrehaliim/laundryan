@@ -3,6 +3,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
+import 'package:laundryan/providers/wardrobe_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:provider/provider.dart';
 
@@ -245,6 +247,8 @@ class _CategorySheetState extends State<CategorySheet> {
   Widget _buildList(AppLocalizations l10n) {
     final categories = context.watch<CategoryProvider>().categories;
     final scheme = Theme.of(context).colorScheme;
+    final wardrobe = context.watch<WardrobeProvider>();
+
     return Column(
       children: [
         if (_listError != null)
@@ -255,20 +259,62 @@ class _CategorySheetState extends State<CategorySheet> {
               child: Text(_listError!, style: TextStyle(color: scheme.error)),
             ),
           ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Text(
+              l10n.organizedItems,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const Spacer(),
+            Text(
+              l10n.dragOrTapToEdit,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
         for (final c in categories)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: HugeIcon(icon: iconFor(c.iconKey), color: scheme.primary),
-            title: Text(categoryName(c, l10n)),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+          SoftCard(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: HugeIcon(
+                    icon: iconFor(c.iconKey),
+                    color: scheme.onPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      categoryName(c, l10n),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      l10n.totalItems(wardrobe.countByCategory(c.id)),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.outline),
+                    ),
+                  ],
+                ),
+                Spacer(),
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
+                  tooltip: l10n.editCategory,
                   onPressed: () => _openEdit(c, l10n),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
+                  tooltip: l10n.delete,
                   onPressed: () => _delete(c, l10n),
                 ),
               ],
@@ -280,71 +326,98 @@ class _CategorySheetState extends State<CategorySheet> {
 
   Widget _buildForm(AppLocalizations l10n) {
     final scheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _nameCtrl,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            labelText: l10n.categoryName,
-            errorText: _formError,
+    return SoftCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_formError != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                _formError!,
+                style: TextStyle(color: scheme.error),
+              ),
+            ),
+          SoftTextFieldOutline(
+            controller: _nameCtrl,
+            textCapitalization: TextCapitalization.sentences,
+            label: l10n.categoryName,
+            validator: (v) =>
+                v != null && v.trim().isNotEmpty ? null : l10n.nameRequired,
+            suffixIcon: Icon(Icons.label_outline_rounded),
           ),
-        ),
-        const SizedBox(height: 16),
-        Text(l10n.icon, style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final key in categoryIcons.keys)
-              InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => setState(() => _iconKey = key),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: key == _iconKey
-                          ? scheme.primary
-                          : scheme.outlineVariant,
-                      width: key == _iconKey ? 2 : 1,
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Text(l10n.icon, style: Theme.of(context).textTheme.titleSmall),
+              Spacer(),
+              Text(
+                iconLabel(_iconKey, l10n),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: scheme.inversePrimary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SoftCardOutline(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final key in categoryIcons.keys)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => setState(() => _iconKey = key),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: key == _iconKey
+                                ? scheme.primary
+                                : Colors.transparent,
+                            width: key == _iconKey ? 2 : 1,
+                          ),
+                        ),
+                        child: HugeIcon(
+                          icon: iconFor(key),
+                          color: key == _iconKey
+                              ? scheme.primary
+                              : scheme.onSurfaceVariant,
+                          strokeWidth: 2,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: HugeIcon(
-                    icon: iconFor(key),
-                    color: key == _iconKey
-                        ? scheme.primary
-                        : scheme.onSurfaceVariant,
-                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => setState(() {
+                    _resetForm();
+                    _tab = 0;
+                  }),
+                  child: Text(l10n.cancel),
                 ),
               ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(() {
-                  _resetForm();
-                  _tab = 0;
-                }),
-                child: Text(l10n.cancel),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => _save(l10n),
+                  child: Text(l10n.save),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton(
-                onPressed: () => _save(l10n),
-                child: Text(l10n.save),
-              ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

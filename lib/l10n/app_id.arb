@@ -24,6 +24,10 @@
   "categorySkirt": "Rok",
   "categoryUnderwear": "Pakaian dalam",
   "categorySocks": "Kaos kaki",
+  "categoryBag": "Tas",
+  "categoryStar": "Bintang",
+  "categoryHeart": "Hati",
+  "categoryHome": "Rumah",
   "next": "Lanjut",
   "categories": "Kategori",
   "addCategory": "Tambah kategori",
@@ -122,5 +126,7 @@
   "manageCategoriesTitle": "Kelola Kategori",
   "categoriesTab": "Kategori ({count})",
   "activeCount": "{count} aktif",
-  "newCategory": "Kategori Baru"
+  "newCategory": "Kategori Baru",
+  "organizedItems": "Item terorganisir",
+  "dragOrTapToEdit": "Tarik atau ketuk untuk mengubah"
 }

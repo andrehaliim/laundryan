@@ -20,8 +20,6 @@ const Map<String, List<List<dynamic>>> categoryIcons = {
 List<List<dynamic>> iconFor(String key) =>
     categoryIcons[key] ?? HugeIcons.strokeRoundedShoppingBag01;
 
-
-
 String categoryName(Category c, AppLocalizations l10n) {
   final name = c.name;
   if (name != null && name.isNotEmpty) return name;
@@ -42,7 +40,46 @@ String categoryName(Category c, AppLocalizations l10n) {
       return l10n.categoryUnderwear;
     case 'socks':
       return l10n.categorySocks;
+    case 'bag':
+      return l10n.categoryBag;
+    case 'star':
+      return l10n.categoryStar;
+    case 'heart':
+      return l10n.categoryHeart;
+    case 'home':
+      return l10n.categoryHome;
     default:
       return '';
+  }
+}
+
+String iconLabel(String key, AppLocalizations l10n) {
+  switch (key) {
+    case 'tshirt':
+      return l10n.categoryTshirt;
+    case 'shirt':
+      return l10n.categoryShirt;
+    case 'outerwear':
+      return l10n.categoryOuterwear;
+    case 'longPants':
+      return l10n.categoryLongPants;
+    case 'shorts':
+      return l10n.categoryShorts;
+    case 'skirt':
+      return l10n.categorySkirt;
+    case 'underwear':
+      return l10n.categoryUnderwear;
+    case 'socks':
+      return l10n.categorySocks;
+    case 'bag':
+      return l10n.categoryBag;
+    case 'star':
+      return l10n.categoryStar;
+    case 'heart':
+      return l10n.categoryHeart;
+    case 'home':
+      return l10n.categoryHome;
+    default:
+      return key; // bag, star, heart, home
   }
 }

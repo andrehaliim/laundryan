@@ -103,6 +103,9 @@ class WardrobeProvider extends ChangeNotifier {
         : WardrobeSort.alphabetDesc,
   );
 
+  int countByCategory(int categoryId) =>
+      _all.where((e) => e.item.categoryId == categoryId).length;
+
   @override
   void dispose() {
     _sub?.cancel();

@@ -24,6 +24,10 @@
   "categorySkirt": "Skirt",
   "categoryUnderwear": "Underwear",
   "categorySocks": "Socks",
+  "categoryBag": "Bag",
+  "categoryStar": "Star",
+  "categoryHeart": "Heart",
+  "categoryHome": "Home",
   "next": "Next",
   "categories": "Categories",
   "addCategory": "Add category",
@@ -212,5 +216,7 @@
       }
     }
   },
-  "newCategory": "New Category"
+  "newCategory": "New Category",
+  "organizedItems": "Organized items",
+  "dragOrTapToEdit": "Drag or tap to edit"
 }
