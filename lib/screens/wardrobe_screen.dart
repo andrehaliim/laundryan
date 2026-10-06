@@ -114,6 +114,7 @@ class WardrobeScreen extends StatelessWidget {
         actions: [const SettingsButton()],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_wardrobe',
         tooltip: l10n.addWardrobe,
         onPressed: () => _open(context),
         child: const Icon(Icons.add),

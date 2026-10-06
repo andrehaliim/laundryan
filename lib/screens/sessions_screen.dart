@@ -128,6 +128,7 @@ class SessionsScreen extends StatelessWidget {
         actions: [const SettingsButton()],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_sessions',
         tooltip: l10n.addSession,
         onPressed: () => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const AddSessionScreen())),
