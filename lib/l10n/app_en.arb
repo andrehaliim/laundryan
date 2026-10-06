@@ -242,5 +242,14 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sessionTitleLabel": "Session title",
+  "laundromatInfo": "Laundromat Info",
+  "laundromatInfoSubtitle": "Vendor & drop-off counter contact",
+  "laundryServiceName": "Laundry Service Name",
+  "dropOffAddress": "Drop-off Address",
+  "contactPhone": "Contact Phone",
+  "scheduleAndTiming": "Schedule & Timing",
+  "scheduleAndTimingSubtitle": "Expected cycle and pickup window",
+  "selectedItems": "Selected Items"
 }

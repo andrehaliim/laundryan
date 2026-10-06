@@ -145,5 +145,14 @@
       }
     }
   },
-  "viewAllHistory": "Lihat semua ({count})"
+  "viewAllHistory": "Lihat semua ({count})",
+  "sessionTitleLabel": "Judul sesi",
+  "laundromatInfo": "Informasi Laundry",
+  "laundromatInfoSubtitle": "Kontak penyedia & tempat drop-off",
+  "laundryServiceName": "Nama Tempat Laundry",
+  "dropOffAddress": "Alamat Drop-off",
+  "contactPhone": "Nomor Telepon Kontak",
+  "scheduleAndTiming": "Jadwal & Waktu",
+  "scheduleAndTimingSubtitle": "Estimasi waktu pencucian dan pengambilan",
+  "selectedItems": "Item Terpilih"
 }

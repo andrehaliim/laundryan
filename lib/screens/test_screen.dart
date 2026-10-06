@@ -367,6 +367,10 @@ class SoftTextFieldOutline extends StatelessWidget {
           labelText: label,
           hintText: hint,
           prefixIcon: prefixIcon,
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 20,
+          ),
           suffixIcon: suffixIcon,
           filled: true,
           fillColor: scheme.primaryContainer.withValues(alpha: 0.4),

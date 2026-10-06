@@ -8,6 +8,7 @@ import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:provider/provider.dart';
@@ -88,9 +89,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   Future<void> _save(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate() || _selected.isEmpty) return;
     if (_ready.isBefore(_dropOff)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.estimateBeforeDropOff)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.estimateBeforeDropOff)));
       return;
     }
     final provider = context.read<SessionProvider>();
@@ -142,26 +142,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                         : GridView.builder(
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 8,
-                              childAspectRatio: 0.8,
-                            ),
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                  childAspectRatio: 0.8,
+                                ),
                             itemCount: items.length,
                             itemBuilder: (_, i) {
                               final e = items[i];
                               final cat = cats
                                   .where((c) => c.id == e.item.categoryId)
                                   .firstOrNull;
-                              return _pickerCard(
-                                e,
-                                cat,
-                                l10n,
-                                () {
-                                  _toggle(e);
-                                  setSheet(() {});
-                                },
-                              );
+                              return _pickerCard(e, cat, l10n, () {
+                                _toggle(e);
+                                setSheet(() {});
+                              });
                             },
                           ),
                   ),
@@ -189,7 +184,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     final icon = Container(
       width: w,
       height: size ?? double.infinity,
-      color: scheme.primaryContainer.withValues(alpha: 0.4),
+      color: scheme.surfaceContainerLowest,
       alignment: Alignment.center,
       child: HugeIcon(
         icon: iconFor(cat?.iconKey ?? ''),
@@ -264,9 +259,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     ),
                     Text(
                       l10n.available(e.availableQty),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -282,66 +276,117 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     final scheme = Theme.of(context).colorScheme;
     final id = e.item.id;
     final qty = _selected[id]!;
-    return Card(
+    return SoftCardOutline(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            _thumb(e.item.photoPath, cat, size: 48),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    e.item.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          _thumb(e.item.photoPath, cat, size: 48),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  e.item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                Text(
+                  l10n.maxQty(e.availableQty),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: scheme.outlineVariant),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.shadow.withValues(
+                    alpha: scheme.brightness == Brightness.light ? 0.06 : 0.3,
                   ),
-                  Text(
-                    l10n.maxQty(e.availableQty),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.remove),
-              onPressed:
-                  qty > 1 ? () => setState(() => _selected[id] = qty - 1) : null,
+            child: Row(
+              children: [
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.remove),
+                  onPressed: qty > 1
+                      ? () => setState(() => _selected[id] = qty - 1)
+                      : null,
+                ),
+                Text('$qty', style: Theme.of(context).textTheme.titleMedium),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.add),
+                  onPressed: qty < e.availableQty
+                      ? () => setState(() => _selected[id] = qty + 1)
+                      : null,
+                ),
+              ],
             ),
-            Text('$qty', style: Theme.of(context).textTheme.titleMedium),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.add),
-              onPressed: qty < e.availableQty
-                  ? () => setState(() => _selected[id] = qty + 1)
-                  : null,
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete01,
+              strokeWidth: 2,
+              size: 20,
             ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => setState(() => _selected.remove(id)),
-            ),
-          ],
-        ),
+            onPressed: () => setState(() => _selected.remove(id)),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _dateField(String label, String value, IconData icon, VoidCallback onTap) {
+  Widget _dateField(
+    String label,
+    String value,
+    Widget? suffixIcon,
+    VoidCallback onTap,
+  ) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final radius = BorderRadius.circular(12);
+
+    OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: c, width: w),
+    );
+
     return InkWell(
       onTap: onTap,
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
-          suffixIcon: Icon(icon),
+          suffixIcon: suffixIcon,
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 20,
+          ),
+          filled: true,
+          fillColor: scheme.primaryContainer.withValues(alpha: 0.4),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: border(Colors.transparent),
+          enabledBorder: border(Colors.transparent),
+          focusedBorder: border(scheme.primary, 2),
+          errorBorder: border(scheme.error),
+          focusedErrorBorder: border(scheme.error, 2),
         ),
         child: Text(value),
       ),
@@ -362,6 +407,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     String? required(String? v) =>
         (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null;
 
+    final titleStyle = Theme.of(context).textTheme.titleSmall
+        ?.copyWith(fontWeight: FontWeight.bold);
+
+    final subtitleStyle = Theme.of(context).textTheme.bodySmall?.copyWith();
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.addSession)),
       body: Form(
@@ -369,97 +420,258 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            TextFormField(
-              controller: _title,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.sessionTitle,
-                border: const OutlineInputBorder(),
-              ),
-              validator: required,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _place,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: l10n.placeName,
-                border: const OutlineInputBorder(),
-              ),
-              validator: required,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _address,
-              maxLines: 2,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.placeAddress,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _phone,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                labelText: l10n.placePhone,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _dateField(
-              l10n.dropOffDate,
-              dateFmt.format(_dropOff),
-              Icons.calendar_today_outlined,
-              _pickDropOff,
-            ),
-            const SizedBox(height: 16),
-            _dateField(
-              l10n.estimatedReady,
-              readyText,
-              Icons.schedule,
-              _pickReady,
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.reminder),
-              subtitle: Text(l10n.reminderHint),
-              value: _reminder,
-              onChanged: (v) => setState(() => _reminder = v),
-            ),
-            const Divider(),
             Row(
               children: [
-                Text(
-                  l10n.sessionItems,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: _openPicker,
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.addItems),
-                ),
+                Text(l10n.sessionTitleLabel, style: titleStyle),
+                SizedBox(width: 4),
+                Text('*', style: TextStyle(color: scheme.error)),
               ],
             ),
-            if (_selected.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: Text(l10n.noItemsSelected)),
-              )
-            else
-              for (final id in _selected.keys)
-                if (byId[id] != null)
-                  _itemTile(
-                    byId[id]!,
-                    cats.where((c) => c.id == byId[id]!.item.categoryId).firstOrNull,
-                    l10n,
-                  ),
+            const SizedBox(height: 8),
+            SoftTextField(
+              controller: _title,
+              textCapitalization: TextCapitalization.sentences,
+              validator: required,
+            ),
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _selected.isEmpty ? null : () => _save(l10n),
-              child: Text(l10n.startSession),
+            SoftCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedWashingMachine,
+                          color: scheme.onPrimaryContainer,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.laundromatInfo, style: titleStyle),
+                          Text(
+                            l10n.laundromatInfoSubtitle,
+                            style: subtitleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(l10n.laundryServiceName, style: subtitleStyle),
+                      SizedBox(width: 4),
+                      Text('*', style: TextStyle(color: scheme.error)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SoftTextFieldOutline(
+                    controller: _place,
+                    textCapitalization: TextCapitalization.words,
+                    prefixIcon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedStore01,
+                      size: 20,
+                      strokeWidth: 2,
+                    ),
+                    validator: required,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.dropOffAddress, style: subtitleStyle),
+                  const SizedBox(height: 8),
+                  SoftTextFieldOutline(
+                    controller: _address,
+                    textCapitalization: TextCapitalization.sentences,
+                    prefixIcon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedLocation01,
+                      size: 20,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.contactPhone, style: subtitleStyle),
+                  const SizedBox(height: 8),
+                  SoftTextFieldOutline(
+                    controller: _phone,
+                    keyboardType: TextInputType.phone,
+                    prefixIcon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCall02,
+                      size: 20,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SoftCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedTimeSchedule,
+                          color: scheme.onPrimaryContainer,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.scheduleAndTiming, style: titleStyle),
+                          Text(
+                            l10n.scheduleAndTimingSubtitle,
+                            style: subtitleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.dropOffDate, style: subtitleStyle),
+                  const SizedBox(height: 8),
+                  _dateField(
+                    '',
+                    dateFmt.format(_dropOff),
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedDateTime,
+                      size: 20,
+                      strokeWidth: 2,
+                    ),
+                    _pickDropOff,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.estimatedReady, style: subtitleStyle),
+                  const SizedBox(height: 8),
+                  _dateField(
+                    '',
+                    readyText,
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedClock01,
+                      size: 20,
+                      strokeWidth: 2,
+                    ),
+                    _pickReady,
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.reminder, style: titleStyle),
+                    subtitle: Text(l10n.reminderHint, style: subtitleStyle),
+                    value: _reminder,
+                    onChanged: (v) => setState(() => _reminder = v),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SoftCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedTimeSchedule,
+                          color: scheme.onPrimaryContainer,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.selectedItems, style: titleStyle),
+                          Text(
+                            l10n.totalItems(_selected.length),
+                            style: subtitleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: _openPicker,
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.wardrobe),
+                        style: TextButton.styleFrom(
+                          backgroundColor: scheme.surfaceContainerHigh,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  if (_selected.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(l10n.noItemsSelected, style: subtitleStyle),
+                      ),
+                    )
+                  else
+                    for (final id in _selected.keys)
+                      if (byId[id] != null)
+                        _itemTile(
+                          byId[id]!,
+                          cats
+                              .where((c) => c.id == byId[id]!.item.categoryId)
+                              .firstOrNull,
+                          l10n,
+                        ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: scheme.primary,
+                  foregroundColor: scheme.onPrimary,
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: _selected.isEmpty ? null : () => _save(l10n),
+                label: Text(
+                  l10n.startSession,
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(color: scheme.onPrimary),
+                ),
+              ),
             ),
           ],
         ),
