@@ -106,7 +106,7 @@ class SessionRepository {
   }
 
   Stream<List<SessionEntry>> watchActive() =>
-      _watch(SessionStatus.active, 's.estimated_ready_at ASC');
+      _watch(SessionStatus.active, 's.created_at DESC');
 
   Stream<List<SessionEntry>> watchHistory() =>
       _watch(SessionStatus.completed, 's.completed_at DESC');
