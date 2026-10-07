@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class TestScreen extends StatelessWidget {
   const TestScreen({super.key});
@@ -386,5 +387,68 @@ class SoftTextFieldOutline extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+enum SoftButtonVariant { primary, secondary, ghost }
+
+class SoftButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final String label;
+  final List<List<dynamic>>? icon;
+  final SoftButtonVariant variant;
+  final bool expanded;
+
+  const SoftButton({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.variant = SoftButtonVariant.primary,
+    this.expanded = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    final (bg, fg) = switch (variant) {
+      SoftButtonVariant.primary => (scheme.primary, scheme.onPrimary),
+      SoftButtonVariant.secondary => (scheme.surface, scheme.onSurface),
+      SoftButtonVariant.ghost => (Colors.transparent, scheme.onSurface),
+    };
+
+    final style = FilledButton.styleFrom(
+      backgroundColor: bg,
+      foregroundColor: fg,
+      disabledBackgroundColor: scheme.onSurface.withValues(alpha: 0.12),
+      elevation: variant == SoftButtonVariant.ghost ? 0 : 1,
+      minimumSize: const Size(0, 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+
+    final text = Text(
+      label,
+      style: theme.textTheme.titleMedium?.copyWith(color: fg),
+    );
+
+    final button = icon == null
+        ? FilledButton(style: style, onPressed: onPressed, child: text)
+        : FilledButton.icon(
+            style: style,
+            onPressed: onPressed,
+            icon: HugeIcon(
+              icon: icon!,
+              color: fg,
+              strokeWidth: 2,
+              size: theme.textTheme.titleMedium!.fontSize,
+            ),
+            label: text,
+          );
+
+    return expanded
+        ? SizedBox(width: double.infinity, child: button)
+        : button;
   }
 }

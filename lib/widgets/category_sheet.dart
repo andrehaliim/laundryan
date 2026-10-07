@@ -404,48 +404,22 @@ class _CategorySheetState extends State<CategorySheet> {
           ),
         ),
         const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: scheme.primary,
-              foregroundColor: scheme.onPrimary,
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () => _save(l10n),
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-              strokeWidth: 2,
-              size: Theme.of(context).textTheme.titleMedium!.fontSize,
-            ),
-            label: Text(
-              l10n.save,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(color: scheme.onPrimary),
-            ),
-          ),
+        SoftButton(
+          label: l10n.save,
+          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+          onPressed: () => _save(l10n),
+          expanded: true,
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            style: ButtonStyle(
-              side: WidgetStateBorderSide.resolveWith(
-                (states) => BorderSide.none,
-              ),
-              backgroundColor: WidgetStateColor.resolveWith(
-                (states) => Colors.transparent,
-              ),
-            ),
-            onPressed: () => setState(() {
-              _resetForm();
-              _tab = 0;
-            }),
-            child: Text(l10n.cancel),
-          ),
+        SoftButton(
+          label: l10n.cancel,
+          onPressed: () => setState(() {
+            _resetForm();
+            _tab = 0;
+          }),
+          icon: null,
+          expanded: true,
+          variant: SoftButtonVariant.ghost,
         ),
       ],
     );

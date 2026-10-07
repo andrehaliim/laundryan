@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 
 class LostLine {
@@ -48,19 +50,26 @@ class ChecklistSummaryScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle_outline,
-                      size: 80, color: scheme.primary),
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 80,
+                    color: scheme.primary,
+                  ),
                   const SizedBox(height: 12),
-                  Text(l10n.allReturned,
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    l10n.allReturned,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             )
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(l10n.missingItems,
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  l10n.missingItems,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 for (final e in lost)
                   ListTile(
@@ -78,13 +87,10 @@ class ChecklistSummaryScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (lost.isNotEmpty && hasPhone)
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () => _chat(context, l10n),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: Text(l10n.chatWhatsapp),
-                  ),
+                SoftButton(
+                  label: l10n.chatWhatsapp,
+                  icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                  onPressed: () => _chat(context, l10n),
                 ),
               const SizedBox(height: 8),
               SizedBox(

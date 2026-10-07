@@ -654,24 +654,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: scheme.primary,
-                  foregroundColor: scheme.onPrimary,
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: _selected.isEmpty ? null : () => _save(l10n),
-                label: Text(
-                  l10n.startSession,
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(color: scheme.onPrimary),
-                ),
-              ),
+            SoftButton(
+              label: l10n.startSession,
+              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+              onPressed: _selected.isEmpty ? null : () => _save(l10n),
             ),
           ],
         ),

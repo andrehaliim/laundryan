@@ -326,32 +326,11 @@ class SessionCard extends StatelessWidget {
                   ),
                   if (onVerify != null) ...[
                     const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: scheme.primary,
-                          foregroundColor: scheme.onPrimary,
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: onVerify,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                          strokeWidth: 2,
-                          size: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .fontSize,
-                        ),
-                        label: Text(
-                          l10n.verify,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(color: scheme.onPrimary),
-                        ),
-                      ),
+                    SoftButton(
+                      label: l10n.verify,
+                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      onPressed: onVerify,
+                      expanded: true,
                     ),
                   ],
                 ],

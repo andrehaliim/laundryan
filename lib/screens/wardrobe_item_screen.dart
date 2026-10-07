@@ -211,26 +211,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: scheme.primary,
-              foregroundColor: scheme.onPrimary,
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          SoftButton(
+            label: l10n.upload,
+            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
             onPressed: () => _pick(ImageSource.gallery),
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedAdd01,
-              strokeWidth: 2,
-              size: Theme.of(context).textTheme.bodyMedium!.fontSize,
-            ),
-            label: Text(
-              l10n.upload,
-              style: Theme.of(context).textTheme.titleSmall
-                  ?.copyWith(color: scheme.onPrimary),
-            ),
           ),
         ],
       ),
@@ -422,46 +406,19 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
             Row(
               children: [
                 Expanded(
-                  flex: 1,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: scheme.surface,
-                      foregroundColor: scheme.onSurface,
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                  child: SoftButton(
+                    label: l10n.cancel,
+                    variant: SoftButtonVariant.secondary,
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      l10n.cancel,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   flex: 2,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: scheme.primary,
-                      foregroundColor: scheme.onPrimary,
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                  child: SoftButton(
+                    label: l10n.save,
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle02,
                     onPressed: () => _save(l10n),
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                      strokeWidth: 2,
-                      size: Theme.of(context).textTheme.titleMedium!.fontSize,
-                    ),
-                    label: Text(
-                      l10n.save,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(color: scheme.onPrimary),
-                    ),
                   ),
                 ),
               ],
