@@ -21,6 +21,8 @@ class SessionDetailScreen extends StatefulWidget {
 class _SessionDetailScreenState extends State<SessionDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _title;
+  late String _savedTitle;
+  bool _editingTitle = false;
   late bool _reminder;
   late DateTime _readyAt;
   late DateTime _dropOffAt;
@@ -36,6 +38,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         .firstWhere((e) => e.session.id == widget.sessionId)
         .session;
     _title = TextEditingController(text: s.title);
+    _savedTitle = s.title;
     _reminder = s.reminderEnabled;
     _readyAt = s.estimatedReadyAt;
     _dropOffAt = s.dropOffDate;
@@ -72,18 +75,29 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         time.minute,
       );
     });
+    await _save();
   }
 
-  Future<void> _save() async {
+  Future<void> _toggleEditTitle() async {
+    if (!_editingTitle) {
+      setState(() => _editingTitle = true);
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
-    final navigator = Navigator.of(context);
-    await context.read<SessionProvider>().update(
+    setState(() {
+      _editingTitle = false;
+      _savedTitle = _title.text.trim();
+    });
+    await _save();
+  }
+
+  Future<void> _save() {
+    return context.read<SessionProvider>().update(
       widget.sessionId,
-      title: _title.text.trim(),
+      title: _savedTitle,
       reminderEnabled: _reminder,
       estimatedReadyAt: _readyAt,
     );
-    navigator.pop();
   }
 
   Future<void> _cancelSession(AppLocalizations l10n) async {
@@ -141,16 +155,52 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextFormField(
-                    controller: _title,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      labelText: l10n.sessionTitle,
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? l10n.nameRequired
-                        : null,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _editingTitle
+                            ? TextFormField(
+                                controller: _title,
+                                autofocus: true,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                style: Theme.of(context).textTheme.titleLarge,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  border: InputBorder.none,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                onFieldSubmitted: (_) => _toggleEditTitle(),
+                                maxLines: 1,
+                                validator: (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                    ? l10n.nameRequired
+                                    : null,
+                              )
+                            : Text(
+                                _title.text,
+                                style: Theme.of(context).textTheme.titleLarge,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: _toggleEditTitle,
+                        child: HugeIcon(
+                          icon: _editingTitle
+                              ? HugeIcons.strokeRoundedTick02
+                              : HugeIcons.strokeRoundedEdit02,
+                          strokeWidth: 2,
+                          size: 20,
+                          color: scheme.onPrimaryContainer,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   SoftCardOutline(
@@ -255,7 +305,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                           Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                         value: _reminder,
-                        onChanged: (v) => setState(() => _reminder = v),
+                        onChanged: (v) {
+                          setState(() => _reminder = v);
+                          _save();
+                        },
                       ),
                     ],
                   ),
@@ -324,8 +377,6 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 );
               },
             ),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: _save, child: Text(l10n.save)),
           ],
         ),
       ),
