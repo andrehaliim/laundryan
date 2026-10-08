@@ -111,6 +111,7 @@
     }
   },
   "verify": "Verify",
+  "viewDetails": "View Details >",
   "sessionDetail": "Session detail",
   "items": "Items",
   "itemsLocked": "Items are locked while the session is active",

@@ -7,6 +7,7 @@ import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
+import 'package:laundryan/screens/checklist_screen.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/phone_utils.dart';
@@ -174,12 +175,14 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                                     TextCapitalization.sentences,
                                 style: Theme.of(context).textTheme.titleLarge,
                                 decoration: const InputDecoration(
-                                  isDense: true,
+                                  isCollapsed: true,
+                                  filled: false,
                                   contentPadding: EdgeInsets.zero,
                                   border: InputBorder.none,
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide.none,
-                                  ),
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  focusedErrorBorder: InputBorder.none,
                                 ),
                                 onFieldSubmitted: (_) => _toggleEditTitle(),
                                 maxLines: 1,
@@ -396,6 +399,19 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               },
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: SoftButton(
+          label: l10n.verify,
+          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+          onPressed: () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => ChecklistScreen(sessionId: widget.sessionId),
+            ),
+          ),
+          expanded: true,
         ),
       ),
     );

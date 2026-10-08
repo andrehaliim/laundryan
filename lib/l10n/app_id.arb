@@ -83,6 +83,7 @@
   "dropOff": "Drop-off",
   "totalItems": "{count} item",
   "verify": "Verifikasi",
+  "viewDetails": "Lihat Detail >",
   "sessionDetail": "Detail sesi",
   "items": "Item",
   "itemsLocked": "Item terkunci selama sesi masih aktif",
