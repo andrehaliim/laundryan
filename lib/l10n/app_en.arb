@@ -157,6 +157,19 @@
   "sessionFinished": "Session finished",
   "allReturned": "All items came back safely",
   "missingItems": "Missing items",
+  "someItemsMissing": "Some items didn't come back",
+  "allReturnedBody": "Every piece is back and available in your wardrobe again.",
+  "missingBody": "Contact the laundry so they can track down the missing pieces.",
+  "verifiedItems": "Verified items",
+  "wardrobeUpdated": "Wardrobe updated",
+  "wardrobeUpdatedBody": "{count} pcs are marked available in your wardrobe again.",
+  "@wardrobeUpdatedBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatWhatsapp": "Chat WhatsApp",
   "whatsappFailed": "Can not open WhatsApp",
   "waMessage": "Hello, for my laundry \"{title}\", these items did not come back:\n{items}",
@@ -370,6 +383,14 @@
     }
   },
   "reportDiscrepancy": "Report discrepancy",
+  "discrepancyCount": "{count} discrepancies",
+  "@discrepancyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "verificationInProgress": "Verification in progress",
   "verificationReady": "All items checked",
   "itemsNeedAction": "{count} items need action",

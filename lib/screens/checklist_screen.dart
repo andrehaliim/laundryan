@@ -81,11 +81,12 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final items = _items;
     if (items == null) return;
     final provider = context.read<SessionProvider>();
+    final cats = context.read<CategoryProvider>().categories;
     final navigator = Navigator.of(context);
     setState(() => _saving = true);
 
     final results = <ItemVerification>[];
-    final lost = <LostLine>[];
+    final lines = <SummaryLine>[];
     for (final v in items) {
       final d = _drafts[v.sessionItem.id]!;
       final lostQty = v.sessionItem.quantity - d.returned;
@@ -99,14 +100,23 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
           lostQty > 0 && note.isNotEmpty ? note : null,
         ),
       );
-      if (lostQty > 0) lost.add(LostLine(v.item.name, lostQty, status));
+      lines.add(
+        SummaryLine(
+          name: v.item.name,
+          photo: v.item.photoPath,
+          category: cats.where((c) => c.id == v.item.categoryId).firstOrNull,
+          total: v.sessionItem.quantity,
+          returned: d.returned,
+          status: status,
+        ),
+      );
     }
 
     await provider.complete(widget.sessionId, results);
     navigator.pushReplacement(
       MaterialPageRoute(
         builder: (_) =>
-            ChecklistSummaryScreen(title: _title, phone: _phone, lost: lost),
+            ChecklistSummaryScreen(title: _title, phone: _phone, lines: lines),
       ),
     );
   }
