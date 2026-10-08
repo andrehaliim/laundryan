@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
+import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/checklist_summary_screen.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +33,8 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   List<SessionItemView>? _items;
   final Map<int, _Draft> _drafts = {};
   String _title = '';
+  String _placeName = '';
+  DateTime? _dropOffAt;
   String? _phone;
   bool _saving = false;
 
@@ -45,6 +51,8 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         .firstOrNull
         ?.session;
     _title = s?.title ?? '';
+    _placeName = s?.placeName ?? '';
+    _dropOffAt = s?.dropOffDate;
     _phone = s?.placePhone;
     final list = await provider.items(widget.sessionId);
     if (!mounted) return;
@@ -64,11 +72,8 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => _DetailSheet(
-        view: v,
-        draft: d,
-        onChanged: () => setState(() {}),
-      ),
+      builder: (_) =>
+          _DetailSheet(view: v, draft: d, onChanged: () => setState(() {})),
     );
   }
 
@@ -86,23 +91,22 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       final lostQty = v.sessionItem.quantity - d.returned;
       final status = lostQty == 0 ? ItemStatus.kembali : d.lostStatus;
       final note = d.note.trim();
-      results.add(ItemVerification(
-        v.sessionItem.id,
-        d.returned,
-        status,
-        lostQty > 0 && note.isNotEmpty ? note : null,
-      ));
+      results.add(
+        ItemVerification(
+          v.sessionItem.id,
+          d.returned,
+          status,
+          lostQty > 0 && note.isNotEmpty ? note : null,
+        ),
+      );
       if (lostQty > 0) lost.add(LostLine(v.item.name, lostQty, status));
     }
 
     await provider.complete(widget.sessionId, results);
     navigator.pushReplacement(
       MaterialPageRoute(
-        builder: (_) => ChecklistSummaryScreen(
-          title: _title,
-          phone: _phone,
-          lost: lost,
-        ),
+        builder: (_) =>
+            ChecklistSummaryScreen(title: _title, phone: _phone, lost: lost),
       ),
     );
   }
@@ -110,41 +114,100 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final cats = context.watch<CategoryProvider>().categories;
     final items = _items;
+    final pending = _drafts.values.where((d) => !d.checked).length;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.verifyItems)),
+      appBar: AppBar(title: Text(l10n.verifyReturnedTitle)),
       body: items == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                for (final v in items)
-                  _buildCard(v, cats, l10n, scheme),
+                _progressCard(context, items),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.dropOffChecklist(items.length),
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        l10n.tapToInspect,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final v in items) ...[
+                  _itemCard(
+                    context,
+                    v,
+                    cats.where((c) => c.id == v.item.categoryId).firstOrNull,
+                  ),
+                  if (v != items.last) const SizedBox(height: 8),
+                ],
               ],
             ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color ?? scheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: scheme.shadow.withValues(alpha: 0.06),
+              blurRadius: 24,
+              offset: const Offset(0, -8),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          minimum: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!_allChecked)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    l10n.checkAllHint,
-                    style: TextStyle(color: scheme.onSurfaceVariant),
-                  ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _allChecked
+                            ? l10n.verificationReady
+                            : l10n.verificationInProgress,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    if (pending > 0)
+                      Text(
+                        l10n.itemsNeedAction(pending).toUpperCase(),
+                        style: textTheme.labelSmall?.copyWith(
+                          color: scheme.onSecondaryContainer,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                  ],
                 ),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _allChecked && !_saving ? _finish : null,
-                  child: Text(l10n.finish),
-                ),
+              ),
+              SoftButton(
+                label: l10n.finishVerification,
+                icon: HugeIcons.strokeRoundedTaskDone01,
+                onPressed: _allChecked && !_saving ? _finish : null,
+                expanded: true,
               ),
             ],
           ),
@@ -153,57 +216,386 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     );
   }
 
-  Widget _buildCard(
-    SessionItemView v,
-    List cats,
-    AppLocalizations l10n,
-    ColorScheme scheme,
-  ) {
+  Widget _progressCard(BuildContext context, List<SessionItemView> items) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final locale = Localizations.localeOf(context).toString();
+
+    var total = 0, returned = 0, missing = 0, checkedPieces = 0;
+    for (final v in items) {
+      final d = _drafts[v.sessionItem.id]!;
+      final qty = v.sessionItem.quantity;
+      total += qty;
+      if (!d.checked) continue;
+      checkedPieces += qty;
+      returned += d.returned;
+      missing += qty - d.returned;
+    }
+    final percent = total == 0 ? 0 : (checkedPieces * 100 / total).round();
+    final subtitle = [
+      if (_placeName.isNotEmpty) _placeName,
+      if (_dropOffAt != null)
+        DateFormat.MMMd(locale).add_jm().format(_dropOffAt!),
+    ].join(' • ');
+
+    return SoftCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _title,
+                      style: textTheme.titleLarge,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (subtitle.isNotEmpty)
+                      Text(
+                        subtitle,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedPackage,
+                  strokeWidth: 2,
+                  size: 22,
+                  color: scheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.piecesVerified(returned, total),
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  l10n.percentDone(percent),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: scheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _ProgressBar(
+            total: total,
+            segments: [
+              (returned, scheme.tertiary),
+              (missing, scheme.secondary),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedCheckList,
+                  strokeWidth: 2,
+                  size: 20,
+                  color: scheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.verifyInstruction,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _itemCard(BuildContext context, SessionItemView v, Category? cat) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final d = _drafts[v.sessionItem.id]!;
     final total = v.sessionItem.quantity;
     final lostQty = total - d.returned;
-    final cat = cats.where((c) => c.id == v.item.categoryId).firstOrNull;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        child: Row(
-          children: [
-            Checkbox(
-              value: d.checked,
-              onChanged: (x) => setState(() => d.checked = x ?? false),
-            ),
-            ItemThumb(photo: v.item.photoPath, category: cat),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    v.item.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  Text(
-                    lostQty > 0
-                        ? l10n.missingCount(lostQty)
-                        : '${d.returned}/$total',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: lostQty > 0
-                              ? scheme.error
-                              : scheme.onSurfaceVariant,
+    final discrepancy = d.checked && lostQty > 0;
+
+    // pending → neutral, all returned → green, lost/swapped → pink.
+    final (
+      List<List<dynamic>> badgeIcon,
+      String badgeLabel,
+      Color badgeBg,
+      Color badgeFg,
+    ) = !d.checked
+        ? (
+            HugeIcons.strokeRoundedClock01,
+            l10n.pendingBadge(total),
+            scheme.surfaceContainerHighest,
+            scheme.onSurfaceVariant,
+          )
+        : lostQty == 0
+        ? (
+            HugeIcons.strokeRoundedTick02,
+            l10n.returnedBadge(d.returned, total),
+            scheme.tertiaryContainer,
+            scheme.onTertiaryContainer,
+          )
+        : d.lostStatus == ItemStatus.tertukar
+        ? (
+            HugeIcons.strokeRoundedArrowDataTransferHorizontal,
+            l10n.swappedBadge(d.returned, total, lostQty),
+            scheme.secondaryContainer,
+            scheme.onSecondaryContainer,
+          )
+        : (
+            HugeIcons.strokeRoundedAlert02,
+            l10n.lostBadge(d.returned, total, lostQty),
+            scheme.secondaryContainer,
+            scheme.onSecondaryContainer,
+          );
+
+    final (
+      List<List<dynamic>> toggleIcon,
+      Color toggleBg,
+      Color toggleFg,
+    ) = !d.checked
+        ? (
+            HugeIcons.strokeRoundedSquare,
+            scheme.surfaceContainer,
+            scheme.onSurfaceVariant,
+          )
+        : lostQty == 0
+        ? (
+            HugeIcons.strokeRoundedTick02,
+            scheme.tertiaryContainer,
+            scheme.onTertiaryContainer,
+          )
+        : (
+            HugeIcons.strokeRoundedAlertCircle,
+            scheme.secondaryContainer,
+            scheme.onSecondaryContainer,
+          );
+
+    return SoftCard(
+      onTap: () => _openDetail(v, d),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              ItemThumb(photo: v.item.photoPath, category: cat),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.item.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                    ),
+                    if (cat != null)
+                      Text(
+                        categoryName(cat, l10n),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
                         ),
+                      ),
+                    const SizedBox(height: 4),
+                    _StatusPill(
+                      icon: badgeIcon,
+                      label: badgeLabel,
+                      bg: badgeBg,
+                      fg: badgeFg,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Material(
+                color: toggleBg,
+                borderRadius: BorderRadius.circular(8),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => setState(() => d.checked = !d.checked),
+                  child: SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: Center(
+                      child: HugeIcon(
+                        icon: toggleIcon,
+                        strokeWidth: 2,
+                        size: 20,
+                        color: toggleFg,
+                      ),
+                    ),
                   ),
-                ],
+                ),
+              ),
+            ],
+          ),
+          if (discrepancy) ...[
+            const SizedBox(height: 8),
+            Material(
+              color: scheme.secondaryContainer.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(10),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _openDetail(v, d),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedAlertDiamond,
+                        strokeWidth: 2,
+                        size: 16,
+                        color: scheme.onSecondaryContainer,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.reportDiscrepancy,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: scheme.onSecondaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.keyboard_arrow_down),
-              onPressed: () => _openDetail(v, d),
-            ),
           ],
-        ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final List<List<dynamic>> icon;
+  final String label;
+  final Color bg;
+  final Color fg;
+  const _StatusPill({
+    required this.icon,
+    required this.label,
+    required this.bg,
+    required this.fg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          HugeIcon(icon: icon, strokeWidth: 2, size: 13, color: fg),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: fg, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressBar extends StatelessWidget {
+  final int total;
+  final List<(int, Color)> segments;
+  const _ProgressBar({required this.total, required this.segments});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    const gap = 4.0;
+    final visible = segments.where((s) => s.$1 > 0).toList();
+    return Container(
+      height: 12,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: LayoutBuilder(
+        builder: (_, c) {
+          final gaps = visible.isEmpty ? 0 : visible.length - 1;
+          final width = c.maxWidth - gap * gaps;
+          return Row(
+            children: [
+              for (final (i, s) in visible.indexed) ...[
+                if (i > 0) const SizedBox(width: gap),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  width: total == 0 ? 0 : width * s.$1 / total,
+                  decoration: BoxDecoration(
+                    color: s.$2,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -224,13 +616,12 @@ class _DetailSheet extends StatefulWidget {
 }
 
 class _DetailSheetState extends State<_DetailSheet> {
-  late final TextEditingController _note;
-
-  @override
-  void initState() {
-    super.initState();
-    _note = TextEditingController(text: widget.draft.note);
-  }
+  // Edits stay local until Confirm, so Cancel/close discards them.
+  late int _returned = widget.draft.returned;
+  late ItemStatus _lostStatus = widget.draft.lostStatus;
+  late final TextEditingController _note = TextEditingController(
+    text: widget.draft.note,
+  );
 
   @override
   void dispose() {
@@ -238,120 +629,441 @@ class _DetailSheetState extends State<_DetailSheet> {
     super.dispose();
   }
 
-  void _setReturned(int v) {
-    setState(() => widget.draft.returned = v);
+  void _confirm() {
+    widget.draft
+      ..returned = _returned
+      ..lostStatus = _lostStatus
+      ..note = _note.text
+      ..checked = true;
     widget.onChanged();
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final cats = context.watch<CategoryProvider>().categories;
     final v = widget.view;
-    final d = widget.draft;
     final total = v.sessionItem.quantity;
-    final lostQty = total - d.returned;
+    final lostQty = total - _returned;
+    final missing = lostQty > 0;
     final cat = cats.where((c) => c.id == v.item.categoryId).firstOrNull;
     final bottom = MediaQuery.of(context).viewInsets.bottom;
+    final subtitle = [
+      v.item.name,
+      if (cat != null) categoryName(cat, l10n),
+    ].join(' • ');
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottom),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              ItemThumb(photo: v.item.photoPath, category: cat, size: 72),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(v.item.name,
-                        style: Theme.of(context).textTheme.titleMedium),
-                    if (cat != null)
-                      Text(
-                        categoryName(cat, l10n),
-                        style: TextStyle(color: scheme.onSurfaceVariant),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottom),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: missing
+                                  ? scheme.secondary
+                                  : scheme.tertiary,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            (missing ? l10n.reconcileCase : l10n.inspectCase)
+                                .toUpperCase(),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: missing
+                                  ? scheme.onSecondaryContainer
+                                  : scheme.onTertiaryContainer,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ],
                       ),
-                    if (v.item.note != null && v.item.note!.isNotEmpty)
                       Text(
-                        v.item.note!,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        l10n.reconcileItem,
+                        style: textTheme.titleLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                  ],
+                      Text(
+                        subtitle,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Text(l10n.returnedQty,
-                  style: Theme.of(context).textTheme.titleSmall),
-              const Spacer(),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.remove),
-                onPressed:
-                    d.returned > 0 ? () => _setReturned(d.returned - 1) : null,
-              ),
-              SizedBox(
-                width: 72,
-                child: Text(
-                  '${d.returned} ${l10n.ofTotal(total)}',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
+                const SizedBox(width: 8),
+                Material(
+                  color: scheme.surfaceContainer,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCancel01,
+                          strokeWidth: 2,
+                          size: 18,
+                          color: scheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.add),
-                onPressed:
-                    d.returned < total ? () => _setReturned(d.returned + 1) : null,
-              ),
-            ],
-          ),
-          if (lostQty > 0) ...[
-            const SizedBox(height: 16),
-            Text(
-              '${l10n.missingStatus} ($lostQty)',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            SegmentedButton<ItemStatus>(
-              segments: [
-                ButtonSegment(
-                    value: ItemStatus.hilang, label: Text(l10n.statusLost)),
-                ButtonSegment(
-                    value: ItemStatus.tertukar, label: Text(l10n.statusSwapped)),
               ],
-              selected: {d.lostStatus},
-              onSelectionChanged: (s) {
-                setState(() => d.lostStatus = s.first);
-                widget.onChanged();
-              },
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _note,
-              maxLines: 2,
-              textCapitalization: TextCapitalization.sentences,
-              onChanged: (t) => d.note = t,
-              decoration: InputDecoration(
-                labelText: l10n.note,
-                border: const OutlineInputBorder(),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  ItemThumb(
+                    photo: v.item.photoPath,
+                    category: cat,
+                    size: 40,
+                    background: scheme.surface,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.expectedDropOff.toUpperCase(),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        Text(
+                          l10n.piecesDroppedOff(total),
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _Stepper(
+                    value: _returned,
+                    onDecrement: _returned > 0
+                        ? () => setState(() => _returned--)
+                        : null,
+                    onIncrement: _returned < total
+                        ? () => setState(() => _returned++)
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+              alignment: Alignment.topCenter,
+              child: !missing
+                  ? const SizedBox(width: double.infinity)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          '${l10n.discrepancyType} ($lostQty)',
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _Segmented(
+                          value: _lostStatus,
+                          onChanged: (s) => setState(() => _lostStatus = s),
+                          options: [
+                            (
+                              ItemStatus.hilang,
+                              HugeIcons.strokeRoundedCancelCircle,
+                              l10n.statusLost,
+                            ),
+                            (
+                              ItemStatus.tertukar,
+                              HugeIcons
+                                  .strokeRoundedArrowDataTransferHorizontal,
+                              l10n.statusSwapped,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.describeIssue,
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        SoftTextFieldOutline(
+                          controller: _note,
+                          hint: l10n.describeIssueHint,
+                          maxLines: 3,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: _SheetButton(
+                    label: l10n.cancel,
+                    bg: scheme.surfaceContainer,
+                    fg: scheme.onSurface,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _SheetButton(
+                    label: missing ? l10n.confirmAlert : l10n.confirmReturned,
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                    bg: missing
+                        ? scheme.secondaryContainer
+                        : scheme.tertiaryContainer,
+                    fg: missing
+                        ? scheme.onSecondaryContainer
+                        : scheme.onTertiaryContainer,
+                    onTap: _confirm,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Stepper extends StatelessWidget {
+  final int value;
+  final VoidCallback? onDecrement;
+  final VoidCallback? onIncrement;
+  const _Stepper({
+    required this.value,
+    required this.onDecrement,
+    required this.onIncrement,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    Widget button(List<List<dynamic>> icon, VoidCallback? onTap) => Material(
+      color: scheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: Center(
+            child: HugeIcon(
+              icon: icon,
+              strokeWidth: 2,
+              size: 16,
+              color: onTap == null
+                  ? scheme.onSurface.withValues(alpha: 0.3)
+                  : scheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color ?? scheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: 0.06),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          button(HugeIcons.strokeRoundedMinusSign, onDecrement),
+          SizedBox(
+            width: 36,
+            child: Text(
+              '$value',
+              textAlign: TextAlign.center,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          button(HugeIcons.strokeRoundedPlusSign, onIncrement),
+        ],
+      ),
+    );
+  }
+}
+
+class _Segmented extends StatelessWidget {
+  final ItemStatus value;
+  final ValueChanged<ItemStatus> onChanged;
+  final List<(ItemStatus, List<List<dynamic>>, String)> options;
+  const _Segmented({
+    required this.value,
+    required this.onChanged,
+    required this.options,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final cardColor = Theme.of(context).cardTheme.color ?? scheme.surface;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          for (final (i, (status, icon, label)) in options.indexed) ...[
+            if (i > 0) const SizedBox(width: 4),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onChanged(status),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: status == value ? cardColor : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: status == value
+                        ? [
+                            BoxShadow(
+                              color: scheme.shadow.withValues(alpha: 0.06),
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      HugeIcon(
+                        icon: icon,
+                        strokeWidth: 2,
+                        size: 16,
+                        color: status == value
+                            ? scheme.onSecondaryContainer
+                            : scheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        label,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: status == value
+                              ? scheme.onSurface
+                              : scheme.onSurfaceVariant,
+                          fontWeight: status == value
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.done),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+class _SheetButton extends StatelessWidget {
+  final String label;
+  final List<List<dynamic>>? icon;
+  final Color bg;
+  final Color fg;
+  final VoidCallback onTap;
+  const _SheetButton({
+    required this.label,
+    required this.bg,
+    required this.fg,
+    required this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 48,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) ...[
+                HugeIcon(icon: icon!, strokeWidth: 2, size: 18, color: fg),
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: fg, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -291,5 +291,111 @@
         "type": "int"
       }
     }
-  }
+  },
+  "verifyReturnedTitle": "Verify Returned Laundry",
+  "piecesVerified": "{done} of {total} pieces verified",
+  "@piecesVerified": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "percentDone": "{percent}% done",
+  "@percentDone": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "verifyInstruction": "Check each item carefully against your drop-off list as you unpack your laundry bag.",
+  "dropOffChecklist": "Drop-off checklist ({count} items)",
+  "@dropOffChecklist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToInspect": "Tap card to inspect",
+  "returnedBadge": "{returned} / {total} returned",
+  "@returnedBadge": {
+    "placeholders": {
+      "returned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingBadge": "{count} pcs pending",
+  "@pendingBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lostBadge": "{returned} / {total} • {count} lost",
+  "@lostBadge": {
+    "placeholders": {
+      "returned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "swappedBadge": "{returned} / {total} • {count} swapped",
+  "@swappedBadge": {
+    "placeholders": {
+      "returned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportDiscrepancy": "Report discrepancy",
+  "verificationInProgress": "Verification in progress",
+  "verificationReady": "All items checked",
+  "itemsNeedAction": "{count} items need action",
+  "@itemsNeedAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "finishVerification": "Finish verification",
+  "reconcileCase": "Reconciliation case",
+  "inspectCase": "Item check",
+  "reconcileItem": "Reconcile item",
+  "expectedDropOff": "Expected drop-off",
+  "piecesDroppedOff": "{count} pcs dropped off",
+  "@piecesDroppedOff": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discrepancyType": "Discrepancy type",
+  "describeIssue": "Describe the issue",
+  "describeIssueHint": "e.g. Received dark navy jeans instead of the light blue pair",
+  "confirmAlert": "Confirm alert",
+  "confirmReturned": "Confirm returned"
 }
