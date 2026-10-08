@@ -95,3 +95,6 @@ key.properties
 # Env / rahasia
 .env
 .env.*
+
+# Claude Code
+CLAUDE.md

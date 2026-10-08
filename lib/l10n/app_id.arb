@@ -154,5 +154,14 @@
   "contactPhone": "Nomor Telepon Kontak",
   "scheduleAndTiming": "Jadwal & Waktu",
   "scheduleAndTimingSubtitle": "Estimasi waktu pencucian dan pengambilan",
-  "selectedItems": "Item Terpilih"
+  "selectedItems": "Item Terpilih",
+  "estHoursFromNow": "Est. {count} jam lagi",
+  "notificationReminder": "Pengingat Notifikasi",
+  "notificationReminderHint": "Dapatkan notifikasi saat cucian siap",
+  "notCompletedYet": "Belum selesai",
+  "phaseCurrent": "Saat ini",
+  "phaseDroppedLong": "Sudah Dititipkan",
+  "phaseWashingLong": "Sedang Dicuci & Dikeringkan",
+  "phasePickupLong": "Siap Diambil",
+  "phaseVerifiedLong": "Terverifikasi & Selesai"
 }

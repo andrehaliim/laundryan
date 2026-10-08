@@ -20,3 +20,10 @@ String phaseLabel(SessionPhase p, AppLocalizations l10n) => switch (p) {
   SessionPhase.pickup => l10n.phasePickup,
   SessionPhase.verified => l10n.phaseVerified,
 };
+
+String phaseLabelLong(SessionPhase p, AppLocalizations l10n) => switch (p) {
+  SessionPhase.dropped => l10n.phaseDroppedLong,
+  SessionPhase.washing => l10n.phaseWashingLong,
+  SessionPhase.pickup => l10n.phasePickupLong,
+  SessionPhase.verified => l10n.phaseVerifiedLong,
+};

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/session_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/utils/session_phase.dart';
+import 'package:laundryan/widgets/pulse.dart';
 import 'package:provider/provider.dart';
 
 class SessionDetailScreen extends StatefulWidget {
@@ -18,16 +23,24 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   late final TextEditingController _title;
   late bool _reminder;
   late DateTime _readyAt;
+  late DateTime _dropOffAt;
+  late DateTime? _completedAt;
   late final Future<List<SessionItemView>> _items;
+  late final SessionPhase _phase;
 
   @override
   void initState() {
     super.initState();
     final provider = context.read<SessionProvider>();
-    final s = provider.active.firstWhere((e) => e.session.id == widget.sessionId).session;
+    final s = provider.active
+        .firstWhere((e) => e.session.id == widget.sessionId)
+        .session;
     _title = TextEditingController(text: s.title);
     _reminder = s.reminderEnabled;
     _readyAt = s.estimatedReadyAt;
+    _dropOffAt = s.dropOffDate;
+    _completedAt = s.completedAt;
+    _phase = s.phase;
     _items = provider.items(widget.sessionId);
   }
 
@@ -51,7 +64,13 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     );
     if (time == null) return;
     setState(() {
-      _readyAt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _readyAt = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 
@@ -59,11 +78,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     if (!_formKey.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     await context.read<SessionProvider>().update(
-          widget.sessionId,
-          title: _title.text.trim(),
-          reminderEnabled: _reminder,
-          estimatedReadyAt: _readyAt,
-        );
+      widget.sessionId,
+      title: _title.text.trim(),
+      reminderEnabled: _reminder,
+      estimatedReadyAt: _readyAt,
+    );
     navigator.pop();
   }
 
@@ -97,7 +116,9 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();
-    final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
+    final dateTimeFmt = DateFormat.yMMMMEEEEd(locale).add_jm();
+    final dateTimeFmtShort = DateFormat.MMMd(locale).add_jm();
+    final hoursFromNow = _readyAt.difference(DateTime.now()).inHours;
 
     return Scaffold(
       appBar: AppBar(
@@ -115,41 +136,176 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            TextFormField(
-              controller: _title,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.sessionTitle,
-                border: const OutlineInputBorder(),
+            SoftCard(
+              padding: EdgeInsetsGeometry.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: _title,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      labelText: l10n.sessionTitle,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.nameRequired
+                        : null,
+                  ),
+                  const SizedBox(height: 8),
+                  SoftCardOutline(
+                    padding: EdgeInsetsGeometry.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedClock01,
+                              strokeWidth: 2,
+                              size: 20,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.estimatedReady.toUpperCase(),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
+                            ),
+                            Spacer(),
+                            InkWell(
+                              onTap: () => _pickReadyAt(),
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedEdit02,
+                                strokeWidth: 2,
+                                size: 20,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          dateTimeFmt.format(_readyAt),
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.estHoursFromNow(hoursFromNow),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedNotification01,
+                        strokeWidth: 2,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.notificationReminder,
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
+                            ),
+                            Text(
+                              l10n.notificationReminderHint,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        trackColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                        thumbColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
+                        value: _reminder,
+                        onChanged: (v) => setState(() => _reminder = v),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _statusIndicator(
+                    context: context,
+                    title: phaseLabelLong(SessionPhase.dropped, l10n),
+                    subTitleText: dateTimeFmtShort.format(_dropOffAt),
+                    icon: HugeIcons.strokeRoundedPackageMoving,
+                    status: SessionPhase.dropped,
+                    current: _phase,
+                  ),
+                  _statusIndicator(
+                    context: context,
+                    title: phaseLabelLong(SessionPhase.washing, l10n),
+                    subTitleText: dateTimeFmtShort.format(
+                      _dropOffAt.add(const Duration(minutes: 10)),
+                    ),
+                    icon: HugeIcons.strokeRoundedWashingMachine,
+                    status: SessionPhase.washing,
+                    current: _phase,
+                  ),
+                  _statusIndicator(
+                    context: context,
+                    title: phaseLabelLong(SessionPhase.pickup, l10n),
+                    subTitleText: dateTimeFmtShort.format(_readyAt),
+                    icon: HugeIcons.strokeRoundedShoppingBag02,
+                    status: SessionPhase.pickup,
+                    current: _phase,
+                  ),
+                  _statusIndicator(
+                    context: context,
+                    title: phaseLabelLong(SessionPhase.verified, l10n),
+                    subTitleText: _completedAt != null
+                        ? dateTimeFmtShort.format(_completedAt!)
+                        : l10n.notCompletedYet,
+                    icon: HugeIcons.strokeRoundedTaskDone01,
+                    status: SessionPhase.verified,
+                    current: _phase,
+                    isLast: true,
+                  ),
+                ],
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? l10n.nameRequired : null,
-            ),
-            const SizedBox(height: 16),
-            InkWell(
-              onTap: _pickReadyAt,
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: l10n.estimatedReady,
-                  border: const OutlineInputBorder(),
-                  suffixIcon: const Icon(Icons.event_outlined),
-                ),
-                child: Text(dateTimeFmt.format(_readyAt)),
-              ),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.reminder),
-              value: _reminder,
-              onChanged: (v) => setState(() => _reminder = v),
             ),
             const SizedBox(height: 8),
             Text(l10n.items, style: Theme.of(context).textTheme.titleMedium),
             Text(
               l10n.itemsLocked,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 8),
             FutureBuilder<List<SessionItemView>>(
@@ -173,6 +329,109 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _statusIndicator({
+    required BuildContext context,
+    required String title,
+    required String subTitleText,
+    required List<List<dynamic>> icon,
+    required SessionPhase status,
+    required SessionPhase current,
+    bool isLast = false,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final isCurrent = current == status;
+    final reached = current.index >= status.index;
+
+    final bg = isCurrent
+        ? scheme.primary
+        : reached
+        ? scheme.tertiary
+        : scheme.surfaceContainerHighest;
+    final fg = isCurrent
+        ? scheme.onPrimary
+        : reached
+        ? scheme.onTertiary
+        : scheme.outline;
+
+    final badgeLabel = isCurrent
+        ? l10n.phaseCurrent
+        : reached
+        ? l10n.done
+        : '';
+
+    final badgeType = isCurrent
+        ? CountBadgeMode.primary
+        : reached
+        ? CountBadgeMode.tertiary
+        : CountBadgeMode.normal;
+
+    final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: reached ? scheme.onSurface : scheme.onSurfaceVariant,
+      fontWeight: reached ? FontWeight.w600 : FontWeight.w400,
+    );
+
+    final subStyle = Theme.of(context).textTheme.labelSmall
+        ?.copyWith(color: scheme.onSurfaceVariant);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Pulse(
+              active: isCurrent && status != SessionPhase.verified,
+              color: bg,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
+                child: HugeIcon(icon: icon, color: fg, size: 18),
+              ),
+            ),
+            SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(title, style: titleStyle),
+
+                    const SizedBox(width: 8),
+                    CountBadge(
+                      label: badgeLabel,
+                      horizontalPadding: !reached ? 0 : 10,
+                      mode: badgeType,
+                    ),
+                  ],
+                ),
+                Text(subTitleText, style: subStyle),
+              ],
+            ),
+          ],
+        ),
+        if (!isLast)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              width: 30,
+              child: Center(
+                child: Container(
+                  width: 2,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: current.index > status.index
+                        ? scheme.tertiary
+                        : scheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -251,5 +251,21 @@
   "contactPhone": "Contact Phone",
   "scheduleAndTiming": "Schedule & Timing",
   "scheduleAndTimingSubtitle": "Expected cycle and pickup window",
-  "selectedItems": "Selected Items"
+  "selectedItems": "Selected Items",
+  "estHoursFromNow": "Est. {count} {count, plural, =1{Hour} other{Hours}} from now",
+  "@estHoursFromNow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationReminder": "Notification Reminder",
+  "notificationReminderHint": "Receive alerts when laundry is ready",
+  "notCompletedYet": "Not completed yet",
+  "phaseCurrent": "Current",
+  "phaseDroppedLong": "Dropped Off",
+  "phaseWashingLong": "In Washing & Drying",
+  "phasePickupLong": "Ready for Pick Up",
+  "phaseVerifiedLong": "Verified & Completed"
 }
