@@ -18,3 +18,12 @@ Future<bool> openWhatsApp(String phone, String message) async {
     return false;
   }
 }
+
+Future<bool> callPhone(String phone) async {
+  final uri = Uri(scheme: 'tel', path: '+${normalizePhone(phone)}');
+  try {
+    return await launchUrl(uri);
+  } catch (_) {
+    return false;
+  }
+}

@@ -163,5 +163,11 @@
   "phaseDroppedLong": "Sudah Dititipkan",
   "phaseWashingLong": "Sedang Dicuci & Dikeringkan",
   "phasePickupLong": "Siap Diambil",
-  "phaseVerifiedLong": "Terverifikasi & Selesai"
+  "phaseVerifiedLong": "Terverifikasi & Selesai",
+  "whatsappSubtitle": "Chat langsung",
+  "callPlace": "Telepon",
+  "callSubtitle": "Panggilan langsung",
+  "callFailed": "Tidak bisa melakukan panggilan",
+  "itemsSummary": "{items} item • {pieces} pcs",
+  "pieces": "{count} pcs"
 }

@@ -267,5 +267,28 @@
   "phaseDroppedLong": "Dropped Off",
   "phaseWashingLong": "In Washing & Drying",
   "phasePickupLong": "Ready for Pick Up",
-  "phaseVerifiedLong": "Verified & Completed"
+  "phaseVerifiedLong": "Verified & Completed",
+  "whatsappSubtitle": "Instant chat",
+  "callPlace": "Call",
+  "callSubtitle": "Direct line",
+  "callFailed": "Can not make a call",
+  "itemsSummary": "{items} items • {pieces} pcs",
+  "@itemsSummary": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "pieces": {
+        "type": "int"
+      }
+    }
+  },
+  "pieces": "{count} pcs",
+  "@pieces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

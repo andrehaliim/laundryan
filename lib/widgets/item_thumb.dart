@@ -8,11 +8,13 @@ class ItemThumb extends StatelessWidget {
   final String? photo;
   final Category? category;
   final double size;
+  final Color? background;
   const ItemThumb({
     super.key,
     required this.photo,
     required this.category,
     this.size = 48,
+    this.background,
   });
 
   @override
@@ -22,7 +24,7 @@ class ItemThumb extends StatelessWidget {
     final icon = Container(
       width: size,
       height: size,
-      color: scheme.primaryContainer.withValues(alpha: 0.4),
+      color: background ?? scheme.primaryContainer.withValues(alpha: 0.4),
       alignment: Alignment.center,
       child: HugeIcon(
         icon: iconFor(category?.iconKey ?? ''),

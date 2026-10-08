@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
+import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/utils/category_utils.dart';
+import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/utils/session_phase.dart';
+import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:laundryan/widgets/pulse.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +34,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   late DateTime? _completedAt;
   late final Future<List<SessionItemView>> _items;
   late final SessionPhase _phase;
+  late final String? _phone;
 
   @override
   void initState() {
@@ -44,6 +50,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     _dropOffAt = s.dropOffDate;
     _completedAt = s.completedAt;
     _phase = s.phase;
+    final phone = s.placePhone?.trim();
+    _phone = (phone == null || phone.isEmpty) ? null : phone;
     _items = provider.items(widget.sessionId);
   }
 
@@ -196,7 +204,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                               : HugeIcons.strokeRoundedEdit02,
                           strokeWidth: 2,
                           size: 20,
-                          color: scheme.onPrimaryContainer,
+                          color: scheme.primary,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -214,9 +222,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                               icon: HugeIcons.strokeRoundedClock01,
                               strokeWidth: 2,
                               size: 20,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -235,9 +241,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                                 icon: HugeIcons.strokeRoundedEdit02,
                                 strokeWidth: 2,
                                 size: 20,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ],
@@ -267,7 +271,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                         icon: HugeIcons.strokeRoundedNotification01,
                         strokeWidth: 2,
                         size: 20,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -353,32 +357,226 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(l10n.items, style: Theme.of(context).textTheme.titleMedium),
-            Text(
-              l10n.itemsLocked,
-              style: Theme.of(context).textTheme.bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
+            if (_phone != null) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: _contactButton(
+                      context: context,
+                      icon: HugeIcons.strokeRoundedWhatsapp,
+                      title: 'WhatsApp',
+                      subtitle: l10n.whatsappSubtitle,
+                      bg: scheme.tertiaryContainer,
+                      fg: scheme.onTertiaryContainer,
+                      onTap: () => _openWhatsApp(l10n),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _contactButton(
+                      context: context,
+                      icon: HugeIcons.strokeRoundedCall02,
+                      title: l10n.callPlace,
+                      subtitle: l10n.callSubtitle,
+                      bg: scheme.surfaceContainerHigh,
+                      fg: scheme.onSurface,
+                      onTap: () => _call(l10n),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
             FutureBuilder<List<SessionItemView>>(
               future: _items,
               builder: (_, snap) {
                 final list = snap.data ?? const <SessionItemView>[];
-                return Column(
-                  children: [
-                    for (final v in list)
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(v.item.name),
-                        trailing: Text('x${v.sessionItem.quantity}'),
-                      ),
-                  ],
-                );
+                return _itemsCard(context, list);
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _openWhatsApp(AppLocalizations l10n) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await openWhatsApp(_phone!, '');
+    if (!ok) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.whatsappFailed)));
+    }
+  }
+
+  Future<void> _call(AppLocalizations l10n) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await callPhone(_phone!);
+    if (!ok) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.callFailed)));
+    }
+  }
+
+  Widget _contactButton({
+    required BuildContext context,
+    required List<List<dynamic>> icon,
+    required String title,
+    required String subtitle,
+    required Color bg,
+    required Color fg,
+    required VoidCallback onTap,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    return SoftCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
+            alignment: Alignment.center,
+            child: HugeIcon(icon: icon, color: fg, size: 18, strokeWidth: 2),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          Text(
+            subtitle,
+            style: textTheme.labelSmall?.copyWith(
+              fontSize: 10,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _itemsCard(BuildContext context, List<SessionItemView> list) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final cats = context.watch<CategoryProvider>().categories;
+    final pieces = list.fold<int>(0, (sum, v) => sum + v.sessionItem.quantity);
+
+    return SoftCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedPackage,
+                strokeWidth: 2,
+                size: 20,
+                color: scheme.primary,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  l10n.items,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              CountBadge(
+                label: l10n.itemsSummary(list.length, pieces),
+                horizontalPadding: 10,
+                mode: CountBadgeMode.normal,
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.itemsLocked,
+            style: textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          for (final v in list) ...[
+            _itemRow(
+              context,
+              v,
+              cats.where((c) => c.id == v.item.categoryId).firstOrNull,
+            ),
+            if (v != list.last) const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _itemRow(BuildContext context, SessionItemView v, Category? cat) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final cardColor = Theme.of(context).cardTheme.color ?? scheme.surface;
+    final shadow = [
+      BoxShadow(
+        color: scheme.shadow.withValues(alpha: 0.06),
+        blurRadius: 2,
+        offset: const Offset(0, 1),
+      ),
+    ];
+
+    return SoftCardOutline(
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          ItemThumb(
+            photo: v.item.photoPath,
+            category: cat,
+            size: 40,
+            background: scheme.surface,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  v.item.name,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (cat != null)
+                  Text(
+                    categoryName(cat, l10n),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: shadow,
+            ),
+            child: Text(
+              l10n.pieces(v.sessionItem.quantity),
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
