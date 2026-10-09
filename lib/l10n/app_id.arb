@@ -202,5 +202,19 @@
   "describeIssue": "Jelaskan masalahnya",
   "describeIssueHint": "mis. Yang kembali celana navy gelap, bukan yang biru muda",
   "confirmAlert": "Konfirmasi selisih",
-  "confirmReturned": "Konfirmasi kembali"
+  "confirmReturned": "Konfirmasi kembali",
+  "orderArchive": "Arsip pesanan",
+  "statusAllSafe": "Semua aman",
+  "statusResolved": "Terselesaikan",
+  "totalGarments": "Total pakaian",
+  "discrepancyLog": "Catatan selisih",
+  "piecesUnit": "pcs",
+  "safeOnPickup": "{count} aman saat diambil",
+  "discrepancyResolved": "{count} pcs terselesaikan",
+  "noDiscrepancy": "Tidak ada selisih",
+  "inventoryAndStatus": "Inventaris & status",
+  "markFound": "Tandai ditemukan",
+  "foundNote": "Sudah ditemukan dan kembali ke lemari.",
+  "permanentLostNote": "{count} pcs dihapus dari lemari.",
+  "backToHistory": "Kembali ke riwayat"
 }

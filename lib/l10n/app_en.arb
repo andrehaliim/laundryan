@@ -418,5 +418,40 @@
   "describeIssue": "Describe the issue",
   "describeIssueHint": "e.g. Received dark navy jeans instead of the light blue pair",
   "confirmAlert": "Confirm alert",
-  "confirmReturned": "Confirm returned"
+  "confirmReturned": "Confirm returned",
+  "orderArchive": "Order archive",
+  "statusAllSafe": "All safe",
+  "statusResolved": "Resolved",
+  "totalGarments": "Total garments",
+  "discrepancyLog": "Discrepancy log",
+  "piecesUnit": "pcs",
+  "safeOnPickup": "{count} safe on pickup",
+  "@safeOnPickup": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discrepancyResolved": "{count} pcs resolved",
+  "@discrepancyResolved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noDiscrepancy": "No discrepancy",
+  "inventoryAndStatus": "Inventory & status",
+  "markFound": "Mark as found",
+  "foundNote": "Recovered and back in your wardrobe.",
+  "permanentLostNote": "{count} pcs removed from your wardrobe.",
+  "@permanentLostNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backToHistory": "Back to history"
 }

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
+import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/utils/category_utils.dart';
+import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:provider/provider.dart';
 
@@ -31,14 +36,10 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     });
   }
 
-  String _label(ItemStatus s, AppLocalizations l10n) => switch (s) {
-        ItemStatus.kembali => l10n.statusReturned,
-        ItemStatus.hilang => l10n.statusLost,
-        ItemStatus.tertukar => l10n.statusSwapped,
-        ItemStatus.hilangPermanen => l10n.statusPermanentlyLost,
-        ItemStatus.ditemukan => l10n.statusFound,
-        ItemStatus.dibawa => '',
-      };
+  static int _lostQty(SessionItem si) => si.quantity - (si.returnedQty ?? 0);
+
+  static bool _unresolved(SessionItem si) =>
+      si.status == ItemStatus.hilang || si.status == ItemStatus.tertukar;
 
   Future<void> _resolve(
     SessionItemView v,
@@ -46,14 +47,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     AppLocalizations l10n,
   ) async {
     final provider = context.read<SessionProvider>();
-    final lostQty = v.sessionItem.quantity - (v.sessionItem.returnedQty ?? 0);
 
     if (result == ItemStatus.hilangPermanen) {
       final ok = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l10n.permanentLostTitle),
-          content: Text(l10n.permanentLostMessage(lostQty)),
+          content: Text(l10n.permanentLostMessage(_lostQty(v.sessionItem))),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -73,14 +73,33 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     if (mounted) _reload();
   }
 
+  Future<void> _chat(
+    Session session,
+    List<SessionItemView> list,
+    AppLocalizations l10n,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final pending = list
+        .where((v) => _unresolved(v.sessionItem))
+        .map((v) {
+          final label = v.sessionItem.status == ItemStatus.tertukar
+              ? l10n.statusSwapped
+              : l10n.statusLost;
+          return '- ${v.item.name} x${_lostQty(v.sessionItem)} ($label)';
+        })
+        .join('\n');
+    final message = pending.isEmpty
+        ? ''
+        : l10n.waMessage(session.title, pending);
+    final ok = await openWhatsApp(session.placePhone!, message);
+    if (!ok) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.whatsappFailed)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
-    final locale = Localizations.localeOf(context).toString();
-    final dateFmt = DateFormat.yMMMd(locale);
-    final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
-    final cats = context.watch<CategoryProvider>().categories;
     final session = context
         .watch<SessionProvider>()
         .history
@@ -92,143 +111,641 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       return Scaffold(appBar: AppBar(title: Text(l10n.sessionDetail)));
     }
 
-    final sub = Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: scheme.onSurfaceVariant,
-        );
+    final hasPhone =
+        session.placePhone != null && session.placePhone!.trim().isNotEmpty;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.sessionDetail)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(session.title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(session.placeName, style: sub),
-          if (session.placeAddress != null) Text(session.placeAddress!, style: sub),
-          if (session.placePhone != null) Text(session.placePhone!, style: sub),
-          const SizedBox(height: 8),
-          Text('${l10n.dropOff}: ${dateFmt.format(session.dropOffDate)}', style: sub),
-          Text(
-            '${l10n.estimatedReady}: ${dateTimeFmt.format(session.estimatedReadyAt)}',
-            style: sub,
-          ),
-          if (session.completedAt != null)
-            Text(
-              '${l10n.completedAt}: ${dateTimeFmt.format(session.completedAt!)}',
-              style: sub,
-            ),
-          const SizedBox(height: 16),
-          Text(l10n.items, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          FutureBuilder<List<SessionItemView>>(
-            future: _items,
-            builder: (_, snap) {
-              final list = snap.data;
-              if (list == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return Column(
-                children: [
-                  for (final v in list) _buildItem(v, cats, l10n, scheme),
+    return FutureBuilder<List<SessionItemView>>(
+      future: _items,
+      builder: (context, snap) {
+        final list = snap.data;
+        return Scaffold(
+          appBar: AppBar(title: Text(l10n.sessionDetail)),
+          body: list == null
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _summaryCard(context, session, list),
+                    const SizedBox(height: 20),
+                    _sectionHeader(context, list),
+                    const SizedBox(height: 12),
+                    for (final v in list) ...[
+                      _itemCard(context, v),
+                      const SizedBox(height: 8),
+                    ],
+                  ],
+                ),
+          bottomNavigationBar: SafeArea(
+            minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasPhone && list != null) ...[
+                  SoftButton(
+                    label: l10n.chatWhatsapp,
+                    icon: HugeIcons.strokeRoundedWhatsapp,
+                    variant: SoftButtonVariant.secondary,
+                    onPressed: () => _chat(session, list, l10n),
+                    expanded: true,
+                  ),
+                  const SizedBox(height: 8),
                 ],
-              );
-            },
+                SoftButton(
+                  label: l10n.backToHistory,
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                  onPressed: () => Navigator.of(context).pop(),
+                  expanded: true,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _summaryCard(
+    BuildContext context,
+    Session session,
+    List<SessionItemView> list,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final dateFmt = DateFormat.MMMd(Localizations.localeOf(context).toString());
+    final yearFmt = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    );
+
+    final total = list.fold(0, (sum, v) => sum + v.sessionItem.quantity);
+    final safe = list.fold(
+      0,
+      (sum, v) => sum + (v.sessionItem.returnedQty ?? 0),
+    );
+    final lost = total - safe;
+    final pending = list
+        .where((v) => _unresolved(v.sessionItem))
+        .fold(0, (sum, v) => sum + _lostQty(v.sessionItem));
+    final pendingItems = list.where((v) => _unresolved(v.sessionItem)).length;
+
+    // all back → green, still open → pink, resolved → blue.
+    final (
+      List<List<dynamic>> statusIcon,
+      String statusLabel,
+      Color statusBg,
+      Color statusFg,
+    ) = lost == 0
+        ? (
+            HugeIcons.strokeRoundedCheckmarkCircle02,
+            l10n.statusAllSafe,
+            scheme.tertiaryContainer,
+            scheme.onTertiaryContainer,
+          )
+        : pending > 0
+        ? (
+            HugeIcons.strokeRoundedAlert02,
+            l10n.itemsNeedAction(pendingItems),
+            scheme.secondaryContainer,
+            scheme.onSecondaryContainer,
+          )
+        : (
+            HugeIcons.strokeRoundedCheckmarkCircle02,
+            l10n.statusResolved,
+            scheme.primaryContainer,
+            scheme.onPrimaryContainer,
+          );
+
+    final end = session.completedAt;
+    final range = end == null
+        ? yearFmt.format(session.dropOffDate)
+        : '${dateFmt.format(session.dropOffDate)} – ${yearFmt.format(end)}';
+    final place = [
+      session.placeName,
+      if (session.placeAddress != null && session.placeAddress!.isNotEmpty)
+        session.placeAddress!,
+    ].join(' • ');
+
+    return SoftCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedWashingMachine,
+                          strokeWidth: 2,
+                          size: 18,
+                          color: scheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          l10n.orderArchive.toUpperCase(),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      session.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      place,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _Pill(
+                icon: statusIcon,
+                label: statusLabel,
+                bg: statusBg,
+                fg: statusFg,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedCalendar03,
+                  strokeWidth: 2,
+                  size: 18,
+                  color: scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    range,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    l10n.finishedLabel,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: scheme.onTertiaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _statTile(
+                  context,
+                  label: l10n.totalGarments,
+                  value: total,
+                  valueColor: scheme.onSurface,
+                  footIcon: HugeIcons.strokeRoundedTickDouble02,
+                  foot: l10n.safeOnPickup(safe),
+                  footColor: scheme.inversePrimary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _statTile(
+                  context,
+                  label: l10n.discrepancyLog,
+                  value: lost,
+                  valueColor: lost > 0 ? scheme.secondary : scheme.onSurface,
+                  footIcon: lost == 0
+                      ? HugeIcons.strokeRoundedCheckmarkCircle02
+                      : pending > 0
+                      ? HugeIcons.strokeRoundedAlert02
+                      : HugeIcons.strokeRoundedArrowDataTransferHorizontal,
+                  foot: lost == 0
+                      ? l10n.noDiscrepancy
+                      : pending > 0
+                      ? l10n.pendingBadge(pending)
+                      : l10n.discrepancyResolved(lost),
+                  footColor: lost == 0
+                      ? scheme.onSurfaceVariant
+                      : scheme.onSecondaryContainer,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildItem(
-    SessionItemView v,
-    List cats,
-    AppLocalizations l10n,
-    ColorScheme scheme,
-  ) {
-    final si = v.sessionItem;
-    final total = si.quantity;
-    final returned = si.returnedQty ?? 0;
-    final lostQty = total - returned;
-    final cat = cats.where((c) => c.id == v.item.categoryId).firstOrNull;
-    final unresolved =
-        si.status == ItemStatus.hilang || si.status == ItemStatus.tertukar;
-    final bad = si.status != ItemStatus.kembali &&
-        si.status != ItemStatus.ditemukan;
+  Widget _statTile(
+    BuildContext context, {
+    required String label,
+    required int value,
+    required Color valueColor,
+    required List<List<dynamic>> footIcon,
+    required String foot,
+    required Color footColor,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                ItemThumb(photo: v.item.photoPath, category: cat),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        v.item.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      Text(
-                        '$returned/$total',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  _label(si.status, l10n),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: bad ? scheme.error : scheme.primary,
-                  ),
-                ),
-              ],
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
-            if (si.note != null && si.note!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(si.note!, style: Theme.of(context).textTheme.bodySmall),
-              ),
-            if (unresolved) ...[
-              const SizedBox(height: 4),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
               Text(
-                l10n.resolveHint(lostQty),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
+                '$value',
+                style: textTheme.headlineSmall?.copyWith(
+                  color: valueColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () =>
-                          _resolve(v, ItemStatus.hilangPermanen, l10n),
-                      child: Text(l10n.statusPermanentlyLost),
+              const SizedBox(width: 4),
+              Text(
+                l10n.piecesUnit,
+                style: textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              HugeIcon(
+                icon: footIcon,
+                strokeWidth: 2,
+                size: 13,
+                color: footColor,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  foot,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: footColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionHeader(BuildContext context, List<SessionItemView> list) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final pieces = list.fold(0, (sum, v) => sum + v.sessionItem.quantity);
+
+    return Row(
+      children: [
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedPackage,
+          strokeWidth: 2,
+          size: 20,
+          color: scheme.primary,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            l10n.inventoryAndStatus,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(width: 8),
+        CountBadge(
+          label: l10n.itemsSummary(list.length, pieces),
+          mode: CountBadgeMode.normal,
+          horizontalPadding: 10,
+        ),
+      ],
+    );
+  }
+
+  Widget _itemCard(BuildContext context, SessionItemView v) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final cats = context.watch<CategoryProvider>().categories;
+    final cat = cats.where((c) => c.id == v.item.categoryId).firstOrNull;
+    final si = v.sessionItem;
+    final lostQty = _lostQty(si);
+    final unresolved = _unresolved(si);
+    final note = si.note?.trim();
+
+    final (
+      List<List<dynamic>> icon,
+      String label,
+      Color bg,
+      Color fg,
+      Color thumbBg,
+    ) = switch (si.status) {
+      ItemStatus.tertukar => (
+        HugeIcons.strokeRoundedArrowDataTransferHorizontal,
+        l10n.swappedBadge(si.returnedQty ?? 0, si.quantity, lostQty),
+        scheme.secondaryContainer,
+        scheme.onSecondaryContainer,
+        scheme.secondaryContainer,
+      ),
+      ItemStatus.hilang => (
+        HugeIcons.strokeRoundedAlert02,
+        l10n.lostBadge(si.returnedQty ?? 0, si.quantity, lostQty),
+        scheme.secondaryContainer,
+        scheme.onSecondaryContainer,
+        scheme.secondaryContainer,
+      ),
+      ItemStatus.ditemukan => (
+        HugeIcons.strokeRoundedCheckmarkBadge01,
+        l10n.statusFound,
+        scheme.tertiaryContainer,
+        scheme.onTertiaryContainer,
+        scheme.primaryContainer,
+      ),
+      ItemStatus.hilangPermanen => (
+        HugeIcons.strokeRoundedCancelCircle,
+        l10n.statusPermanentlyLost,
+        scheme.surfaceContainerHighest,
+        scheme.onSurfaceVariant,
+        scheme.surfaceContainerHigh,
+      ),
+      ItemStatus.kembali || ItemStatus.dibawa => (
+        HugeIcons.strokeRoundedTick02,
+        l10n.statusReturned,
+        scheme.tertiaryContainer.withValues(alpha: 0.5),
+        scheme.onTertiaryContainer,
+        scheme.surfaceContainer,
+      ),
+    };
+
+    // catatan tambahan per status, ditampilkan di kotak info.
+    final (List<List<dynamic>>, String, Color)? info = switch (si.status) {
+      ItemStatus.hilang || ItemStatus.tertukar => (
+        HugeIcons.strokeRoundedAlert02,
+        note == null || note.isEmpty
+            ? l10n.resolveHint(lostQty)
+            : '$note\n${l10n.resolveHint(lostQty)}',
+        scheme.secondary,
+      ),
+      ItemStatus.ditemukan => (
+        HugeIcons.strokeRoundedPackageReceive,
+        note == null || note.isEmpty ? l10n.foundNote : note,
+        scheme.tertiary,
+      ),
+      ItemStatus.hilangPermanen => (
+        HugeIcons.strokeRoundedPackageRemove,
+        note == null || note.isEmpty ? l10n.permanentLostNote(lostQty) : note,
+        scheme.onSurfaceVariant,
+      ),
+      _ when note != null && note.isNotEmpty => (
+        HugeIcons.strokeRoundedNote,
+        note,
+        scheme.onSurfaceVariant,
+      ),
+      _ => null,
+    };
+
+    final subtitle = [
+      if (cat != null) categoryName(cat, l10n),
+      l10n.pieces(si.quantity),
+    ].join(' • ');
+
+    return SoftCard(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ItemThumb(
+                photo: v.item.photoPath,
+                category: cat,
+                size: 40,
+                background: thumbBg,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.item.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _Pill(icon: icon, label: label, bg: bg, fg: fg),
+            ],
+          ),
+          if (info != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  HugeIcon(
+                    icon: info.$1,
+                    strokeWidth: 2,
+                    size: 18,
+                    color: info.$3,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: FilledButton(
-                      onPressed: () => _resolve(v, ItemStatus.ditemukan, l10n),
-                      child: Text(l10n.statusFound),
+                    child: Text(
+                      info.$2,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
           ],
-        ),
+          if (unresolved) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _actionButton(
+                    context,
+                    icon: HugeIcons.strokeRoundedTick02,
+                    label: l10n.markFound,
+                    bg: scheme.tertiaryContainer,
+                    fg: scheme.onTertiaryContainer,
+                    onPressed: () => _resolve(v, ItemStatus.ditemukan, l10n),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _actionButton(
+                    context,
+                    icon: HugeIcons.strokeRoundedCancel01,
+                    label: l10n.statusPermanentlyLost,
+                    bg: scheme.surfaceContainer,
+                    fg: scheme.onSurface,
+                    onPressed: () =>
+                        _resolve(v, ItemStatus.hilangPermanen, l10n),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _actionButton(
+    BuildContext context, {
+    required List<List<dynamic>> icon,
+    required String label,
+    required Color bg,
+    required Color fg,
+    required VoidCallback onPressed,
+  }) {
+    return FilledButton.icon(
+      style: FilledButton.styleFrom(
+        backgroundColor: bg,
+        foregroundColor: fg,
+        elevation: 0,
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      onPressed: onPressed,
+      icon: HugeIcon(icon: icon, strokeWidth: 2, size: 18, color: fg),
+      label: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.labelLarge
+            ?.copyWith(color: fg, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final List<List<dynamic>> icon;
+  final String label;
+  final Color bg;
+  final Color fg;
+  const _Pill({
+    required this.icon,
+    required this.label,
+    required this.bg,
+    required this.fg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          HugeIcon(icon: icon, strokeWidth: 2, size: 13, color: fg),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: fg, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }
