@@ -1,8 +1,32 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/screens/home_screen.dart';
+import 'package:laundryan/screens/test_screen.dart';
 import 'package:provider/provider.dart';
+
+class _OnboardPage {
+  final List<List<dynamic>> icon;
+  final List<List<List<dynamic>>> orbit;
+  final String title;
+  final String desc;
+  final Color accent;
+  final Color container;
+  final Color onContainer;
+
+  const _OnboardPage({
+    required this.icon,
+    required this.orbit,
+    required this.title,
+    required this.desc,
+    required this.accent,
+    required this.container,
+    required this.onContainer,
+  });
+}
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -11,13 +35,30 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen>
+    with SingleTickerProviderStateMixin {
   final _controller = PageController();
+  late final AnimationController _float = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 4),
+  );
   int _page = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Respect the OS "reduce motion" setting for the idle floating loop.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _float.stop();
+    } else if (!_float.isAnimating) {
+      _float.repeat();
+    }
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _float.dispose();
     super.dispose();
   }
 
@@ -26,88 +67,483 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await context.read<SettingsProvider>().completeOnboarding();
     // Clear the stack so replaying from settings doesn't stack a second home.
     navigator.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (_, _, _) => const HomeScreen(),
+        transitionsBuilder: (_, anim, _, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
       (_) => false,
     );
   }
 
+  void _next() => _controller.nextPage(
+    duration: const Duration(milliseconds: 300),
+    curve: Curves.easeOut,
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme.primary;
+    final scheme = Theme.of(context).colorScheme;
     final pages = [
-      (Icons.checkroom, l10n.onboardingTitle1),
-      (Icons.local_laundry_service, l10n.onboardingTitle2),
+      _OnboardPage(
+        icon: HugeIcons.strokeRoundedWardrobe01,
+        orbit: const [
+          HugeIcons.strokeRoundedTShirt,
+          HugeIcons.strokeRoundedDress01,
+          HugeIcons.strokeRoundedHoodie,
+        ],
+        title: l10n.onboardingTitle1,
+        desc: l10n.onboardingDesc1,
+        accent: scheme.primary,
+        container: scheme.primaryContainer,
+        onContainer: scheme.onPrimaryContainer,
+      ),
+      _OnboardPage(
+        icon: HugeIcons.strokeRoundedWashingMachine,
+        orbit: const [
+          HugeIcons.strokeRoundedClock01,
+          HugeIcons.strokeRoundedNotification01,
+          HugeIcons.strokeRoundedDroplet,
+        ],
+        title: l10n.onboardingTitle2,
+        desc: l10n.onboardingDesc2,
+        accent: scheme.tertiary,
+        container: scheme.tertiaryContainer,
+        onContainer: scheme.onTertiaryContainer,
+      ),
+      _OnboardPage(
+        icon: HugeIcons.strokeRoundedTaskDone01,
+        orbit: const [
+          HugeIcons.strokeRoundedTick02,
+          HugeIcons.strokeRoundedPackageReceive,
+          HugeIcons.strokeRoundedCheckmarkCircle02,
+        ],
+        title: l10n.onboardingTitle3,
+        desc: l10n.onboardingDesc3,
+        accent: scheme.secondary,
+        container: scheme.secondaryContainer,
+        onContainer: scheme.onSecondaryContainer,
+      ),
     ];
     final isLast = _page == pages.length - 1;
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(onPressed: _finish, child: Text(l10n.skip)),
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: pages.length,
-                onPageChanged: (i) => setState(() => _page = i),
-                itemBuilder: (_, i) {
-                  final (icon, title) = pages[i];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(icon, size: 120, color: color),
-                        const SizedBox(height: 32),
-                        Text(
-                          title,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+      body: Stack(
+        children: [
+          // Soft tinted blobs per page, cross-faded with opacity only.
+          for (var i = 0; i < pages.length; i++)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: i == _page ? 1 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                  child: _Backdrop(color: pages[i].accent),
+                ),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                pages.length,
-                (i) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.all(4),
-                  width: i == _page ? 20 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: i == _page ? color : color.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(4),
+          SafeArea(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 56,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: AnimatedOpacity(
+                        opacity: isLast ? 0 : 1,
+                        duration: const Duration(milliseconds: 200),
+                        child: IgnorePointer(
+                          ignoring: isLast,
+                          child: SoftButton(
+                            label: l10n.skip,
+                            variant: SoftButtonVariant.ghost,
+                            onPressed: _finish,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: isLast
-                      ? _finish
-                      : () => _controller.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOut,
-                        ),
-                  child: Text(isLast ? l10n.start : l10n.next),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _controller,
+                    itemCount: pages.length,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemBuilder: (_, i) => _PageBody(
+                      page: pages[i],
+                      index: i,
+                      active: i == _page,
+                      controller: _controller,
+                      float: _float,
+                    ),
+                  ),
                 ),
-              ),
+                _Dots(pages: pages, current: _page),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: SoftButton(
+                      key: ValueKey(isLast),
+                      label: isLast ? l10n.start : l10n.next,
+                      icon: isLast
+                          ? HugeIcons.strokeRoundedTick02
+                          : HugeIcons.strokeRoundedArrowRight01,
+                      expanded: true,
+                      onPressed: isLast ? _finish : _next,
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Backdrop extends StatelessWidget {
+  final Color color;
+
+  const _Backdrop({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final alpha = isLight ? 0.28 : 0.14;
+
+    Widget blob(double size) => Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            color.withValues(alpha: alpha),
+            color.withValues(alpha: 0),
           ],
         ),
       ),
+    );
+
+    return LayoutBuilder(
+      builder: (_, c) => Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: -c.maxWidth * 0.35,
+            right: -c.maxWidth * 0.3,
+            child: blob(c.maxWidth * 1.1),
+          ),
+          Positioned(
+            bottom: -c.maxWidth * 0.4,
+            left: -c.maxWidth * 0.45,
+            child: blob(c.maxWidth * 1.0),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PageBody extends StatelessWidget {
+  final _OnboardPage page;
+  final int index;
+  final bool active;
+  final PageController controller;
+  final Animation<double> float;
+
+  const _PageBody({
+    required this.page,
+    required this.index,
+    required this.active,
+    required this.controller,
+    required this.float,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+
+    return LayoutBuilder(
+      builder: (_, c) {
+        final heroSize = math.min(c.maxWidth * 0.78, c.maxHeight * 0.55);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Parallax: the illustration trails the page swipe a bit.
+              AnimatedBuilder(
+                animation: controller,
+                builder: (_, child) {
+                  final pos =
+                      controller.hasClients &&
+                          controller.position.haveDimensions
+                      ? controller.page ?? index.toDouble()
+                      : index.toDouble();
+                  final delta = (index - pos).clamp(-1.0, 1.0);
+                  return Transform.translate(
+                    offset: Offset(delta * c.maxWidth * 0.25, 0),
+                    child: Opacity(
+                      opacity: (1 - delta.abs() * 0.6).clamp(0.0, 1.0),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _EntryAnimation(
+                  active: active,
+                  child: _Hero(page: page, size: heroSize, float: float),
+                ),
+              ),
+              const SizedBox(height: 40),
+              _EntryAnimation(
+                active: active,
+                delay: const Duration(milliseconds: 80),
+                child: Text(
+                  page.title,
+                  textAlign: TextAlign.center,
+                  style: text.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _EntryAnimation(
+                active: active,
+                delay: const Duration(milliseconds: 160),
+                child: Text(
+                  page.desc,
+                  textAlign: TextAlign.center,
+                  style: text.bodyLarge?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.6,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Hero extends StatelessWidget {
+  final _OnboardPage page;
+  final double size;
+  final Animation<double> float;
+
+  const _Hero({required this.page, required this.size, required this.float});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isLight = scheme.brightness == Brightness.light;
+    final cardColor = theme.cardTheme.color;
+    final shadow = BoxShadow(
+      color: scheme.shadow.withValues(alpha: isLight ? 0.06 : 0.3),
+      blurRadius: 12,
+      offset: const Offset(0, 2),
+    );
+    final core = size * 0.42;
+    final chip = size * 0.2;
+
+    // Orbit chips sit on fixed angles and bob gently out of phase.
+    const angles = [-2.4, -0.5, 1.6];
+
+    return SizedBox.square(
+      dimension: size,
+      child: AnimatedBuilder(
+        animation: float,
+        builder: (_, _) {
+          final t = float.value * 2 * math.pi;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: size * 0.92,
+                height: size * 0.92,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: page.container.withValues(
+                    alpha: isLight ? 0.45 : 0.35,
+                  ),
+                ),
+              ),
+              Container(
+                width: size * 0.66,
+                height: size * 0.66,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: page.container,
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(0, math.sin(t) * 4),
+                child: Container(
+                  width: core,
+                  height: core,
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: scheme.outlineVariant),
+                    boxShadow: [shadow],
+                  ),
+                  child: Center(
+                    child: HugeIcon(
+                      icon: page.icon,
+                      size: core * 0.48,
+                      strokeWidth: 1.8,
+                      color: page.onContainer,
+                    ),
+                  ),
+                ),
+              ),
+              for (var i = 0; i < page.orbit.length; i++)
+                Transform.translate(
+                  offset: Offset(
+                    math.cos(angles[i]) * size * 0.4,
+                    math.sin(angles[i]) * size * 0.4 +
+                        math.sin(t + i * 2.1) * 6,
+                  ),
+                  child: Container(
+                    width: chip,
+                    height: chip,
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: scheme.outlineVariant),
+                      boxShadow: [shadow],
+                    ),
+                    child: Center(
+                      child: HugeIcon(
+                        icon: page.orbit[i],
+                        size: chip * 0.46,
+                        strokeWidth: 2,
+                        color: page.onContainer,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Fade + translate-Y (16px → 0) over 420ms ease-out, replayed each time
+/// [active] turns true.
+class _EntryAnimation extends StatefulWidget {
+  final bool active;
+  final Duration delay;
+  final Widget child;
+
+  const _EntryAnimation({
+    required this.active,
+    required this.child,
+    this.delay = Duration.zero,
+  });
+
+  @override
+  State<_EntryAnimation> createState() => _EntryAnimationState();
+}
+
+class _EntryAnimationState extends State<_EntryAnimation>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 420),
+  );
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _c,
+    curve: Curves.easeOut,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.active) _play();
+  }
+
+  @override
+  void didUpdateWidget(_EntryAnimation old) {
+    super.didUpdateWidget(old);
+    if (widget.active && !old.active) {
+      _play();
+    } else if (!widget.active && old.active) {
+      _c.value = 0;
+    }
+  }
+
+  Future<void> _play() async {
+    _c.value = 0;
+    if (widget.delay > Duration.zero) {
+      await Future.delayed(widget.delay);
+      if (!mounted || !widget.active) return;
+    }
+    _c.forward();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _curve,
+      builder: (_, child) => Opacity(
+        opacity: _curve.value,
+        child: Transform.translate(
+          offset: Offset(0, 16 * (1 - _curve.value)),
+          child: child,
+        ),
+      ),
+      child: widget.child,
+    );
+  }
+}
+
+class _Dots extends StatelessWidget {
+  final List<_OnboardPage> pages;
+  final int current;
+
+  const _Dots({required this.pages, required this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = Theme.of(context).colorScheme.outlineVariant;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(pages.length, (i) {
+        final on = i == current;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: on ? 24 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: on ? pages[current].accent : muted,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
+      }),
     );
   }
 }
