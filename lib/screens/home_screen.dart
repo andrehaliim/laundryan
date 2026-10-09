@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/screens/sessions_screen.dart';
 import 'package:laundryan/screens/wardrobe_screen.dart';
@@ -28,16 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
             index: _index,
             onTap: (i) => setState(() => _index = i),
             items: [
-              _NavData(
-                Icons.local_laundry_service_outlined,
-                Icons.local_laundry_service,
-                l10n.sessions,
-              ),
-              _NavData(
-                Icons.checkroom_outlined,
-                Icons.checkroom,
-                l10n.wardrobe,
-              ),
+              _NavData(HugeIcons.strokeRoundedWashingMachine, l10n.sessions),
+              _NavData(HugeIcons.strokeRoundedHanger, l10n.wardrobe),
             ],
           ),
         ),
@@ -47,10 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _NavData {
-  final IconData icon;
-  final IconData selectedIcon;
+  final List<List<dynamic>> icon;
   final String label;
-  const _NavData(this.icon, this.selectedIcon, this.label);
+  const _NavData(this.icon, this.label);
 }
 
 class _FloatingNavBar extends StatelessWidget {
@@ -153,7 +145,12 @@ class _NavItem extends StatelessWidget {
         builder: (context, color, _) => Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(selected ? data.selectedIcon : data.icon, color: color),
+            HugeIcon(
+              icon: data.icon,
+              color: color,
+              size: 22,
+              strokeWidth: selected ? 2.2 : 1.8,
+            ),
             const SizedBox(width: 8),
             Text(
               data.label,

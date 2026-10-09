@@ -127,7 +127,10 @@ class SessionsScreen extends StatelessWidget {
         tooltip: l10n.addSession,
         onPressed: () => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const AddSessionScreen())),
-        child: const Icon(Icons.add),
+        child: const HugeIcon(
+          icon: HugeIcons.strokeRoundedPlusSign,
+          strokeWidth: 2,
+        ),
       ),
       body: body,
     );

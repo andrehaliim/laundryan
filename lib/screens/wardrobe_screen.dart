@@ -117,7 +117,10 @@ class WardrobeScreen extends StatelessWidget {
         heroTag: 'fab_wardrobe',
         tooltip: l10n.addWardrobe,
         onPressed: () => _open(context),
-        child: const Icon(Icons.add),
+        child: const HugeIcon(
+          icon: HugeIcons.strokeRoundedPlusSign,
+          strokeWidth: 2,
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +134,14 @@ class WardrobeScreen extends StatelessWidget {
                     onChanged: context.read<WardrobeProvider>().setQuery,
                     decoration: InputDecoration(
                       hintText: l10n.searchHint,
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedSearch01,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
+                      ),
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(28)),
                       ),

@@ -250,7 +250,19 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       Positioned(
                         top: 6,
                         right: 6,
-                        child: Icon(Icons.check_circle, color: scheme.primary),
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: scheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedTick02,
+                            color: scheme.onPrimary,
+                            strokeWidth: 2.5,
+                            size: 16,
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -330,7 +342,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               children: [
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.remove),
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedMinusSign,
+                    strokeWidth: 2,
+                  ),
                   onPressed: qty > 1
                       ? () => setState(() => _selected[id] = qty - 1)
                       : null,
@@ -338,7 +353,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 Text('$qty', style: Theme.of(context).textTheme.titleMedium),
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.add),
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
+                    strokeWidth: 2,
+                  ),
                   onPressed: qty < e.availableQty
                       ? () => setState(() => _selected[id] = qty + 1)
                       : null,
@@ -632,7 +650,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       const Spacer(),
                       TextButton.icon(
                         onPressed: _openPicker,
-                        icon: const Icon(Icons.add),
+                        icon: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedPlusSign,
+                          size: 18,
+                          strokeWidth: 2,
+                        ),
                         label: Text(l10n.wardrobe),
                         style: TextButton.styleFrom(
                           backgroundColor: scheme.surfaceContainerHigh,

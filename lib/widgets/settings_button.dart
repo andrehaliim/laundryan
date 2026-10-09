@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/screens/settings_screen.dart';
 
 class SettingsButton extends StatelessWidget {
@@ -7,7 +8,10 @@ class SettingsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.settings_outlined),
+      icon: const HugeIcon(
+        icon: HugeIcons.strokeRoundedSettings01,
+        strokeWidth: 2,
+      ),
       onPressed: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const SettingsScreen()),
       ),

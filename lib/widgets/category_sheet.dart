@@ -175,7 +175,7 @@ class _CategorySheetState extends State<CategorySheet> {
 
   Widget _buildTabs(AppLocalizations l10n, int count) {
     final scheme = Theme.of(context).colorScheme;
-    Widget tab(int i, IconData icon, String label) {
+    Widget tab(int i, List<List<dynamic>> icon, String label) {
       final selected = _tab == i;
       return Expanded(
         child: GestureDetector(
@@ -200,9 +200,10 @@ class _CategorySheetState extends State<CategorySheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
+                HugeIcon(
+                  icon: icon,
                   size: 20,
+                  strokeWidth: 2,
                   color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 8),
@@ -233,10 +234,12 @@ class _CategorySheetState extends State<CategorySheet> {
       ),
       child: Row(
         children: [
-          tab(0, Icons.inventory_2_outlined, l10n.categoriesTab(count)),
+          tab(0, HugeIcons.strokeRoundedTag01, l10n.categoriesTab(count)),
           tab(
             1,
-            _editing == null ? Icons.add_circle_outline : Icons.edit_outlined,
+            _editing == null
+                ? HugeIcons.strokeRoundedAddCircle
+                : HugeIcons.strokeRoundedEdit02,
             _editing == null ? l10n.newCategory : l10n.editCategory,
           ),
         ],
@@ -308,12 +311,18 @@ class _CategorySheetState extends State<CategorySheet> {
                 ),
                 Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedEdit02,
+                    strokeWidth: 2,
+                  ),
                   tooltip: l10n.editCategory,
                   onPressed: () => _openEdit(c, l10n),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedDelete01,
+                    strokeWidth: 2,
+                  ),
                   tooltip: l10n.delete,
                   onPressed: () => _delete(c, l10n),
                 ),
@@ -347,7 +356,14 @@ class _CategorySheetState extends State<CategorySheet> {
                 label: l10n.categoryName,
                 validator: (v) =>
                     v != null && v.trim().isNotEmpty ? null : l10n.nameRequired,
-                suffixIcon: Icon(Icons.label_outline_rounded),
+                suffixIcon: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedLabel,
+                    size: 20,
+                    strokeWidth: 2,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               Row(

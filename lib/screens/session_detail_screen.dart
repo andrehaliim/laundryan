@@ -149,7 +149,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         title: Text(l10n.sessionDetail),
         actions: [
           IconButton(
-            icon: const Icon(Icons.cancel_outlined),
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedCancelCircle,
+              strokeWidth: 2,
+            ),
             tooltip: l10n.cancelSession,
             onPressed: () => _cancelSession(l10n),
           ),

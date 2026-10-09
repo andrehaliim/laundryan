@@ -82,7 +82,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
+              leading: const HugeIcon(
+                icon: HugeIcons.strokeRoundedCamera01,
+                strokeWidth: 2,
+              ),
               title: Text(l10n.takePhoto),
               onTap: () {
                 Navigator.pop(ctx);
@@ -90,7 +93,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
+              leading: const HugeIcon(
+                icon: HugeIcons.strokeRoundedImage02,
+                strokeWidth: 2,
+              ),
               title: Text(l10n.chooseGallery),
               onTap: () {
                 Navigator.pop(ctx);
@@ -99,7 +105,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
             ),
             if (_photo != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline),
+                leading: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete01,
+                  strokeWidth: 2,
+                ),
                 title: Text(l10n.removePhoto),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -201,7 +210,12 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_a_photo_outlined, size: 36, color: scheme.onSurface),
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedImageAdd02,
+            size: 36,
+            strokeWidth: 1.8,
+            color: scheme.onSurface,
+          ),
           const SizedBox(height: 8),
           Text(l10n.addPhoto, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
@@ -226,7 +240,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
         actions: [
           if (_isEdit)
             IconButton(
-              icon: const Icon(Icons.delete_outline),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedDelete01,
+                strokeWidth: 2,
+              ),
               onPressed: () => _delete(l10n),
             ),
         ],
@@ -359,7 +376,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                           child: Row(
                             children: [
                               IconButton.filledTonal(
-                                icon: const Icon(Icons.remove),
+                                icon: const HugeIcon(
+                                  icon: HugeIcons.strokeRoundedMinusSign,
+                                  strokeWidth: 2,
+                                ),
                                 onPressed: _qty > _minQty
                                     ? () => setState(() => _qty--)
                                     : null,
@@ -373,7 +393,10 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                                 ),
                               ),
                               IconButton.filledTonal(
-                                icon: const Icon(Icons.add),
+                                icon: const HugeIcon(
+                                  icon: HugeIcons.strokeRoundedPlusSign,
+                                  strokeWidth: 2,
+                                ),
                                 onPressed: () => setState(() => _qty++),
                               ),
                             ],
