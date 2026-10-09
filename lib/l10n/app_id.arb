@@ -216,5 +216,16 @@
   "markFound": "Tandai ditemukan",
   "foundNote": "Sudah ditemukan dan kembali ke lemari.",
   "permanentLostNote": "{count} pcs dihapus dari lemari.",
-  "backToHistory": "Kembali ke riwayat"
+  "backToHistory": "Kembali ke riwayat",
+  "system": "Sistem",
+  "appearance": "Tampilan",
+  "data": "Data",
+  "general": "Umum",
+  "about": "Tentang",
+  "developer": "Developer",
+  "categoriesHint": "Tambah, ubah, atau hapus kategori",
+  "showOnboarding": "Lihat intro lagi",
+  "showOnboardingHint": "Putar ulang layar pembuka",
+  "licenses": "Lisensi open source",
+  "licensesHint": "Library yang dipakai di aplikasi ini"
 }

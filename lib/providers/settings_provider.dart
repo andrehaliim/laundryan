@@ -16,8 +16,11 @@ class SettingsProvider extends ChangeNotifier {
 
   // Default: English & Light
   Locale get locale => Locale(_prefs.getString(_kLang) ?? 'en');
-  ThemeMode get themeMode =>
-      _prefs.getString(_kTheme) == 'dark' ? ThemeMode.dark : ThemeMode.light;
+  ThemeMode get themeMode => switch (_prefs.getString(_kTheme)) {
+    'dark' => ThemeMode.dark,
+    'system' => ThemeMode.system,
+    _ => ThemeMode.light,
+  };
   bool get onboardingDone => _prefs.getBool(_kOnboarding) ?? false;
 
   Future<void> setLanguage(String code) async {
@@ -26,7 +29,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    await _prefs.setString(_kTheme, mode == ThemeMode.dark ? 'dark' : 'light');
+    await _prefs.setString(_kTheme, mode.name);
     notifyListeners();
   }
 

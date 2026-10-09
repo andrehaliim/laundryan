@@ -24,8 +24,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _finish() async {
     final navigator = Navigator.of(context);
     await context.read<SettingsProvider>().completeOnboarding();
-    navigator.pushReplacement(
+    // Clear the stack so replaying from settings doesn't stack a second home.
+    navigator.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (_) => false,
     );
   }
 
@@ -96,9 +98,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onPressed: isLast
                       ? _finish
                       : () => _controller.nextPage(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                          ),
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOut,
+                        ),
                   child: Text(isLast ? l10n.start : l10n.next),
                 ),
               ),

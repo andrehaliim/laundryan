@@ -453,5 +453,16 @@
       }
     }
   },
-  "backToHistory": "Back to history"
+  "backToHistory": "Back to history",
+  "system": "System",
+  "appearance": "Appearance",
+  "data": "Data",
+  "general": "General",
+  "about": "About",
+  "developer": "Developer",
+  "categoriesHint": "Add, rename, or remove categories",
+  "showOnboarding": "Show intro again",
+  "showOnboardingHint": "Replay the welcome screens",
+  "licenses": "Open source licenses",
+  "licensesHint": "Libraries used in this app"
 }
