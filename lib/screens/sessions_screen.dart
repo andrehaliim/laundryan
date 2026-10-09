@@ -378,61 +378,192 @@ class HistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final s = entry.session;
-    final dateTimeFmt = DateFormat.MMMd(locale);
-    final subStyle = Theme.of(context).textTheme.bodySmall
-        ?.copyWith(color: scheme.onSurfaceVariant);
+    final dateFmt = DateFormat.MMMd(locale);
+    final yearFmt = DateFormat.yMMMd(locale);
 
-    return Card(
+    final total = entry.totalItems;
+    final missing = entry.missingQty;
+    final returned = (total - missing).clamp(0, total);
+    final safe = missing == 0;
+
+    // all back → green, something still missing → pink.
+    final (
+      List<List<dynamic>> statusIcon,
+      Color statusBg,
+      Color statusFg,
+    ) = safe
+        ? (
+            HugeIcons.strokeRoundedCheckmarkCircle02,
+            scheme.tertiaryContainer,
+            scheme.onTertiaryContainer,
+          )
+        : (
+            HugeIcons.strokeRoundedAlert02,
+            scheme.secondaryContainer,
+            scheme.onSecondaryContainer,
+          );
+
+    final end = s.completedAt;
+    final range = end == null
+        ? yearFmt.format(s.dropOffDate)
+        : '${dateFmt.format(s.dropOffDate)} – ${yearFmt.format(end)}';
+    final days = end == null
+        ? null
+        : DateUtils.dateOnly(end)
+              .difference(DateUtils.dateOnly(s.dropOffDate))
+              .inDays
+              .clamp(0, 9999);
+    final place = [
+      s.placeName,
+      if (s.placeAddress != null && s.placeAddress!.isNotEmpty) s.placeAddress!,
+    ].join(' • ');
+
+    return SoftCard(
       margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+      padding: const EdgeInsets.all(16),
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: HugeIcon(
+                  icon: statusIcon,
+                  strokeWidth: 2,
+                  size: 22,
+                  color: statusFg,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       s.title.isEmpty ? l10n.sessionTitle : s.title,
-                      style: Theme.of(context).textTheme.titleMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                      ),
                     ),
-                  ),
-                  CountBadge(
-                    label: entry.missingQty > 0
-                        ? l10n.swapMissing(entry.missingQty)
-                        : l10n.finishedLabel,
-                    horizontalPadding: 8,
-                    mode: entry.missingQty > 0
-                        ? CountBadgeMode.secondary
-                        : CountBadgeMode.tertiary,
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedLocation01,
+                          strokeWidth: 2,
+                          size: 13,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            place,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                (s.placeAddress == null || s.placeAddress!.isEmpty)
-                    ? s.placeName
-                    : '${s.placeName} (${s.placeAddress})',
-                style: subStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                '${dateTimeFmt.format(s.dropOffDate)} - ${dateTimeFmt.format(s.completedAt!)}',
-                style: subStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              const SizedBox(width: 8),
+              CountBadge(
+                label: safe ? l10n.statusAllSafe : l10n.swapMissing(missing),
+                horizontalPadding: 8,
+                mode: safe ? CountBadgeMode.tertiary : CountBadgeMode.secondary,
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedCalendar03,
+                      strokeWidth: 2,
+                      size: 16,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        range,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall,
+                      ),
+                    ),
+                    if (days != null) ...[
+                      const SizedBox(width: 8),
+                      CountBadge(
+                        label: l10n.durationDays(days),
+                        horizontalPadding: 8,
+                        mode: CountBadgeMode.normal,
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedTShirt,
+                      strokeWidth: 2,
+                      size: 16,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: total == 0 ? 0 : returned / total,
+                          minHeight: 6,
+                          color: safe ? scheme.tertiary : scheme.secondary,
+                          backgroundColor: scheme.surfaceContainerHighest,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.returnedBadge(returned, total),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

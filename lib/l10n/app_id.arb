@@ -227,5 +227,6 @@
   "showOnboarding": "Lihat intro lagi",
   "showOnboardingHint": "Putar ulang layar pembuka",
   "licenses": "Lisensi open source",
-  "licensesHint": "Library yang dipakai di aplikasi ini"
+  "licensesHint": "Library yang dipakai di aplikasi ini",
+  "durationDays": "{count} hari"
 }
