@@ -12,6 +12,7 @@ import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/utils/session_phase.dart';
+import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:laundryan/widgets/pulse.dart';
 import 'package:provider/provider.dart';
@@ -70,7 +71,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (date == null || !mounted) return;
-    final time = await showTimePicker(
+    final time = await showTimePicker12h(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_readyAt),
     );
@@ -139,8 +140,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();
-    final dateTimeFmt = DateFormat.yMMMMEEEEd(locale).add_jm();
-    final dateTimeFmtShort = DateFormat.MMMd(locale).add_jm();
+    final dateTimeFmt = with12hTime(DateFormat.yMMMMEEEEd(locale));
+    final dateTimeFmtShort = with12hTime(DateFormat.MMMd(locale));
     final hoursFromNow = _readyAt.difference(DateTime.now()).inHours;
 
     return Scaffold(

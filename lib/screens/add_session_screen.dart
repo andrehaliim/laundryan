@@ -11,6 +11,7 @@ import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
+import 'package:laundryan/utils/time_format.dart';
 import 'package:provider/provider.dart';
 
 class AddSessionScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _dropOff = DateTime(now.year, now.month, now.day);
+    _dropOff = DateTime(now.year, now.month, now.day, now.hour, now.minute);
     _ready = DateTime(now.year, now.month, now.day + 2, 17);
   }
 
@@ -57,7 +58,15 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
-    if (d != null) setState(() => _dropOff = d);
+    if (d == null || !mounted) return;
+    final t = await showTimePicker12h(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_dropOff),
+    );
+    if (t == null || !mounted) return;
+    setState(
+      () => _dropOff = DateTime(d.year, d.month, d.day, t.hour, t.minute),
+    );
   }
 
   Future<void> _pickReady() async {
@@ -68,7 +77,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       lastDate: DateTime(2100),
     );
     if (d == null || !mounted) return;
-    final t = await showTimePicker(
+    final t = await showTimePicker12h(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_ready),
     );
@@ -401,8 +410,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     final byId = {for (final e in wardrobe) e.item.id: e};
     final locale = Localizations.localeOf(context).toString();
     final dateFmt = DateFormat.yMMMd(locale);
-    final readyText =
-        '${dateFmt.format(_ready)}, ${TimeOfDay.fromDateTime(_ready).format(context)}';
+    String dateTimeText(DateTime dt) => with12hTime(dateFmt).format(dt);
 
     String? required(String? v) =>
         (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null;
@@ -556,7 +564,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   const SizedBox(height: 8),
                   _dateField(
                     '',
-                    dateFmt.format(_dropOff),
+                    dateTimeText(_dropOff),
                     HugeIcon(
                       icon: HugeIcons.strokeRoundedDateTime,
                       size: 20,
@@ -569,7 +577,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   const SizedBox(height: 8),
                   _dateField(
                     '',
-                    readyText,
+                    dateTimeText(_ready),
                     HugeIcon(
                       icon: HugeIcons.strokeRoundedClock01,
                       size: 20,

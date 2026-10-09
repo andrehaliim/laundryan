@@ -10,6 +10,7 @@ import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/checklist_summary_screen.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
+import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:provider/provider.dart';
 
@@ -246,7 +247,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final subtitle = [
       if (_placeName.isNotEmpty) _placeName,
       if (_dropOffAt != null)
-        DateFormat.MMMd(locale).add_jm().format(_dropOffAt!),
+        with12hTime(DateFormat.MMMd(locale)).format(_dropOffAt!),
     ].join(' • ');
 
     return SoftCard(

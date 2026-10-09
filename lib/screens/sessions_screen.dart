@@ -11,6 +11,7 @@ import 'package:laundryan/screens/history_list_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/session_phase.dart';
+import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/pulse.dart';
 import 'package:laundryan/widgets/session_category_badges.dart';
 import 'package:laundryan/widgets/settings_button.dart';
@@ -145,7 +146,7 @@ class SessionCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();
     final s = entry.session;
-    final dateTimeFmt = DateFormat.yMMMd(locale).add_Hm();
+    final dateTimeFmt = with12hTime(DateFormat.yMMMd(locale));
     final subStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
 
@@ -259,7 +260,7 @@ class SessionCard extends StatelessWidget {
                     Text('${l10n.dropOffDate}: ', style: subStyle),
                     const Spacer(),
                     Text(
-                      DateFormat.yMMMd(locale).format(s.dropOffDate),
+                      dateTimeFmt.format(s.dropOffDate),
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ],
