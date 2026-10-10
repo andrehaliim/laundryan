@@ -473,6 +473,15 @@
   "showOnboardingHint": "Replay the welcome screens",
   "licenses": "Open source licenses",
   "licensesHint": "Libraries used in this app",
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "madeBy": "Made by",
   "durationDays": "{count, plural, =1{1 day} other{{count} days}}",
   "@durationDays": {
     "placeholders": {

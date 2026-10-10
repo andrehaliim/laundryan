@@ -38,7 +38,9 @@ class WardrobeScreen extends StatelessWidget {
     }
 
     Widget body;
-    if (wardrobe.isEmpty) {
+    if (!wardrobe.isLoaded) {
+      body = const SizedBox.shrink();
+    } else if (wardrobe.isEmpty) {
       body = EmptyState(
         icon: HugeIcons.strokeRoundedWardrobe01,
         orbit: const [

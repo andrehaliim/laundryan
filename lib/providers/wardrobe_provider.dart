@@ -9,6 +9,7 @@ class WardrobeProvider extends ChangeNotifier {
   final WardrobeRepository _repo;
   StreamSubscription<List<WardrobeEntry>>? _sub;
   List<WardrobeEntry> _all = [];
+  bool _loaded = false;
   String _query = '';
   List<WardrobeEntry> get allItems => _all;
   int? _categoryId;
@@ -17,6 +18,7 @@ class WardrobeProvider extends ChangeNotifier {
   WardrobeProvider(this._repo) {
     _sub = _repo.watchAll().listen((data) {
       _all = data;
+      _loaded = true;
       if (data.isEmpty) {
         _query = '';
         _categoryId = null;
@@ -25,6 +27,7 @@ class WardrobeProvider extends ChangeNotifier {
     });
   }
 
+  bool get isLoaded => _loaded;
   bool get isEmpty => _all.isEmpty;
 
   List<WardrobeEntry> get items {

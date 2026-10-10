@@ -8,6 +8,7 @@ import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/screens/onboarding_screen.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/widgets/category_sheet.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 typedef _Option<T> = ({T value, String label, List<List<dynamic>> icon});
@@ -167,8 +168,48 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 32),
+          _footer(context),
         ],
       ),
+    );
+  }
+
+  Widget _footer(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final style = textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+
+    return Column(
+      children: [
+        FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            final info = snapshot.data;
+            return Text(
+              info == null ? '' : l10n.appVersion(info.version),
+              style: style,
+            );
+          },
+        ),
+        const SizedBox(height: 2),
+        Text.rich(
+          TextSpan(
+            text: '${l10n.madeBy} ',
+            children: [
+              TextSpan(
+                text: '@andrehaliim',
+                style: TextStyle(
+                  color: scheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          style: style,
+        ),
+      ],
     );
   }
 

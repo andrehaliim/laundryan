@@ -13,11 +13,14 @@ class HistoryListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final history = context.watch<SessionProvider>().history;
+    final sessions = context.watch<SessionProvider>();
+    final history = sessions.history;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.history)),
-      body: history.isEmpty
+      body: !sessions.isLoaded
+          ? const SizedBox.shrink()
+          : history.isEmpty
           ? EmptyState(
               tone: EmptyStateTone.secondary,
               icon: HugeIcons.strokeRoundedArchive02,

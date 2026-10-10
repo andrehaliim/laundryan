@@ -1,3 +1,3 @@
-# laundryan
+# Laundryan
 
-A new Flutter project.
+Track your laundry so nothing gets lost.

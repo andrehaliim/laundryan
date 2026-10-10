@@ -31,7 +31,9 @@ class SessionsScreen extends StatelessWidget {
     final isEmpty = sessions.active.isEmpty && sessions.history.isEmpty;
 
     Widget body;
-    if (isEmpty) {
+    if (!sessions.isLoaded) {
+      body = const SizedBox.shrink();
+    } else if (isEmpty) {
       body = EmptyState(
         icon: HugeIcons.strokeRoundedWashingMachine,
         orbit: const [

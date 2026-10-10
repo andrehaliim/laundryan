@@ -236,6 +236,8 @@
   "showOnboardingHint": "Putar ulang layar pembuka",
   "licenses": "Lisensi open source",
   "licensesHint": "Library yang dipakai di aplikasi ini",
+  "appVersion": "Versi {version}",
+  "madeBy": "Dibuat oleh",
   "durationDays": "{count} hari",
   "deleteCategoryTitle": "Hapus kategori?",
   "deleteCategoryMessage": "\"{name}\" akan dihapus dari daftar kategori.",

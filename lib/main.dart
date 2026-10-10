@@ -29,12 +29,15 @@ Future<void> main() async {
         ChangeNotifierProvider.value(value: settings),
         Provider<AppDatabase>.value(value: db),
         ChangeNotifierProvider(
+          lazy: false,
           create: (_) => CategoryProvider(CategoryRepository(db)),
         ),
         ChangeNotifierProvider(
+          lazy: false,
           create: (_) => WardrobeProvider(WardrobeRepository(db)),
         ),
         ChangeNotifierProvider(
+          lazy: false,
           create: (_) =>
               SessionProvider(SessionRepository(db), () => settings.locale),
         ),

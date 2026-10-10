@@ -13,20 +13,25 @@ class SessionProvider extends ChangeNotifier {
   StreamSubscription<List<SessionEntry>>? _historySub;
   List<SessionEntry> _active = [];
   List<SessionEntry> _history = [];
+  bool _activeLoaded = false;
+  bool _historyLoaded = false;
 
   SessionProvider(this._repo, this._locale) {
     _activeSub = _repo.watchActive().listen((d) {
       _active = d;
+      _activeLoaded = true;
       notifyListeners();
     });
     _historySub = _repo.watchHistory().listen((d) {
       _history = d;
+      _historyLoaded = true;
       notifyListeners();
     });
   }
 
   List<SessionEntry> get active => _active;
   List<SessionEntry> get history => _history;
+  bool get isLoaded => _activeLoaded && _historyLoaded;
 
   Future<List<SessionItemView>> items(int sessionId) => _repo.items(sessionId);
 
