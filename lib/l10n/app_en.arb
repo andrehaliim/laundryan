@@ -12,7 +12,6 @@
   "skip": "Skip",
   "sessions": "Sessions",
   "wardrobe": "Wardrobe",
-  "myWardrobe": "My Wardrobe",
   "settings": "Settings",
   "language": "Language",
   "theme": "Theme",
@@ -34,7 +33,6 @@
   "categoryHome": "Home",
   "next": "Next",
   "categories": "Categories",
-  "addCategory": "Add category",
   "editCategory": "Edit category",
   "categoryName": "Category name",
   "icon": "Icon",
@@ -147,32 +145,12 @@
       }
     }
   },
-  "verifyItems": "Verify items",
   "finish": "Finish",
-  "checkAllHint": "Check all items to finish",
   "returnedQty": "Returned",
-  "ofTotal": "of {total}",
-  "@ofTotal": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "missingCount": "{count} missing",
-  "@missingCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "missingStatus": "Status of missing items",
   "statusLost": "Lost",
   "statusSwapped": "Swapped",
   "sessionFinished": "Session finished",
   "allReturned": "All items came back safely",
-  "missingItems": "Missing items",
   "someItemsMissing": "Some items didn't come back",
   "allReturnedBody": "Every piece is back and available in your wardrobe again.",
   "missingBody": "Contact the laundry so they can track down the missing pieces.",
