@@ -50,7 +50,6 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
 
   @override
   void dispose() {
-    // Foto draft yang belum disimpan dibersihkan
     if (!_done && _photo != _originalPhoto) PhotoStorage.delete(_photo);
     _name.dispose();
     _note.dispose();
@@ -63,9 +62,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
       if (name == null || !mounted) return;
       if (_photo != _originalPhoto) await PhotoStorage.delete(_photo);
       setState(() => _photo = name);
-    } catch (_) {
-      // izin ditolak / batal: abaikan
-    }
+    } catch (_) {}
   }
 
   Future<void> _removePhoto() async {

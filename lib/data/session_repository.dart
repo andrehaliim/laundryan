@@ -39,7 +39,7 @@ class SessionRepository {
   final AppDatabase db;
   SessionRepository(this.db);
 
-  /// Simpan sesi + item-nya dalam satu transaksi. Return id sesi.
+  /// Saves a session and its items in a single transaction. Returns the session id.
   Future<int> create({
     required String title,
     required String placeName,
@@ -51,7 +51,9 @@ class SessionRepository {
     required List<SessionItemInput> items,
   }) {
     return db.transaction(() async {
-      final id = await db.into(db.sessions).insert(
+      final id = await db
+          .into(db.sessions)
+          .insert(
             SessionsCompanion.insert(
               title: title,
               placeName: placeName,
@@ -96,11 +98,13 @@ class SessionRepository {
         .watch()
         .map(
           (rows) => rows
-              .map((r) => SessionEntry(
-                    db.sessions.map(r.data),
-                    r.read<int>('total_items'),
-                    r.read<int>('missing_qty'),
-                  ))
+              .map(
+                (r) => SessionEntry(
+                  db.sessions.map(r.data),
+                  r.read<int>('total_items'),
+                  r.read<int>('missing_qty'),
+                ),
+              )
               .toList(),
         );
   }
@@ -117,18 +121,19 @@ class SessionRepository {
         db.wardrobeItems,
         db.wardrobeItems.id.equalsExp(db.sessionItems.itemId),
       ),
-    ])
-      ..where(db.sessionItems.sessionId.equals(sessionId));
+    ])..where(db.sessionItems.sessionId.equals(sessionId));
     final rows = await query.get();
     return rows
-        .map((r) => SessionItemView(
-              r.readTable(db.sessionItems),
-              r.readTable(db.wardrobeItems),
-            ))
+        .map(
+          (r) => SessionItemView(
+            r.readTable(db.sessionItems),
+            r.readTable(db.wardrobeItems),
+          ),
+        )
         .toList();
   }
 
-  /// Hanya judul, reminder, dan estimasi selesai yang boleh diubah.
+  /// Only the title, reminder, and estimated finish time can be changed.
   Future<void> update(
     int id, {
     required String title,
@@ -144,46 +149,51 @@ class SessionRepository {
     );
   }
 
-  /// Hapus sesi aktif. session_items ikut terhapus (cascade),
-  /// jadi qty otomatis kembali tersedia.
+  /// Deletes an active session. session_items are deleted too (cascade),
+  /// so their qty becomes available again automatically.
   Future<void> cancel(int id) async {
-    await (db.delete(db.sessions)
-          ..where((t) =>
-              t.id.equals(id) & t.status.equalsValue(SessionStatus.active)))
+    await (db.delete(db.sessions)..where(
+          (t) => t.id.equals(id) & t.status.equalsValue(SessionStatus.active),
+        ))
         .go();
   }
 
-    Future<void> complete(int sessionId, List<ItemVerification> results) {
+  Future<void> complete(int sessionId, List<ItemVerification> results) {
     return db.transaction(() async {
       for (final r in results) {
-        await (db.update(db.sessionItems)
-              ..where((t) => t.id.equals(r.sessionItemId)))
-            .write(SessionItemsCompanion(
-          returnedQty: Value(r.returnedQty),
-          status: Value(r.status),
-          note: Value(r.note),
-        ));
+        await (db.update(
+          db.sessionItems,
+        )..where((t) => t.id.equals(r.sessionItemId))).write(
+          SessionItemsCompanion(
+            returnedQty: Value(r.returnedQty),
+            status: Value(r.status),
+            note: Value(r.note),
+          ),
+        );
       }
-      await (db.update(db.sessions)..where((t) => t.id.equals(sessionId)))
-          .write(SessionsCompanion(
-        status: const Value(SessionStatus.completed),
-        completedAt: Value(DateTime.now()),
-      ));
+      await (db.update(
+        db.sessions,
+      )..where((t) => t.id.equals(sessionId))).write(
+        SessionsCompanion(
+          status: const Value(SessionStatus.completed),
+          completedAt: Value(DateTime.now()),
+        ),
+      );
     });
   }
 
-  /// Selesaikan item hilang/tertukar untuk seluruh qty hilang sekaligus.
-  /// ditemukan -> qty tersedia kembali otomatis (status tidak lagi mengunci).
-  /// hilangPermanen -> totalQty wardrobe berkurang sebesar lostQty.
+  /// Resolves a lost/swapped item for its entire lost qty at once.
+  /// ditemukan -> qty becomes available again automatically (status no longer locks it).
+  /// hilangPermanen -> wardrobe totalQty is reduced by lostQty.
   Future<void> resolveLost(int sessionItemId, ItemStatus result) {
-    assert(result == ItemStatus.ditemukan ||
-        result == ItemStatus.hilangPermanen);
+    assert(
+      result == ItemStatus.ditemukan || result == ItemStatus.hilangPermanen,
+    );
     return db.transaction(() async {
-      final si = await (db.select(db.sessionItems)
-            ..where((t) => t.id.equals(sessionItemId)))
-          .getSingle();
-      if (si.status != ItemStatus.hilang &&
-          si.status != ItemStatus.tertukar) {
+      final si = await (db.select(
+        db.sessionItems,
+      )..where((t) => t.id.equals(sessionItemId))).getSingle();
+      if (si.status != ItemStatus.hilang && si.status != ItemStatus.tertukar) {
         return;
       }
       final lostQty = si.quantity - (si.returnedQty ?? 0);
@@ -193,15 +203,17 @@ class SessionRepository {
           .write(SessionItemsCompanion(status: Value(result)));
 
       if (result == ItemStatus.hilangPermanen) {
-        final w = await (db.select(db.wardrobeItems)
-              ..where((t) => t.id.equals(si.itemId)))
-            .getSingle();
-        await (db.update(db.wardrobeItems)
-              ..where((t) => t.id.equals(si.itemId)))
-            .write(WardrobeItemsCompanion(
-          totalQty: Value(w.totalQty - lostQty),
-          updatedAt: Value(DateTime.now()),
-        ));
+        final w = await (db.select(
+          db.wardrobeItems,
+        )..where((t) => t.id.equals(si.itemId))).getSingle();
+        await (db.update(
+          db.wardrobeItems,
+        )..where((t) => t.id.equals(si.itemId))).write(
+          WardrobeItemsCompanion(
+            totalQty: Value(w.totalQty - lostQty),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
       }
     });
   }

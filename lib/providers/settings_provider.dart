@@ -14,7 +14,6 @@ class SettingsProvider extends ChangeNotifier {
     return SettingsProvider._(prefs);
   }
 
-  // Default: English & Light
   Locale get locale => Locale(_prefs.getString(_kLang) ?? 'en');
   ThemeMode get themeMode => switch (_prefs.getString(_kTheme)) {
     'dark' => ThemeMode.dark,

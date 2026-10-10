@@ -80,6 +80,6 @@ String iconLabel(String key, AppLocalizations l10n) {
     case 'home':
       return l10n.categoryHome;
     default:
-      return key; // bag, star, heart, home
+      return key;
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// Tambahkan jam format 12 jam (mis. "3:45 PM") ke [fmt].
-/// Tidak pakai `add_jm()` karena locale `id` memetakannya ke 24 jam.
+/// Appends a 12-hour time (e.g. "3:45 PM") to [fmt].
+/// Doesn't use `add_jm()` because the `id` locale maps it to 24-hour time.
 DateFormat with12hTime(DateFormat fmt) => fmt.addPattern('h:mm a');
 
-/// `showTimePicker` yang selalu tampil dalam mode 12 jam.
+/// `showTimePicker` that always displays in 12-hour mode.
 Future<TimeOfDay?> showTimePicker12h({
   required BuildContext context,
   required TimeOfDay initialTime,

@@ -20,7 +20,6 @@ class _SessionCategoryBadgesState extends State<SessionCategoryBadges> {
   @override
   void initState() {
     super.initState();
-    // categoryId -> total qty yang dicuci
     _counts = context.read<SessionProvider>().items(widget.sessionId).then((
       list,
     ) {

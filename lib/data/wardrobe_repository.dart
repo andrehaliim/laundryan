@@ -18,7 +18,6 @@ class WardrobeRepository {
   final AppDatabase db;
   WardrobeRepository(this.db);
 
-  // qty yang sedang di sesi aktif
   static const _inWash = '''
 COALESCE((
   SELECT SUM(si.quantity)
@@ -27,7 +26,6 @@ COALESCE((
   WHERE si.item_id = w.id AND s.status = 'active'
 ), 0)''';
 
-  // qty hilang/tertukar yang belum diselesaikan
   static const _missing = '''
 COALESCE((
   SELECT SUM(si.quantity - COALESCE(si.returned_qty, 0))
@@ -92,7 +90,7 @@ COALESCE((
         );
   }
 
-  /// false kalau totalQty lebih kecil dari qty yang sedang terkunci.
+  /// false if totalQty is less than the currently locked qty.
   Future<bool> update(
     int id, {
     required String name,
@@ -115,9 +113,9 @@ COALESCE((
     return true;
   }
 
-  /// Ditolak selama item masih di sesi aktif atau hilang/tertukar belum
-  /// selesai. Item yang pernah dipakai di sesi diarsipkan supaya riwayat
-  /// tetap utuh; yang belum pernah dipakai dihapus permanen.
+  /// Rejected while the item is still in an active session or has an unresolved
+  /// lost/swapped entry. Items used in past sessions are archived so history
+  /// stays intact; items never used are deleted permanently.
   Future<WardrobeDeleteResult> delete(int id) {
     return db.transaction(() async {
       if (await lockedQty(id) > 0) return WardrobeDeleteResult.blocked;

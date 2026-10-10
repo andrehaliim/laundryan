@@ -268,7 +268,6 @@ class SettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    // Tagline is "Laundryan - ..."; drop the name prefix since it's shown above.
     final tagline = l10n.tagline.split(' - ').last;
 
     return Padding(

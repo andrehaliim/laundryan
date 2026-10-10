@@ -35,10 +35,8 @@ Future<void> main() async {
           create: (_) => WardrobeProvider(WardrobeRepository(db)),
         ),
         ChangeNotifierProvider(
-          create: (_) => SessionProvider(
-            SessionRepository(db),
-            () => settings.locale, // <- tambah
-          ),
+          create: (_) =>
+              SessionProvider(SessionRepository(db), () => settings.locale),
         ),
       ],
       child: const MyApp(),

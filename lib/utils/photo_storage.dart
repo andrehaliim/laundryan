@@ -17,7 +17,7 @@ class PhotoStorage {
   static File? file(String? name) =>
       name == null ? null : File(p.join(_dir.path, name));
 
-  /// Ambil foto lalu simpan ke folder app. Return nama file, null kalau batal.
+  /// Takes a photo and saves it to the app folder. Returns the file name, or null if cancelled.
   static Future<String?> pick(ImageSource source) async {
     final x = await _picker.pickImage(
       source: source,

@@ -184,7 +184,6 @@ class _IllustrationState extends State<_Illustration>
   static const _size = 176.0;
   static const _core = 76.0;
   static const _chip = 40.0;
-  // Upper-right and lower-left, so the chips never cover the core card.
   static const _angles = [-0.7, 2.45];
 
   late final AnimationController _float = AnimationController(
@@ -195,7 +194,6 @@ class _IllustrationState extends State<_Illustration>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Respect the OS "reduce motion" setting for the idle floating loop.
     if (MediaQuery.disableAnimationsOf(context)) {
       _float.stop();
     } else if (!_float.isAnimating) {

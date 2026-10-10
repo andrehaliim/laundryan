@@ -202,7 +202,6 @@ class WardrobeScreen extends StatelessWidget {
     );
   }
 
-  //chip style
   Widget buildChip(
     BuildContext context,
     String label,

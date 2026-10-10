@@ -346,7 +346,6 @@ class ChecklistSummaryScreen extends StatelessWidget {
     final cardColor = Theme.of(context).cardTheme.color ?? scheme.surface;
     final cat = e.category;
 
-    // all returned → green, lost/swapped → pink.
     final (
       List<List<dynamic>> icon,
       String label,

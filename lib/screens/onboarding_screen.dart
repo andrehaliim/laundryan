@@ -47,7 +47,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Respect the OS "reduce motion" setting for the idle floating loop.
     if (MediaQuery.disableAnimationsOf(context)) {
       _float.stop();
     } else if (!_float.isAnimating) {
@@ -65,7 +64,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _finish() async {
     final navigator = Navigator.of(context);
     await context.read<SettingsProvider>().completeOnboarding();
-    // Clear the stack so replaying from settings doesn't stack a second home.
     navigator.pushAndRemoveUntil(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 200),
@@ -132,7 +130,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Soft tinted blobs per page, cross-faded with opacity only.
           for (var i = 0; i < pages.length; i++)
             Positioned.fill(
               child: IgnorePointer(
@@ -280,7 +277,6 @@ class _PageBody extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Parallax: the illustration trails the page swipe a bit.
               AnimatedBuilder(
                 animation: controller,
                 builder: (_, child) {
@@ -359,7 +355,6 @@ class _Hero extends StatelessWidget {
     final core = size * 0.42;
     final chip = size * 0.2;
 
-    // Orbit chips sit on fixed angles and bob gently out of phase.
     const angles = [-2.4, -0.5, 1.6];
 
     return SizedBox.square(

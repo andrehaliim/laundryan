@@ -27,7 +27,7 @@ class CategorySheet extends StatefulWidget {
 
 class _CategorySheetState extends State<CategorySheet> {
   final _nameCtrl = TextEditingController();
-  int _tab = 0; // 0 = list, 1 = form
+  int _tab = 0;
   Category? _editing;
   String _iconKey = categoryIcons.keys.first;
   String? _listError;
@@ -59,7 +59,6 @@ class _CategorySheetState extends State<CategorySheet> {
 
   void _selectTab(int i) {
     setState(() {
-      // pindah manual ke tab 2 = mulai kategori baru
       if (i == 1 && _tab == 0) _resetForm();
       _listError = null;
       _tab = i;
@@ -77,7 +76,6 @@ class _CategorySheetState extends State<CategorySheet> {
     if (editing == null) {
       await provider.add(text, _iconKey);
     } else {
-      // Kategori bawaan yang namanya tidak diubah tetap ikut bahasa (name = null)
       final unchanged =
           editing.defaultKey != null && text == categoryName(editing, l10n);
       await provider.update(

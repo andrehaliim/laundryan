@@ -30,7 +30,7 @@ class SessionProvider extends ChangeNotifier {
 
   Future<List<SessionItemView>> items(int sessionId) => _repo.items(sessionId);
 
-  /// Batalkan jadwal lama, lalu jadwalkan ulang kalau reminder aktif.
+  /// Cancels the old schedule, then reschedules if the reminder is enabled.
   Future<void> _syncReminder({
     required int id,
     required String title,

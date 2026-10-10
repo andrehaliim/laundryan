@@ -407,7 +407,6 @@ class HistoryCard extends StatelessWidget {
     final returned = (total - missing).clamp(0, total);
     final safe = missing == 0;
 
-    // all back → green, something still missing → pink.
     final (
       List<List<dynamic>> statusIcon,
       Color statusBg,

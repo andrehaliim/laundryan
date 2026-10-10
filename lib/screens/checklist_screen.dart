@@ -372,7 +372,6 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final lostQty = total - d.returned;
     final discrepancy = d.checked && lostQty > 0;
 
-    // pending → neutral, all returned → green, lost/swapped → pink.
     final (
       List<List<dynamic>> badgeIcon,
       String badgeLabel,
@@ -627,7 +626,6 @@ class _DetailSheet extends StatefulWidget {
 }
 
 class _DetailSheetState extends State<_DetailSheet> {
-  // Edits stay local until Confirm, so Cancel/close discards them.
   late int _returned = widget.draft.returned;
   late ItemStatus _lostStatus = widget.draft.lostStatus;
   late final TextEditingController _note = TextEditingController(

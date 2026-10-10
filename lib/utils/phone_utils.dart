@@ -1,6 +1,6 @@
 import 'package:url_launcher/url_launcher.dart';
 
-/// 08xx -> 628xx, buang spasi/strip/plus.
+/// 08xx -> 628xx, strips spaces, dashes and plus signs.
 String normalizePhone(String raw) {
   var d = raw.replaceAll(RegExp(r'[^0-9+]'), '');
   if (d.startsWith('+')) d = d.substring(1);

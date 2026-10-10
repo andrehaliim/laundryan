@@ -31,7 +31,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   late DateTime _ready;
   bool _reminder = true;
 
-  /// itemId -> qty yang dicuci (urutan sesuai pemilihan)
+  /// itemId -> qty to wash (in selection order)
   final Map<int, int> _selected = {};
 
   @override

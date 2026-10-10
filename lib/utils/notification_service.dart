@@ -23,15 +23,19 @@ class NotificationService {
     );
   }
 
-  /// true kalau izin diberikan.
+  /// true if permission is granted.
   static Future<bool> requestPermission() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android != null) {
       return await android.requestNotificationsPermission() ?? false;
     }
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (ios != null) {
       return await ios.requestPermissions(
             alert: true,
@@ -43,7 +47,7 @@ class NotificationService {
     return false;
   }
 
-  /// Lewati kalau waktunya sudah lewat atau izin ditolak.
+  /// Skipped if the time has already passed or permission is denied.
   static Future<void> schedule({
     required int id,
     required String title,
@@ -69,9 +73,7 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
-    } catch (_) {
-      // gagal jadwal: jangan ganggu proses simpan sesi
-    }
+    } catch (_) {}
   }
 
   static Future<void> cancel(int id) => _plugin.cancel(id: id);

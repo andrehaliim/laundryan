@@ -188,7 +188,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
         .fold(0, (sum, v) => sum + _lostQty(v.sessionItem));
     final pendingItems = list.where((v) => _unresolved(v.sessionItem)).length;
 
-    // all back → green, still open → pink, resolved → blue.
     final (
       List<List<dynamic>> statusIcon,
       String statusLabel,
@@ -543,7 +542,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       ),
     };
 
-    // catatan tambahan per status, ditampilkan di kotak info.
     final (List<List<dynamic>>, String, Color)? info = switch (si.status) {
       ItemStatus.hilang || ItemStatus.tertukar => (
         HugeIcons.strokeRoundedAlert02,
