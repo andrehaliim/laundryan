@@ -13,6 +13,8 @@ import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
+import 'package:laundryan/screens/wardrobe_item_screen.dart';
+import 'package:laundryan/widgets/empty_state.dart';
 import 'package:provider/provider.dart';
 
 class AddSessionScreen extends StatefulWidget {
@@ -159,7 +161,25 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   const SizedBox(height: 12),
                   Expanded(
                     child: items.isEmpty
-                        ? Center(child: Text(l10n.noWardrobeItems))
+                        ? EmptyState(
+                            icon: HugeIcons.strokeRoundedWardrobe01,
+                            orbit: const [
+                              HugeIcons.strokeRoundedTShirt,
+                              HugeIcons.strokeRoundedDress01,
+                            ],
+                            title: l10n.wardrobeEmpty,
+                            message: l10n.noWardrobeItems,
+                            actionLabel: l10n.addWardrobe,
+                            actionIcon: HugeIcons.strokeRoundedPlusSign,
+                            onAction: () {
+                              Navigator.pop(ctx);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const WardrobeItemScreen(),
+                                ),
+                              );
+                            },
+                          )
                         : GridView.builder(
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
@@ -678,14 +698,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     ),
                     SizedBox(height: 16),
                     if (_selected.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: Text(
-                            l10n.noItemsSelected,
-                            style: subtitleStyle,
-                          ),
-                        ),
+                      EmptyState(
+                        compact: true,
+                        framed: false,
+                        icon: HugeIcons.strokeRoundedShoppingBag01,
+                        title: l10n.noItemsSelected,
+                        message: l10n.noItemsSelectedHint,
                       )
                     else
                       for (final id in _selected.keys)

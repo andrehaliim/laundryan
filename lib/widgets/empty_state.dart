@@ -20,6 +20,9 @@ class EmptyState extends StatelessWidget {
   final VoidCallback? onAction;
   final bool compact;
 
+  /// Compact only: wrap in a [SoftCard]. Use false inside another card.
+  final bool framed;
+
   const EmptyState({
     super.key,
     required this.icon,
@@ -31,6 +34,7 @@ class EmptyState extends StatelessWidget {
     this.actionIcon,
     this.onAction,
     this.compact = false,
+    this.framed = true,
   });
 
   (Color, Color) _colors(ColorScheme s) => switch (tone) {
@@ -113,10 +117,11 @@ class EmptyState extends StatelessWidget {
     final scheme = theme.colorScheme;
     final (container, onContainer) = _colors(scheme);
 
-    return FadeSlideIn(
-      child: SoftCard(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+    final hasAction = actionLabel != null && onAction != null;
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
           children: [
             Container(
               width: 48,
@@ -158,7 +163,29 @@ class EmptyState extends StatelessWidget {
             ),
           ],
         ),
-      ),
+        if (hasAction) ...[
+          const SizedBox(height: 12),
+          SoftButton(
+            label: actionLabel!,
+            icon: actionIcon,
+            variant: SoftButtonVariant.secondary,
+            onPressed: onAction,
+          ),
+        ],
+      ],
+    );
+
+    return FadeSlideIn(
+      child: framed
+          ? SoftCard(padding: const EdgeInsets.all(16), child: content)
+          : Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: content,
+            ),
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
+import 'package:laundryan/widgets/empty_state.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showCategorySheet(BuildContext context) {
@@ -277,19 +278,30 @@ class _CategorySheetState extends State<CategorySheet> {
             ),
           ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Text(
-              l10n.organizedItems,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const Spacer(),
-            Text(
-              l10n.dragOrTapToEdit,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
+        if (categories.isEmpty)
+          EmptyState(
+            compact: true,
+            icon: HugeIcons.strokeRoundedTag01,
+            title: l10n.noCategories,
+            message: l10n.noCategoriesHint,
+            actionLabel: l10n.newCategory,
+            actionIcon: HugeIcons.strokeRoundedPlusSign,
+            onAction: () => _selectTab(1),
+          )
+        else
+          Row(
+            children: [
+              Text(
+                l10n.organizedItems,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const Spacer(),
+              Text(
+                l10n.dragOrTapToEdit,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         const SizedBox(height: 8),
         for (final c in categories)
           SoftCard(

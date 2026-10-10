@@ -89,7 +89,8 @@
   "reminderHint": "Notify 2 hours before it's ready",
   "sessionItems": "Items",
   "addItems": "Add items",
-  "noItemsSelected": "No items yet. Tap Add items.",
+  "noItemsSelected": "No items selected yet",
+  "noItemsSelectedHint": "Tap Wardrobe above to pick the clothes you are sending to the laundry.",
   "maxQty": "Max {count}",
   "@maxQty": {
     "placeholders": {
@@ -102,7 +103,9 @@
   "startSession": "Start session",
   "fieldRequired": "This field is required",
   "estimateBeforeDropOff": "Estimated time can't be before the drop-off date",
-  "noWardrobeItems": "Your wardrobe is empty. Add items first.",
+  "noWardrobeItems": "Add clothes to your wardrobe first, then come back to pick them for this session.",
+  "noCategories": "No categories yet",
+  "noCategoriesHint": "Create a category to group your clothes, like shirts or pants.",
   "sessionsEmpty": "No sessions yet",
   "sessionsEmptyHint": "Create a session each time you drop clothes at the laundry, then check them off when they come back.",
   "activeSessions": "Active sessions",
