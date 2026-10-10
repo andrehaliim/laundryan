@@ -8,13 +8,13 @@ import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
-import 'package:laundryan/widgets/soft.dart';
+import 'package:laundryan/screens/wardrobe_item_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
-import 'package:laundryan/screens/wardrobe_item_screen.dart';
 import 'package:laundryan/widgets/empty_state.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:provider/provider.dart';
 
 class AddSessionScreen extends StatefulWidget {
@@ -694,8 +694,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                         SoftButton(
                           label: l10n.wardrobe,
                           icon: HugeIcons.strokeRoundedPlusSign,
-                          variant: SoftButtonVariant.secondary,
+                          variant: SoftButtonVariant.primary,
                           onPressed: _openPicker,
+                          isSmall: true,
                         ),
                       ],
                     ),

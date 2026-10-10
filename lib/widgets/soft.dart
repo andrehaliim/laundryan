@@ -380,6 +380,7 @@ class SoftButton extends StatelessWidget {
   final List<List<dynamic>>? icon;
   final SoftButtonVariant variant;
   final bool expanded;
+  final bool isSmall;
 
   const SoftButton({
     super.key,
@@ -388,6 +389,7 @@ class SoftButton extends StatelessWidget {
     this.icon,
     this.variant = SoftButtonVariant.primary,
     this.expanded = false,
+    this.isSmall = false,
   });
 
   @override
@@ -406,13 +408,15 @@ class SoftButton extends StatelessWidget {
       foregroundColor: fg,
       disabledBackgroundColor: scheme.onSurface.withValues(alpha: 0.12),
       elevation: variant == SoftButtonVariant.ghost ? 0 : 1,
-      minimumSize: const Size(0, 48),
+      minimumSize: Size(0, isSmall ? 32 : 48),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
 
     final text = Text(
       label,
-      style: theme.textTheme.titleMedium?.copyWith(color: fg),
+      style: isSmall
+          ? theme.textTheme.titleSmall?.copyWith(color: fg)
+          : theme.textTheme.titleMedium?.copyWith(color: fg),
     );
 
     final button = icon == null
@@ -429,8 +433,6 @@ class SoftButton extends StatelessWidget {
             label: text,
           );
 
-    return expanded
-        ? SizedBox(width: double.infinity, child: button)
-        : button;
+    return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }
 }
