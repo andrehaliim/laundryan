@@ -17,12 +17,10 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  /// Background sampled from `assets/icon/icon.png` so the icon blends into
-  /// the screen.
-  static const _bg = Color(0xFFE1F3FA);
-  static const _charcoal = Color(0xFF1E252D);
-  static const _muted = Color(0xFF586574);
-  static const _sky = Color(0xFF87CEEB);
+  /// Light background sampled from `assets/icon/icon.png`; both match the
+  /// native splash colors in pubspec.yaml so the handoff is seamless.
+  static const _lightBg = Color(0xFFE1F3FA);
+  static const _darkBg = Color(0xFF12161A);
 
   late final AnimationController _main = AnimationController(
     vsync: this,
@@ -109,17 +107,22 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final text = theme.textTheme;
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final bg = isDark ? _darkBg : _lightBg;
     final tagline = l10n.tagline.split(' - ').last;
     final logoSize = math.min(MediaQuery.sizeOf(context).width * 0.62, 260.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: _bg,
-      ),
+      value: (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: bg,
+          ),
       child: Material(
-        color: _bg,
+        color: bg,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -144,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                       _entry(
                         _logoIn,
                         Image.asset(
-                          'assets/icon/icon.png',
+                          'assets/icon/icon_foreground.png',
                           width: logoSize,
                           height: logoSize,
                         ),
@@ -155,7 +158,7 @@ class _SplashScreenState extends State<SplashScreen>
                           l10n.appName,
                           textAlign: TextAlign.center,
                           style: text.displaySmall?.copyWith(
-                            color: _charcoal,
+                            color: scheme.onSurface,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.8,
                             height: 1.1,
@@ -171,7 +174,7 @@ class _SplashScreenState extends State<SplashScreen>
                             tagline,
                             textAlign: TextAlign.center,
                             style: text.bodyLarge?.copyWith(
-                              color: _muted,
+                              color: scheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                               height: 1.5,
                             ),
@@ -189,7 +192,7 @@ class _SplashScreenState extends State<SplashScreen>
                   level: _level,
                   wave: _wave,
                   clock: _main,
-                  color: _sky,
+                  color: scheme.primary,
                 ),
               ),
             ),
