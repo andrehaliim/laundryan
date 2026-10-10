@@ -83,7 +83,6 @@
     }
   },
   "addSession": "New session",
-  "sessionTitle": "Title",
   "placeName": "Laundry name",
   "placeAddress": "Address (optional)",
   "placePhone": "WhatsApp number (optional)",
@@ -137,13 +136,21 @@
   "cancelSessionMessage": "The session will be deleted permanently and all items become available again.",
   "keepSession": "Keep",
   "reminderTitle": "Laundry almost ready",
-  "reminderBody": "{title} at {place} should be ready in about 2 hours",
+  "reminderBody": "Your laundry at {place} should be ready in about 2 hours",
   "@reminderBody": {
     "placeholders": {
-      "title": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderBodyWithNote": "Your laundry at {place} ({note}) should be ready in about 2 hours",
+  "@reminderBodyWithNote": {
+    "placeholders": {
+      "place": {
         "type": "String"
       },
-      "place": {
+      "note": {
         "type": "String"
       }
     }
@@ -169,10 +176,10 @@
   },
   "chatWhatsapp": "Chat WhatsApp",
   "whatsappFailed": "Can not open WhatsApp",
-  "waMessage": "Hello, for my laundry \"{title}\", these items did not come back:\n{items}",
+  "waMessage": "Hello, for the laundry I dropped off on {date}, these items did not come back:\n{items}",
   "@waMessage": {
     "placeholders": {
-      "title": {
+      "date": {
         "type": "String"
       },
       "items": {
@@ -254,7 +261,10 @@
       }
     }
   },
-  "sessionTitleLabel": "Session title",
+  "sessionTitleLabel": "Note",
+  "optional": "(optional)",
+  "sessionNoteHint": "e.g. work clothes, bed sheets",
+  "addSessionNote": "Add a note",
   "laundromatInfo": "Laundromat Info",
   "laundromatInfoSubtitle": "Vendor & drop-off counter contact",
   "laundryServiceName": "Laundry Service Name",

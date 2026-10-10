@@ -494,20 +494,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Row(
-                children: [
-                  Text(l10n.sessionTitleLabel, style: titleStyle),
-                  SizedBox(width: 4),
-                  Text('*', style: TextStyle(color: scheme.error)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SoftTextField(
-                controller: _title,
-                textCapitalization: TextCapitalization.sentences,
-                validator: required,
-              ),
-              const SizedBox(height: 16),
               SoftCard(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -584,6 +570,22 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       keyboardType: TextInputType.phone,
                       prefixIcon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCall02,
+                        size: 20,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${l10n.sessionTitleLabel} ${l10n.optional}',
+                      style: subtitleStyle,
+                    ),
+                    const SizedBox(height: 8),
+                    SoftTextFieldOutline(
+                      controller: _title,
+                      hint: l10n.sessionNoteHint,
+                      textCapitalization: TextCapitalization.sentences,
+                      prefixIcon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedNote,
                         size: 20,
                         strokeWidth: 2,
                       ),

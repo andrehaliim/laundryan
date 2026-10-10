@@ -9,13 +9,13 @@ import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/history_detail_screen.dart';
 import 'package:laundryan/screens/history_list_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
-import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/session_phase.dart';
 import 'package:laundryan/utils/time_format.dart';
+import 'package:laundryan/widgets/empty_state.dart';
 import 'package:laundryan/widgets/pulse.dart';
 import 'package:laundryan/widgets/session_category_badges.dart';
 import 'package:laundryan/widgets/settings_button.dart';
-import 'package:laundryan/widgets/empty_state.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:provider/provider.dart';
 
 class SessionsScreen extends StatelessWidget {
@@ -56,8 +56,8 @@ class SessionsScreen extends StatelessWidget {
           if (sessions.active.isEmpty)
             EmptyState(
               compact: true,
-              tone: EmptyStateTone.tertiary,
-              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+              tone: EmptyStateTone.primary,
+              icon: HugeIcons.strokeRoundedWashingMachine,
               title: l10n.noActiveSessions,
               message: l10n.noActiveSessionsHint,
             ),
@@ -172,8 +172,13 @@ class SessionCard extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final s = entry.session;
     final textTheme = Theme.of(context).textTheme;
-    final subStyle = textTheme.bodySmall
-        ?.copyWith(color: scheme.onSurfaceVariant);
+    final subStyle = textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
+    final subtitle = [
+      if (s.title.isNotEmpty) s.title,
+      if (s.placeAddress != null && s.placeAddress!.isNotEmpty) s.placeAddress!,
+    ].join(' • ');
 
     return StreamBuilder<void>(
       stream: phaseTicker,
@@ -192,7 +197,7 @@ class SessionCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        s.title.isEmpty ? l10n.sessionTitle : s.title,
+                        s.placeName,
                         style: Theme.of(context).textTheme.titleMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -205,15 +210,15 @@ class SessionCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  (s.placeAddress == null || s.placeAddress!.isEmpty)
-                      ? s.placeName
-                      : '${s.placeName} (${s.placeAddress})',
-                  style: subStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: subStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 const SizedBox(height: 8),
                 SoftCardOutline(
                   padding: EdgeInsets.all(8),
@@ -281,8 +286,9 @@ class SessionCard extends StatelessWidget {
                   value: Text(
                     formatSmartDateTime(s.dropOffDate, locale, l10n),
                     textAlign: TextAlign.end,
-                    style: textTheme.bodyMedium
-                        ?.copyWith(color: scheme.onSurfaceVariant),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -295,21 +301,19 @@ class SessionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        formatSmartDateTime(
-                          s.estimatedReadyAt,
-                          locale,
-                          l10n,
-                        ),
+                        formatSmartDateTime(s.estimatedReadyAt, locale, l10n),
                         textAlign: TextAlign.end,
-                        style: textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (timeLeft != null)
                         Text(
                           timeLeft,
                           textAlign: TextAlign.end,
-                          style: textTheme.labelSmall
-                              ?.copyWith(color: scheme.error),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: scheme.error,
+                          ),
                         ),
                     ],
                   ),
@@ -323,9 +327,7 @@ class SessionCard extends StatelessWidget {
                   value: Text(
                     s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
                     style: textTheme.titleSmall?.copyWith(
-                      color: s.reminderEnabled
-                          ? scheme.tertiary
-                          : scheme.error,
+                      color: s.reminderEnabled ? scheme.tertiary : scheme.error,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -473,8 +475,8 @@ class HistoryCard extends StatelessWidget {
               .difference(DateUtils.dateOnly(s.dropOffDate))
               .inDays
               .clamp(0, 9999);
-    final place = [
-      s.placeName,
+    final subtitle = [
+      if (s.title.isNotEmpty) s.title,
       if (s.placeAddress != null && s.placeAddress!.isNotEmpty) s.placeAddress!,
     ].join(' • ');
 
@@ -509,7 +511,7 @@ class HistoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      s.title.isEmpty ? l10n.sessionTitle : s.title,
+                      s.placeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.titleMedium?.copyWith(
@@ -517,28 +519,17 @@ class HistoryCard extends StatelessWidget {
                         letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedLocation01,
-                          strokeWidth: 2,
-                          size: 13,
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            place,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ],
                 ),
               ),

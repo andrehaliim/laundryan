@@ -56,10 +56,13 @@ class SessionProvider extends ChangeNotifier {
     await NotificationService.cancel(id);
     if (!enabled) return;
     final l10n = lookupAppLocalizations(_locale());
+    final note = title.trim();
     await NotificationService.schedule(
       id: id,
       title: l10n.reminderTitle,
-      body: l10n.reminderBody(title, place),
+      body: note.isEmpty
+          ? l10n.reminderBody(place)
+          : l10n.reminderBodyWithNote(place, note),
       fireAt: readyAt.subtract(const Duration(hours: 2)),
     );
   }

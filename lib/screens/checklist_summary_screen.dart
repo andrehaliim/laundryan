@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
@@ -28,12 +29,14 @@ class SummaryLine {
 }
 
 class ChecklistSummaryScreen extends StatelessWidget {
-  final String title;
+  final String placeName;
+  final DateTime? dropOffAt;
   final String? phone;
   final List<SummaryLine> lines;
   const ChecklistSummaryScreen({
     super.key,
-    required this.title,
+    required this.placeName,
+    required this.dropOffAt,
     required this.phone,
     required this.lines,
   });
@@ -48,7 +51,12 @@ class ChecklistSummaryScreen extends StatelessWidget {
     final items = _lost
         .map((e) => '- ${e.name} x${e.lostQty} (${_label(e.status, l10n)})')
         .join('\n');
-    final ok = await openWhatsApp(phone!, l10n.waMessage(title, items));
+    final date = dropOffAt == null
+        ? ''
+        : DateFormat.yMMMMd(
+            Localizations.localeOf(context).toString(),
+          ).format(dropOffAt!);
+    final ok = await openWhatsApp(phone!, l10n.waMessage(date, items));
     if (!ok) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.whatsappFailed)));
     }
@@ -212,10 +220,10 @@ class ChecklistSummaryScreen extends StatelessWidget {
                           ? scheme.onPrimaryContainer
                           : scheme.onSecondaryContainer,
                     ),
-                    if (title.isNotEmpty)
+                    if (placeName.isNotEmpty)
                       _Pill(
-                        icon: HugeIcons.strokeRoundedPackage,
-                        label: title,
+                        icon: HugeIcons.strokeRoundedWashingMachine,
+                        label: placeName,
                         bg: scheme.surfaceContainerHigh,
                         fg: scheme.onSurfaceVariant,
                       ),

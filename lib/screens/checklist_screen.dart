@@ -136,8 +136,12 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     if (!mounted) return;
     navigator.pushReplacement(
       MaterialPageRoute(
-        builder: (_) =>
-            ChecklistSummaryScreen(title: _title, phone: _phone, lines: lines),
+        builder: (_) => ChecklistSummaryScreen(
+          placeName: _placeName,
+          dropOffAt: _dropOffAt,
+          phone: _phone,
+          lines: lines,
+        ),
       ),
     );
   }
@@ -268,7 +272,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     }
     final percent = total == 0 ? 0 : (checkedPieces * 100 / total).round();
     final subtitle = [
-      if (_placeName.isNotEmpty) _placeName,
+      if (_title.isNotEmpty) _title,
       if (_dropOffAt != null)
         with12hTime(DateFormat.MMMd(locale)).format(_dropOffAt!),
     ].join(' • ');
@@ -286,7 +290,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _title,
+                      _placeName,
                       style: textTheme.titleLarge,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

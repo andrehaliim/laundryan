@@ -172,6 +172,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     final dateTimeFmt = with12hTime(DateFormat.yMMMMEEEEd(locale));
     final dateTimeFmtShort = with12hTime(DateFormat.MMMd(locale));
     final hoursFromNow = _readyAt.difference(DateTime.now()).inHours;
+    final noteStyle = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: scheme.onSurfaceVariant);
 
     return Scaffold(
       appBar: AppBar(
@@ -197,6 +199,13 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    _session.placeName,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Expanded(
@@ -206,10 +215,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                                 autofocus: true,
                                 textCapitalization:
                                     TextCapitalization.sentences,
-                                style: Theme.of(context).textTheme.titleLarge,
-                                decoration: const InputDecoration(
+                                style: noteStyle,
+                                decoration: InputDecoration(
                                   isCollapsed: true,
                                   filled: false,
+                                  hintText: l10n.sessionNoteHint,
                                   contentPadding: EdgeInsets.zero,
                                   border: InputBorder.none,
                                   focusedBorder: InputBorder.none,
@@ -219,16 +229,21 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                                 ),
                                 onFieldSubmitted: (_) => _toggleEditTitle(),
                                 maxLines: 1,
-                                validator: (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                    ? l10n.nameRequired
-                                    : null,
                               )
-                            : Text(
-                                _title.text,
-                                style: Theme.of(context).textTheme.titleLarge,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                            : GestureDetector(
+                                onTap: _toggleEditTitle,
+                                child: Text(
+                                  _title.text.isEmpty
+                                      ? l10n.addSessionNote
+                                      : _title.text,
+                                  style: _title.text.isEmpty
+                                      ? noteStyle?.copyWith(
+                                          fontStyle: FontStyle.italic,
+                                        )
+                                      : noteStyle,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                       ),
                       const SizedBox(width: 8),
@@ -239,7 +254,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                               ? HugeIcons.strokeRoundedTick02
                               : HugeIcons.strokeRoundedEdit02,
                           strokeWidth: 2,
-                          size: 20,
+                          size: 18,
                           color: scheme.primary,
                         ),
                       ),

@@ -79,9 +79,10 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
           return '- ${v.item.name} x${_lostQty(v.sessionItem)} ($label)';
         })
         .join('\n');
-    final message = pending.isEmpty
-        ? ''
-        : l10n.waMessage(session.title, pending);
+    final date = DateFormat.yMMMMd(
+      Localizations.localeOf(context).toString(),
+    ).format(session.dropOffDate);
+    final message = pending.isEmpty ? '' : l10n.waMessage(date, pending);
     final ok = await openWhatsApp(session.placePhone!, message);
     if (!ok) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.whatsappFailed)));
@@ -209,8 +210,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     final range = end == null
         ? yearFmt.format(session.dropOffDate)
         : '${dateFmt.format(session.dropOffDate)} – ${yearFmt.format(end)}';
-    final place = [
-      session.placeName,
+    final subtitle = [
+      if (session.title.isNotEmpty) session.title,
       if (session.placeAddress != null && session.placeAddress!.isNotEmpty)
         session.placeAddress!,
     ].join(' • ');
@@ -248,7 +249,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      session.title,
+                      session.placeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.titleLarge?.copyWith(
@@ -256,15 +257,17 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         letterSpacing: -0.3,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      place,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
