@@ -12,6 +12,7 @@ import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
+import 'package:laundryan/widgets/skeleton.dart';
 import 'package:provider/provider.dart';
 
 class HistoryDetailScreen extends StatefulWidget {
@@ -111,7 +112,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
         return Scaffold(
           appBar: AppBar(title: Text(l10n.sessionDetail)),
           body: list == null
-              ? const Center(child: CircularProgressIndicator())
+              ? const SessionDetailSkeleton()
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [

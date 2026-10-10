@@ -11,8 +11,9 @@ import 'package:laundryan/screens/checklist_summary_screen.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/time_format.dart';
-import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
+import 'package:laundryan/widgets/item_thumb.dart';
+import 'package:laundryan/widgets/skeleton.dart';
 import 'package:provider/provider.dart';
 
 class _Draft {
@@ -144,7 +145,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.verifyReturnedTitle)),
       body: items == null
-          ? const Center(child: CircularProgressIndicator())
+          ? const SessionDetailSkeleton()
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
