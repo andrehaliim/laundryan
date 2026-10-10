@@ -15,14 +15,23 @@ class SessionCategoryBadges extends StatefulWidget {
 }
 
 class _SessionCategoryBadgesState extends State<SessionCategoryBadges> {
-  late final Future<Map<int, int>> _counts;
+  late Future<Map<int, int>> _counts;
 
   @override
   void initState() {
     super.initState();
-    _counts = context.read<SessionProvider>().items(widget.sessionId).then((
-      list,
-    ) {
+    _counts = _load();
+  }
+
+  @override
+  void didUpdateWidget(SessionCategoryBadges oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionId != widget.sessionId) _counts = _load();
+  }
+
+  Future<Map<int, int>> _load() {
+    final provider = context.read<SessionProvider>();
+    return provider.items(widget.sessionId).then((list) {
       final map = <int, int>{};
       for (final v in list) {
         map.update(

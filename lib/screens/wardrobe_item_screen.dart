@@ -31,6 +31,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
   String? _photo;
   late int _qty;
   bool _done = false;
+  bool _saving = false;
   late final int? _initialCategoryId;
 
   bool get _isEdit => widget.entry != null;
@@ -69,7 +70,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
   }
 
   Future<void> _onPop(bool didPop) async {
-    if (didPop) return;
+    if (didPop || _saving) return;
     final navigator = Navigator.of(context);
     if (_dirty && !await showDiscardChangesDialog(context)) return;
     navigator.pop();
@@ -191,36 +192,49 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
   }
 
   Future<void> _save(AppLocalizations l10n) async {
+    if (_saving) return;
+    final messenger = ScaffoldMessenger.of(context);
     final catId = _categoryId;
-    if (!_formKey.currentState!.validate() || catId == null) return;
+    if (!_formKey.currentState!.validate()) return;
+    if (catId == null) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.selectCategory)));
+      return;
+    }
 
     final provider = context.read<WardrobeProvider>();
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final name = _name.text.trim();
     final note = _note.text.trim().isEmpty ? null : _note.text.trim();
 
+    setState(() => _saving = true);
     var ok = true;
-    if (_isEdit) {
-      ok = await provider.update(
-        widget.entry!.item.id,
-        name: name,
-        categoryId: catId,
-        totalQty: _qty,
-        photoPath: _photo,
-        note: note,
-      );
-    } else {
-      await provider.add(
-        name: name,
-        categoryId: catId,
-        totalQty: _qty,
-        photoPath: _photo,
-        note: note,
-      );
+    try {
+      if (_isEdit) {
+        ok = await provider.update(
+          widget.entry!.item.id,
+          name: name,
+          categoryId: catId,
+          totalQty: _qty,
+          photoPath: _photo,
+          note: note,
+        );
+      } else {
+        await provider.add(
+          name: name,
+          categoryId: catId,
+          totalQty: _qty,
+          photoPath: _photo,
+          note: note,
+        );
+      }
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.saveFailed)));
+      return;
     }
 
     if (!ok) {
+      if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(SnackBar(content: Text(l10n.minQtyHint(_minQty))));
       return;
     }
@@ -232,6 +246,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
   }
 
   Future<void> _delete(AppLocalizations l10n) async {
+    if (_saving) return;
     final provider = context.read<WardrobeProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -264,6 +279,9 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final categories = context.watch<CategoryProvider>().categories;
+    if (!categories.any((c) => c.id == _categoryId)) {
+      _categoryId = categories.firstOrNull?.id;
+    }
     final file = PhotoStorage.file(_photo);
     final locked = widget.entry?.lockedQty ?? 0;
 
@@ -518,7 +536,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                     child: SoftButton(
                       label: l10n.save,
                       icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                      onPressed: () => _save(l10n),
+                      onPressed: _saving ? null : () => _save(l10n),
                     ),
                   ),
                 ],

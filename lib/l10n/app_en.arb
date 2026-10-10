@@ -70,6 +70,8 @@
   "clearSearch": "Clear search",
   "deleteItemTitle": "Delete item?",
   "deleteItemMessage": "This item will be removed from your wardrobe.",
+  "saveFailed": "Couldn't save. Please try again",
+  "selectCategory": "Please choose a category first",
   "itemInUse": "This item is still in an active session or has an unresolved missing report, so it can't be deleted yet",
   "minQtyHint": "Can't go below {count} (in use or lost)",
   "@minQtyHint": {

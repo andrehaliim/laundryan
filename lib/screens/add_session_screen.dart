@@ -33,6 +33,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   late DateTime _dropOff;
   late DateTime _ready;
   bool _reminder = true;
+  bool _saving = false;
 
   /// itemId -> qty to wash (in selection order)
   final Map<int, int> _selected = {};
@@ -59,7 +60,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       [_title, _place, _address, _phone].any((c) => c.text.trim().isNotEmpty);
 
   Future<void> _onPop(bool didPop) async {
-    if (didPop) return;
+    if (didPop || _saving) return;
     final navigator = Navigator.of(context);
     if (_dirty && !await showDiscardChangesDialog(context)) return;
     navigator.pop();
@@ -110,6 +111,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   }
 
   Future<void> _save(AppLocalizations l10n) async {
+    if (_saving) return;
     if (!_formKey.currentState!.validate() || _selected.isEmpty) return;
     if (_ready.isBefore(_dropOff)) {
       ScaffoldMessenger.of(context)
@@ -117,21 +119,30 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       return;
     }
     final provider = context.read<SessionProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     String? orNull(String s) => s.trim().isEmpty ? null : s.trim();
 
-    await provider.create(
-      title: _title.text.trim(),
-      placeName: _place.text.trim(),
-      placeAddress: orNull(_address.text),
-      placePhone: orNull(_phone.text),
-      dropOffDate: _dropOff,
-      estimatedReadyAt: _ready,
-      reminderEnabled: _reminder,
-      items: [
-        for (final e in _selected.entries) SessionItemInput(e.key, e.value),
-      ],
-    );
+    setState(() => _saving = true);
+    try {
+      await provider.create(
+        title: _title.text.trim(),
+        placeName: _place.text.trim(),
+        placeAddress: orNull(_address.text),
+        placePhone: orNull(_phone.text),
+        dropOffDate: _dropOff,
+        estimatedReadyAt: _ready,
+        reminderEnabled: _reminder,
+        items: [
+          for (final e in _selected.entries)
+            SessionItemInput(e.key, e.value),
+        ],
+      );
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.saveFailed)));
+      return;
+    }
     navigator.pop();
   }
 
@@ -726,7 +737,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               SoftButton(
                 label: l10n.startSession,
                 icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                onPressed: _selected.isEmpty ? null : () => _save(l10n),
+                onPressed: _selected.isEmpty || _saving
+                    ? null
+                    : () => _save(l10n),
               ),
             ],
           ),

@@ -63,6 +63,7 @@ class SessionsScreen extends StatelessWidget {
             ),
           for (final e in sessions.active)
             SessionCard(
+              key: ValueKey(e.session.id),
               entry: e,
               onViewDetails: () => Navigator.of(context).push(
                 MaterialPageRoute(

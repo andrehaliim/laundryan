@@ -63,6 +63,8 @@
   "clearSearch": "Hapus pencarian",
   "deleteItemTitle": "Hapus item?",
   "deleteItemMessage": "Item ini akan dihapus dari lemari.",
+  "saveFailed": "Gagal menyimpan. Silakan coba lagi",
+  "selectCategory": "Pilih kategori terlebih dahulu",
   "itemInUse": "Item ini masih ada di sesi aktif atau laporan hilangnya belum selesai, jadi belum bisa dihapus",
   "minQtyHint": "Tidak bisa kurang dari {count} (sedang dicuci atau hilang)",
   "addSession": "Sesi baru",

@@ -38,6 +38,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   late final Future<List<SessionItemView>> _items;
   late final SessionPhase _phase;
   late final String? _phone;
+  Future<void> _saveQueue = Future.value();
 
   @override
   void initState() {
@@ -65,27 +66,33 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   }
 
   Future<void> _pickReadyAt() async {
+    final l10n = AppLocalizations.of(context)!;
     final date = await showDatePicker(
       context: context,
       initialDate: _readyAt,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      firstDate: DateUtils.dateOnly(_dropOffAt),
+      lastDate: DateTime(2100),
     );
     if (date == null || !mounted) return;
     final time = await showTimePicker12h(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_readyAt),
     );
-    if (time == null) return;
-    setState(() {
-      _readyAt = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute,
+    if (time == null || !mounted) return;
+    final readyAt = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (readyAt.isBefore(_dropOffAt)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.estimateBeforeDropOff)),
       );
-    });
+      return;
+    }
+    setState(() => _readyAt = readyAt);
     await _save();
   }
 
@@ -102,13 +109,24 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     await _save();
   }
 
+  /// Saves run one after another so a fast reminder toggle can't leave a
+  /// stale notification scheduled; each run writes the latest values.
   Future<void> _save() {
-    return context.read<SessionProvider>().update(
-      widget.sessionId,
-      title: _savedTitle,
-      reminderEnabled: _reminder,
-      estimatedReadyAt: _readyAt,
-    );
+    final provider = context.read<SessionProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return _saveQueue = _saveQueue.then((_) async {
+      try {
+        await provider.update(
+          widget.sessionId,
+          title: _savedTitle,
+          reminderEnabled: _reminder,
+          estimatedReadyAt: _readyAt,
+        );
+      } catch (_) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.saveFailed)));
+      }
+    });
   }
 
   Future<void> _cancelSession(AppLocalizations l10n) async {

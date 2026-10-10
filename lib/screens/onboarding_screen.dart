@@ -39,6 +39,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen>
     with SingleTickerProviderStateMixin {
   final _controller = PageController();
+  bool _finishing = false;
   late final AnimationController _float = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 4),
@@ -63,8 +64,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Future<void> _finish() async {
+    if (_finishing) return;
+    _finishing = true;
     final navigator = Navigator.of(context);
     await context.read<SettingsProvider>().completeOnboarding();
+    if (navigator.canPop()) {
+      navigator.pop();
+      return;
+    }
     navigator.pushAndRemoveUntil(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 200),

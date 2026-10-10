@@ -86,6 +86,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final provider = context.read<SessionProvider>();
     final cats = context.read<CategoryProvider>().allCategories;
     final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     final confirm = await showConfirmDialog(
       context,
@@ -124,7 +125,15 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       );
     }
 
-    await provider.complete(widget.sessionId, results);
+    try {
+      await provider.complete(widget.sessionId, results);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.saveFailed)));
+      return;
+    }
+    if (!mounted) return;
     navigator.pushReplacement(
       MaterialPageRoute(
         builder: (_) =>
@@ -142,96 +151,99 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final items = _items;
     final pending = _drafts.values.where((d) => !d.checked).length;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.verifyReturnedTitle)),
-      body: items == null
-          ? const SessionDetailSkeleton()
-          : ListView(
-              padding: const EdgeInsets.all(16),
+    return PopScope(
+      canPop: !_saving,
+      child: Scaffold(
+        appBar: AppBar(title: Text(l10n.verifyReturnedTitle)),
+        body: items == null
+            ? const SessionDetailSkeleton()
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _progressCard(context, items),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.dropOffChecklist(items.length),
+                            style: textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          l10n.tapToInspect,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  for (final v in items) ...[
+                    _itemCard(
+                      context,
+                      v,
+                      cats.where((c) => c.id == v.item.categoryId).firstOrNull,
+                    ),
+                    if (v != items.last) const SizedBox(height: 8),
+                  ],
+                ],
+              ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color ?? scheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: scheme.shadow.withValues(alpha: 0.06),
+                blurRadius: 24,
+                offset: const Offset(0, -8),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            minimum: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _progressCard(context, items),
-                const SizedBox(height: 16),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.dropOffChecklist(items.length),
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+                          _allChecked
+                              ? l10n.verificationReady
+                              : l10n.verificationInProgress,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ),
-                      Text(
-                        l10n.tapToInspect,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                      if (pending > 0)
+                        Text(
+                          l10n.itemsNeedAction(pending).toUpperCase(),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: scheme.onSecondaryContainer,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.6,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                for (final v in items) ...[
-                  _itemCard(
-                    context,
-                    v,
-                    cats.where((c) => c.id == v.item.categoryId).firstOrNull,
-                  ),
-                  if (v != items.last) const SizedBox(height: 8),
-                ],
+                SoftButton(
+                  label: l10n.finishVerification,
+                  icon: HugeIcons.strokeRoundedTaskDone01,
+                  onPressed: _allChecked && !_saving ? _finish : null,
+                  expanded: true,
+                ),
               ],
             ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color ?? scheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: scheme.shadow.withValues(alpha: 0.06),
-              blurRadius: 24,
-              offset: const Offset(0, -8),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          minimum: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _allChecked
-                            ? l10n.verificationReady
-                            : l10n.verificationInProgress,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    if (pending > 0)
-                      Text(
-                        l10n.itemsNeedAction(pending).toUpperCase(),
-                        style: textTheme.labelSmall?.copyWith(
-                          color: scheme.onSecondaryContainer,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SoftButton(
-                label: l10n.finishVerification,
-                icon: HugeIcons.strokeRoundedTaskDone01,
-                onPressed: _allChecked && !_saving ? _finish : null,
-                expanded: true,
-              ),
-            ],
           ),
         ),
       ),

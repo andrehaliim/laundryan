@@ -90,7 +90,8 @@ class SessionRepository {
           'WHERE si.session_id = s.id), 0) AS total_items, '
           'COALESCE((SELECT SUM(si.quantity - COALESCE(si.returned_qty, 0)) '
           'FROM session_items si WHERE si.session_id = s.id '
-          "AND si.status IN ('hilang', 'tertukar')), 0) AS missing_qty "
+          'AND si.status IN '
+          "('hilang', 'tertukar', 'hilangPermanen')), 0) AS missing_qty "
           'FROM sessions s WHERE s.status = ? ORDER BY $order',
           variables: [Variable.withString(status.name)],
           readsFrom: {db.sessions, db.sessionItems},
