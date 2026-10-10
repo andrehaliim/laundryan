@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/fade_slide_in.dart';
+import 'package:laundryan/widgets/soft.dart';
 
 enum EmptyStateTone { primary, secondary, tertiary }
 
@@ -294,68 +295,6 @@ class _IllustrationState extends State<_Illustration>
           );
         },
       ),
-    );
-  }
-}
-
-/// Fade + translate-Y (16px → 0) over 420ms ease-out after [delay].
-class FadeSlideIn extends StatefulWidget {
-  final Duration delay;
-  final Widget child;
-
-  const FadeSlideIn({
-    super.key,
-    required this.child,
-    this.delay = Duration.zero,
-  });
-
-  @override
-  State<FadeSlideIn> createState() => _FadeSlideInState();
-}
-
-class _FadeSlideInState extends State<FadeSlideIn>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 420),
-  );
-  late final Animation<double> _curve = CurvedAnimation(
-    parent: _c,
-    curve: Curves.easeOut,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    _start();
-  }
-
-  Future<void> _start() async {
-    if (widget.delay > Duration.zero) {
-      await Future.delayed(widget.delay);
-      if (!mounted) return;
-    }
-    _c.forward();
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _curve,
-      builder: (_, child) => Opacity(
-        opacity: _curve.value,
-        child: Transform.translate(
-          offset: Offset(0, 16 * (1 - _curve.value)),
-          child: child,
-        ),
-      ),
-      child: widget.child,
     );
   }
 }

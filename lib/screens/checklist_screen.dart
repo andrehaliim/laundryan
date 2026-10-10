@@ -8,7 +8,7 @@ import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/checklist_summary_screen.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
@@ -84,7 +84,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final items = _items;
     if (items == null) return;
     final provider = context.read<SessionProvider>();
-    final cats = context.read<CategoryProvider>().categories;
+    final cats = context.read<CategoryProvider>().allCategories;
     final navigator = Navigator.of(context);
     final l10n = AppLocalizations.of(context)!;
     final confirm = await showConfirmDialog(
@@ -138,7 +138,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
-    final cats = context.watch<CategoryProvider>().categories;
+    final cats = context.watch<CategoryProvider>().allCategories;
     final items = _items;
     final pending = _drafts.values.where((d) => !d.checked).length;
 
@@ -664,7 +664,7 @@ class _DetailSheetState extends State<_DetailSheet> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final cats = context.watch<CategoryProvider>().categories;
+    final cats = context.watch<CategoryProvider>().allCategories;
     final v = widget.view;
     final total = v.sessionItem.quantity;
     final lostQty = total - _returned;

@@ -24,16 +24,34 @@ class CategoryRepository {
     );
   }
 
-  Future<bool> isUsed(int id) async {
+  Future<int> _countItems(int id, {required bool archived}) async {
     final count = db.wardrobeItems.id.count();
     final query = db.selectOnly(db.wardrobeItems)
       ..addColumns([count])
-      ..where(db.wardrobeItems.categoryId.equals(id));
-    final result = await query.map((r) => r.read(count)).getSingle();
-    return (result ?? 0) > 0;
+      ..where(db.wardrobeItems.categoryId.equals(id))
+      ..where(
+        archived
+            ? db.wardrobeItems.archivedAt.isNotNull()
+            : db.wardrobeItems.archivedAt.isNull(),
+      );
+    return await query.map((r) => r.read(count)).getSingle() ?? 0;
   }
 
-  Future<void> delete(int id) async {
-    await (db.delete(db.categories)..where((t) => t.id.equals(id))).go();
+  /// Returns false while active wardrobe items still use the category.
+  /// Categories used only by archived items are archived so session history
+  /// can still show them; unused ones are deleted.
+  Future<bool> delete(int id) {
+    return db.transaction(() async {
+      if (await _countItems(id, archived: false) > 0) return false;
+
+      if (await _countItems(id, archived: true) > 0) {
+        await (db.update(db.categories)..where((t) => t.id.equals(id))).write(
+          CategoriesCompanion(archivedAt: Value(DateTime.now())),
+        );
+      } else {
+        await (db.delete(db.categories)..where((t) => t.id.equals(id))).go();
+      }
+      return true;
+    });
   }
 }

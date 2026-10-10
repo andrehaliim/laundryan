@@ -8,7 +8,7 @@ import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/utils/time_format.dart';
@@ -142,7 +142,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         builder: (ctx, setSheet) {
           final l10n = AppLocalizations.of(ctx)!;
           final items = ctx.watch<WardrobeProvider>().allItems;
-          final cats = ctx.watch<CategoryProvider>().categories;
+          final cats = ctx.watch<CategoryProvider>().allCategories;
           return SizedBox(
             height: MediaQuery.of(ctx).size.height * 0.7,
             child: Padding(
@@ -435,7 +435,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final wardrobe = context.watch<WardrobeProvider>().allItems;
-    final cats = context.watch<CategoryProvider>().categories;
+    final cats = context.watch<CategoryProvider>().allCategories;
     final byId = {for (final e in wardrobe) e.item.id: e};
     final locale = Localizations.localeOf(context).toString();
     final dateFmt = DateFormat.yMMMd(locale);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +38,7 @@ class _SessionCategoryBadgesState extends State<SessionCategoryBadges> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cats = context.watch<CategoryProvider>().categories;
+    final cats = context.watch<CategoryProvider>().allCategories;
 
     return FutureBuilder<Map<int, int>>(
       future: _counts,

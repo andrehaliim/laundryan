@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/data/enums.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/widgets/item_thumb.dart';

@@ -9,7 +9,7 @@ import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/history_detail_screen.dart';
 import 'package:laundryan/screens/history_list_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/session_phase.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/pulse.dart';

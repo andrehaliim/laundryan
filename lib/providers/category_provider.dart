@@ -16,7 +16,13 @@ class CategoryProvider extends ChangeNotifier {
     });
   }
 
-  List<Category> get categories => _categories;
+  /// Active categories, for lists and pickers.
+  List<Category> get categories =>
+      _categories.where((c) => c.archivedAt == null).toList();
+
+  /// Includes archived categories, for looking up items in session history.
+  List<Category> get allCategories => _categories;
+
   Category? byId(int id) => _categories.where((c) => c.id == id).firstOrNull;
 
   Future<void> add(String name, String iconKey) => _repo.add(name, iconKey);
@@ -24,12 +30,8 @@ class CategoryProvider extends ChangeNotifier {
   Future<void> update(int id, {String? name, required String iconKey}) =>
       _repo.update(id, name: name, iconKey: iconKey);
 
-  /// Returns false if the category is still used by wardrobe items.
-  Future<bool> delete(Category c) async {
-    if (await _repo.isUsed(c.id)) return false;
-    await _repo.delete(c.id);
-    return true;
-  }
+  /// Returns false if the category is still used by active wardrobe items.
+  Future<bool> delete(Category c) => _repo.delete(c.id);
 
   @override
   void dispose() {

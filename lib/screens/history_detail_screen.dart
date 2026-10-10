@@ -7,7 +7,7 @@ import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
@@ -482,7 +482,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final cats = context.watch<CategoryProvider>().categories;
+    final cats = context.watch<CategoryProvider>().allCategories;
     final cat = cats.where((c) => c.id == v.item.categoryId).firstOrNull;
     final si = v.sessionItem;
     final lostQty = _lostQty(si);

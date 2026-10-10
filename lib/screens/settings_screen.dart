@@ -6,7 +6,7 @@ import 'package:laundryan/data/app_database.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/screens/onboarding_screen.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/widgets/category_sheet.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';

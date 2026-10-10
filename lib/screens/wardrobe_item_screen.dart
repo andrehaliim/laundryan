@@ -7,7 +7,7 @@ import 'package:laundryan/data/wardrobe_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/widgets/category_sheet.dart';

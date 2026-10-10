@@ -6,6 +6,7 @@ class Categories extends Table {
   TextColumn get name => text().nullable()();
   TextColumn get defaultKey => text().nullable()();
   TextColumn get iconKey => text()();
+  DateTimeColumn get archivedAt => dateTime().nullable()();
 }
 
 class WardrobeItems extends Table {

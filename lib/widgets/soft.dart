@@ -1,24 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-class TestScreen extends StatelessWidget {
-  const TestScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final height = MediaQuery.sizeOf(context).height;
-
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SoftCard(height: height / 3, child: const SizedBox()),
-        ),
-      ),
-    );
-  }
-}
-
 class SoftCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;

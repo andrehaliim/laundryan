@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:laundryan/screens/test_screen.dart';
+import 'package:laundryan/widgets/soft.dart';
 
 /// Sweeps a soft highlight across its [child]'s painted shapes.
 /// Stays static when the OS asks to reduce motion.
