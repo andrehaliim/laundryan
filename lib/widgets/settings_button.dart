@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/screens/settings_screen.dart';
 
 class SettingsButton extends StatelessWidget {
@@ -8,6 +9,7 @@ class SettingsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: AppLocalizations.of(context)!.settings,
       icon: const HugeIcon(
         icon: HugeIcons.strokeRoundedSettings01,
         strokeWidth: 2,

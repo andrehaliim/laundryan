@@ -305,6 +305,7 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
           actions: [
             if (_isEdit)
               IconButton(
+                tooltip: l10n.delete,
                 icon: const HugeIcon(
                   icon: HugeIcons.strokeRoundedDelete01,
                   strokeWidth: 2,

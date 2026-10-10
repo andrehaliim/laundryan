@@ -454,8 +454,9 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           ),
           Text(
             subtitle,
-            style: textTheme.labelSmall?.copyWith(
-              fontSize: 10,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),

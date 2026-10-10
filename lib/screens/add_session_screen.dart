@@ -372,6 +372,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             child: Row(
               children: [
                 IconButton(
+                  tooltip: l10n.decreaseQty,
                   visualDensity: VisualDensity.compact,
                   icon: const HugeIcon(
                     icon: HugeIcons.strokeRoundedMinusSign,
@@ -383,6 +384,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 ),
                 Text('$qty', style: Theme.of(context).textTheme.titleMedium),
                 IconButton(
+                  tooltip: l10n.increaseQty,
                   visualDensity: VisualDensity.compact,
                   icon: const HugeIcon(
                     icon: HugeIcons.strokeRoundedPlusSign,
@@ -396,6 +398,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             ),
           ),
           IconButton(
+            tooltip: l10n.removeItem,
             visualDensity: VisualDensity.compact,
             icon: const HugeIcon(
               icon: HugeIcons.strokeRoundedDelete01,
