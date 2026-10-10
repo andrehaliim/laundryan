@@ -15,6 +15,7 @@ import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/pulse.dart';
 import 'package:laundryan/widgets/session_category_badges.dart';
 import 'package:laundryan/widgets/settings_button.dart';
+import 'package:laundryan/widgets/empty_state.dart';
 import 'package:provider/provider.dart';
 
 class SessionsScreen extends StatelessWidget {
@@ -29,11 +30,18 @@ class SessionsScreen extends StatelessWidget {
 
     Widget body;
     if (sessions.active.isEmpty && sessions.history.isEmpty) {
-      body = Center(
-        child: Text(
-          l10n.sessionsEmpty,
-          style: TextStyle(color: scheme.onSurfaceVariant),
-        ),
+      body = EmptyState(
+        icon: HugeIcons.strokeRoundedWashingMachine,
+        orbit: const [
+          HugeIcons.strokeRoundedTShirt,
+          HugeIcons.strokeRoundedClock01,
+        ],
+        title: l10n.sessionsEmpty,
+        message: l10n.sessionsEmptyHint,
+        actionLabel: l10n.addSession,
+        actionIcon: HugeIcons.strokeRoundedPlusSign,
+        onAction: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const AddSessionScreen())),
       );
     } else {
       body = ListView(
@@ -42,9 +50,12 @@ class SessionsScreen extends StatelessWidget {
           Text(l10n.activeSessions, style: titleStyle),
           const SizedBox(height: 8),
           if (sessions.active.isEmpty)
-            Text(
-              l10n.noActiveSessions,
-              style: TextStyle(color: scheme.onSurfaceVariant),
+            EmptyState(
+              compact: true,
+              tone: EmptyStateTone.tertiary,
+              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+              title: l10n.noActiveSessions,
+              message: l10n.noActiveSessionsHint,
             ),
           for (final e in sessions.active)
             SessionCard(
@@ -79,9 +90,12 @@ class SessionsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           if (sessions.history.isEmpty)
-            Text(
-              l10n.noHistory,
-              style: TextStyle(color: scheme.onSurfaceVariant),
+            EmptyState(
+              compact: true,
+              tone: EmptyStateTone.secondary,
+              icon: HugeIcons.strokeRoundedArchive02,
+              title: l10n.noHistory,
+              message: l10n.noHistoryHint,
             ),
           for (final e in sessions.history.take(3))
             HistoryCard(

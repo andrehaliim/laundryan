@@ -10,6 +10,7 @@ import 'package:laundryan/screens/wardrobe_item_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/widgets/settings_button.dart';
+import 'package:laundryan/widgets/empty_state.dart';
 import 'package:provider/provider.dart';
 
 class WardrobeScreen extends StatelessWidget {
@@ -26,7 +27,6 @@ class WardrobeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final wardrobe = context.watch<WardrobeProvider>();
     final categories = context.watch<CategoryProvider>().categories;
-    final scheme = Theme.of(context).colorScheme;
     final items = wardrobe.items;
     final selectedId = categories.any((c) => c.id == wardrobe.categoryId)
         ? wardrobe.categoryId
@@ -39,30 +39,29 @@ class WardrobeScreen extends StatelessWidget {
 
     Widget body;
     if (wardrobe.isEmpty) {
-      body = Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedShirt01,
-              size: 72,
-              color: scheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.wardrobeEmpty,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.wardrobeEmptyHint,
-              style: TextStyle(color: scheme.onSurfaceVariant),
-            ),
-          ],
-        ),
+      body = EmptyState(
+        icon: HugeIcons.strokeRoundedWardrobe01,
+        orbit: const [
+          HugeIcons.strokeRoundedTShirt,
+          HugeIcons.strokeRoundedDress01,
+        ],
+        title: l10n.wardrobeEmpty,
+        message: l10n.wardrobeEmptyHint,
+        actionLabel: l10n.addWardrobe,
+        actionIcon: HugeIcons.strokeRoundedPlusSign,
+        onAction: () => _open(context),
       );
     } else if (items.isEmpty) {
-      body = Center(child: Text(l10n.noResults));
+      body = EmptyState(
+        tone: EmptyStateTone.secondary,
+        icon: HugeIcons.strokeRoundedSearchRemove,
+        orbit: const [
+          HugeIcons.strokeRoundedTShirt,
+          HugeIcons.strokeRoundedTag01,
+        ],
+        title: l10n.noResults,
+        message: l10n.noResultsHint,
+      );
     } else {
       body = GridView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
