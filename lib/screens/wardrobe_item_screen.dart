@@ -186,13 +186,15 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
     );
     if (confirm != true) return;
 
-    final deleted = await provider.delete(widget.entry!.item.id);
-    if (!deleted) {
+    final result = await provider.delete(widget.entry!.item.id);
+    if (result == WardrobeDeleteResult.blocked) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.itemInUse)));
       return;
     }
     _done = true;
-    await PhotoStorage.delete(_originalPhoto);
+    if (result == WardrobeDeleteResult.deleted) {
+      await PhotoStorage.delete(_originalPhoto);
+    }
     if (_photo != _originalPhoto) await PhotoStorage.delete(_photo);
     navigator.pop();
   }

@@ -60,7 +60,7 @@
   "removePhoto": "Hapus foto",
   "deleteItemTitle": "Hapus item?",
   "deleteItemMessage": "Item ini akan dihapus dari lemari.",
-  "itemInUse": "Item ini terhubung ke sesi, jadi tidak bisa dihapus",
+  "itemInUse": "Item ini masih ada di sesi aktif atau laporan hilangnya belum selesai, jadi belum bisa dihapus",
   "minQtyHint": "Tidak bisa kurang dari {count} (sedang dicuci atau hilang)",
   "addSession": "Sesi baru",
   "sessionTitle": "Judul",

@@ -67,7 +67,7 @@
   "removePhoto": "Remove photo",
   "deleteItemTitle": "Delete item?",
   "deleteItemMessage": "This item will be removed from your wardrobe.",
-  "itemInUse": "This item is used in a session, so it can't be deleted",
+  "itemInUse": "This item is still in an active session or has an unresolved missing report, so it can't be deleted yet",
   "minQtyHint": "Can't go below {count} (in use or lost)",
   "@minQtyHint": {
     "placeholders": {

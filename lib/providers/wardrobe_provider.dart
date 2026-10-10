@@ -82,7 +82,7 @@ class WardrobeProvider extends ChangeNotifier {
     note: note,
   );
 
-  Future<bool> delete(int id) => _repo.delete(id);
+  Future<WardrobeDeleteResult> delete(int id) => _repo.delete(id);
 
   void setCategory(int? id) {
     _categoryId = id;

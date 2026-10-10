@@ -18,6 +18,7 @@ class WardrobeItems extends Table {
   IntColumn get totalQty => integer()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get archivedAt => dateTime().nullable()();
 }
 
 class Sessions extends Table {

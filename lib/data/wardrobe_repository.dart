@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart' show Value, Variable, BaseAggregate;
-import 'package:laundryan/data/enums.dart';
 
 import 'app_database.dart';
 
@@ -12,6 +11,8 @@ class WardrobeEntry {
   int get lockedQty => inWashQty + missingQty;
   int get availableQty => item.totalQty - lockedQty;
 }
+
+enum WardrobeDeleteResult { deleted, archived, blocked }
 
 class WardrobeRepository {
   final AppDatabase db;
@@ -41,7 +42,8 @@ COALESCE((
     return db
         .customSelect(
           'SELECT w.*, $_inWash AS in_wash_qty, $_missing AS missing_qty '
-          'FROM wardrobe_items w ORDER BY w.name COLLATE NOCASE',
+          'FROM wardrobe_items w WHERE w.archived_at IS NULL '
+          'ORDER BY w.name COLLATE NOCASE',
           readsFrom: {db.wardrobeItems, db.sessionItems, db.sessions},
         )
         .watch()
@@ -113,26 +115,27 @@ COALESCE((
     return true;
   }
 
-  /// false kalau item masih punya riwayat selain hilang permanen
-  /// (sesi aktif, hilang/tertukar belum selesai, kembali, ditemukan).
-  Future<bool> delete(int id) {
+  /// Ditolak selama item masih di sesi aktif atau hilang/tertukar belum
+  /// selesai. Item yang pernah dipakai di sesi diarsipkan supaya riwayat
+  /// tetap utuh; yang belum pernah dipakai dihapus permanen.
+  Future<WardrobeDeleteResult> delete(int id) {
     return db.transaction(() async {
+      if (await lockedQty(id) > 0) return WardrobeDeleteResult.blocked;
+
       final count = db.sessionItems.id.count();
       final query = db.selectOnly(db.sessionItems)
         ..addColumns([count])
-        ..where(db.sessionItems.itemId.equals(id))
-        ..where(
-          db.sessionItems.status.isNotIn([ItemStatus.hilangPermanen.name]),
-        );
-      final blocking = await query.map((r) => r.read(count)).getSingle();
-      if ((blocking ?? 0) > 0) return false;
+        ..where(db.sessionItems.itemId.equals(id));
+      final used = await query.map((r) => r.read(count)).getSingle();
 
-      // buang jejak hilang permanen biar FK restrict nggak menolak
-      await (db.delete(
-        db.sessionItems,
-      )..where((t) => t.itemId.equals(id))).go();
+      if ((used ?? 0) > 0) {
+        await (db.update(db.wardrobeItems)..where((t) => t.id.equals(id)))
+            .write(WardrobeItemsCompanion(archivedAt: Value(DateTime.now())));
+        return WardrobeDeleteResult.archived;
+      }
+
       await (db.delete(db.wardrobeItems)..where((t) => t.id.equals(id))).go();
-      return true;
+      return WardrobeDeleteResult.deleted;
     });
   }
 
