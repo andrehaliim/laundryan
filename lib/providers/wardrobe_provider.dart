@@ -9,6 +9,7 @@ class WardrobeProvider extends ChangeNotifier {
   final WardrobeRepository _repo;
   StreamSubscription<List<WardrobeEntry>>? _sub;
   List<WardrobeEntry> _all = [];
+  List<WardrobeEntry>? _filtered;
   bool _loaded = false;
   String _query = '';
   String get query => _query;
@@ -19,6 +20,7 @@ class WardrobeProvider extends ChangeNotifier {
   WardrobeProvider(this._repo) {
     _sub = _repo.watchAll().listen((data) {
       _all = data;
+      _filtered = null;
       _loaded = true;
       if (data.isEmpty) {
         _query = '';
@@ -31,7 +33,11 @@ class WardrobeProvider extends ChangeNotifier {
   bool get isLoaded => _loaded;
   bool get isEmpty => _all.isEmpty;
 
-  List<WardrobeEntry> get items {
+  /// Filtered and sorted list, cached until the data or a filter changes.
+  /// The repository already returns items A-Z.
+  List<WardrobeEntry> get items => _filtered ??= _filter();
+
+  List<WardrobeEntry> _filter() {
     final q = _query.trim().toLowerCase();
     final list = _all.where((e) {
       final matchCategory =
@@ -40,23 +46,15 @@ class WardrobeProvider extends ChangeNotifier {
       return matchCategory && matchName;
     }).toList();
 
-    switch (_sort) {
-      case WardrobeSort.alphabetDesc:
-        list.sort(
-          (a, b) =>
-              b.item.name.toLowerCase().compareTo(a.item.name.toLowerCase()),
-        );
-      case WardrobeSort.alphabetAsc:
-        list.sort(
-          (a, b) =>
-              a.item.name.toLowerCase().compareTo(b.item.name.toLowerCase()),
-        );
-    }
-    return list;
+    return switch (_sort) {
+      WardrobeSort.alphabetAsc => list,
+      WardrobeSort.alphabetDesc => list.reversed.toList(),
+    };
   }
 
   void setQuery(String q) {
     _query = q;
+    _filtered = null;
     notifyListeners();
   }
 
@@ -94,6 +92,7 @@ class WardrobeProvider extends ChangeNotifier {
 
   void setCategory(int? id) {
     _categoryId = id;
+    _filtered = null;
     notifyListeners();
   }
 
@@ -102,6 +101,7 @@ class WardrobeProvider extends ChangeNotifier {
 
   void setSort(WardrobeSort s) {
     _sort = s;
+    _filtered = null;
     notifyListeners();
   }
 

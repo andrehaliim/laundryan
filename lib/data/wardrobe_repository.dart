@@ -98,19 +98,22 @@ COALESCE((
     required int totalQty,
     String? photoPath,
     String? note,
-  }) async {
-    if (totalQty < await lockedQty(id)) return false;
-    await (db.update(db.wardrobeItems)..where((t) => t.id.equals(id))).write(
-      WardrobeItemsCompanion(
-        name: Value(name),
-        categoryId: Value(categoryId),
-        totalQty: Value(totalQty),
-        photoPath: Value(photoPath),
-        note: Value(note),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
-    return true;
+  }) {
+    return db.transaction(() async {
+      if (totalQty < await lockedQty(id)) return false;
+      await (db.update(db.wardrobeItems)..where((t) => t.id.equals(id)))
+          .write(
+            WardrobeItemsCompanion(
+              name: Value(name),
+              categoryId: Value(categoryId),
+              totalQty: Value(totalQty),
+              photoPath: Value(photoPath),
+              note: Value(note),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+      return true;
+    });
   }
 
   /// Rejected while the item is still in an active session or has an unresolved
@@ -135,13 +138,5 @@ COALESCE((
       await (db.delete(db.wardrobeItems)..where((t) => t.id.equals(id))).go();
       return WardrobeDeleteResult.deleted;
     });
-  }
-
-  Future<int> countByCategory(int categoryId) async {
-    final count = db.wardrobeItems.id.count();
-    final query = db.selectOnly(db.wardrobeItems)
-      ..addColumns([count])
-      ..where(db.wardrobeItems.categoryId.equals(categoryId));
-    return await query.map((r) => r.read(count)).getSingle() ?? 0;
   }
 }

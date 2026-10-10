@@ -63,6 +63,7 @@
   "clearSearch": "Hapus pencarian",
   "deleteItemTitle": "Hapus item?",
   "deleteItemMessage": "Item ini akan dihapus dari lemari.",
+  "photoFailed": "Gagal mengambil foto. Periksa akses kamera atau galeri",
   "saveFailed": "Gagal menyimpan. Silakan coba lagi",
   "selectCategory": "Pilih kategori terlebih dahulu",
   "itemInUse": "Item ini masih ada di sesi aktif atau laporan hilangnya belum selesai, jadi belum bisa dihapus",

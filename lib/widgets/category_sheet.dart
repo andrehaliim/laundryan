@@ -34,6 +34,7 @@ class _CategorySheetState extends State<CategorySheet> {
   String _iconKey = categoryIcons.keys.first;
   String? _listError;
   String? _formError;
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -68,6 +69,7 @@ class _CategorySheetState extends State<CategorySheet> {
   }
 
   Future<void> _save(AppLocalizations l10n) async {
+    if (_saving) return;
     final text = _nameCtrl.text.trim();
     if (text.isEmpty) {
       setState(() => _formError = l10n.nameRequired);
@@ -75,19 +77,31 @@ class _CategorySheetState extends State<CategorySheet> {
     }
     final provider = context.read<CategoryProvider>();
     final editing = _editing;
-    if (editing == null) {
-      await provider.add(text, _iconKey);
-    } else {
-      final unchanged =
-          editing.defaultKey != null && text == categoryName(editing, l10n);
-      await provider.update(
-        editing.id,
-        name: unchanged ? editing.name : text,
-        iconKey: _iconKey,
-      );
+    setState(() => _saving = true);
+    try {
+      if (editing == null) {
+        await provider.add(text, _iconKey);
+      } else {
+        final unchanged =
+            editing.defaultKey != null && text == categoryName(editing, l10n);
+        await provider.update(
+          editing.id,
+          name: unchanged ? editing.name : text,
+          iconKey: _iconKey,
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _formError = l10n.saveFailed;
+        });
+      }
+      return;
     }
     if (!mounted) return;
     setState(() {
+      _saving = false;
       _resetForm();
       _tab = 0;
     });
@@ -108,7 +122,13 @@ class _CategorySheetState extends State<CategorySheet> {
       tone: ConfirmTone.danger,
     );
     if (!confirm) return;
-    final ok = await provider.delete(c);
+    final bool ok;
+    try {
+      ok = await provider.delete(c);
+    } catch (_) {
+      if (mounted) setState(() => _listError = l10n.saveFailed);
+      return;
+    }
     if (mounted) setState(() => _listError = ok ? null : l10n.categoryInUse);
   }
 
@@ -449,7 +469,7 @@ class _CategorySheetState extends State<CategorySheet> {
         SoftButton(
           label: l10n.save,
           icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-          onPressed: () => _save(l10n),
+          onPressed: _saving ? null : () => _save(l10n),
           expanded: true,
         ),
         const SizedBox(height: 8),

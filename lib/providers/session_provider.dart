@@ -11,6 +11,8 @@ class SessionProvider extends ChangeNotifier {
   final Locale Function() _locale;
   StreamSubscription<List<SessionEntry>>? _activeSub;
   StreamSubscription<List<SessionEntry>>? _historySub;
+  StreamSubscription<Map<int, Map<int, int>>>? _countsSub;
+  Map<int, Map<int, int>> _categoryCounts = {};
   List<SessionEntry> _active = [];
   List<SessionEntry> _history = [];
   bool _activeLoaded = false;
@@ -27,11 +29,19 @@ class SessionProvider extends ChangeNotifier {
       _historyLoaded = true;
       notifyListeners();
     });
+    _countsSub = _repo.watchActiveCategoryCounts().listen((d) {
+      _categoryCounts = d;
+      notifyListeners();
+    });
   }
 
   List<SessionEntry> get active => _active;
   List<SessionEntry> get history => _history;
   bool get isLoaded => _activeLoaded && _historyLoaded;
+
+  /// categoryId -> qty for an active session.
+  Map<int, int> categoryCounts(int sessionId) =>
+      _categoryCounts[sessionId] ?? const {};
 
   Future<List<SessionItemView>> items(int sessionId) => _repo.items(sessionId);
 
@@ -129,6 +139,7 @@ class SessionProvider extends ChangeNotifier {
   void dispose() {
     _activeSub?.cancel();
     _historySub?.cancel();
+    _countsSub?.cancel();
     super.dispose();
   }
 }

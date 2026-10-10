@@ -219,7 +219,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                     padding: const EdgeInsets.only(right: 8),
                     child: buildChip(
                       context,
-                      '${l10n.all} (${items.length})',
+                      '${l10n.all} (${wardrobe.allItems.length})',
                       selectedId == null,
                       (_) => wardrobe.setCategory(null),
                     ),

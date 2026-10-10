@@ -110,6 +110,33 @@ class SessionRepository {
         );
   }
 
+  /// sessionId -> (categoryId -> qty) for every active session.
+  Stream<Map<int, Map<int, int>>> watchActiveCategoryCounts() {
+    return db
+        .customSelect(
+          'SELECT si.session_id, w.category_id, SUM(si.quantity) AS qty '
+          'FROM session_items si '
+          'JOIN sessions s ON s.id = si.session_id '
+          'JOIN wardrobe_items w ON w.id = si.item_id '
+          "WHERE s.status = 'active' "
+          'GROUP BY si.session_id, w.category_id '
+          'ORDER BY MIN(si.id)',
+          readsFrom: {db.sessions, db.sessionItems, db.wardrobeItems},
+        )
+        .watch()
+        .map((rows) {
+          final result = <int, Map<int, int>>{};
+          for (final r in rows) {
+            final counts = result.putIfAbsent(
+              r.read<int>('session_id'),
+              () => {},
+            );
+            counts[r.read<int>('category_id')] = r.read<int>('qty');
+          }
+          return result;
+        });
+  }
+
   Stream<List<SessionEntry>> watchActive() =>
       _watch(SessionStatus.active, 's.created_at DESC');
 

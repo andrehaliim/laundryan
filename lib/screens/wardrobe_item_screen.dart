@@ -77,12 +77,22 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
   }
 
   Future<void> _pick(ImageSource source) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final String? name;
     try {
-      final name = await PhotoStorage.pick(source);
-      if (name == null || !mounted) return;
-      if (_photo != _originalPhoto) await PhotoStorage.delete(_photo);
-      setState(() => _photo = name);
-    } catch (_) {}
+      name = await PhotoStorage.pick(source);
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.photoFailed)));
+      return;
+    }
+    if (name == null) return;
+    if (!mounted || _done) {
+      await PhotoStorage.delete(name);
+      return;
+    }
+    if (_photo != _originalPhoto) await PhotoStorage.delete(_photo);
+    setState(() => _photo = name);
   }
 
   Future<void> _removePhoto() async {

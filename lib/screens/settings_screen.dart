@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 
 typedef _Option<T> = ({T value, String label, List<List<dynamic>> icon});
 
+final _packageInfo = PackageInfo.fromPlatform();
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -184,7 +186,7 @@ class SettingsScreen extends StatelessWidget {
     return Column(
       children: [
         FutureBuilder<PackageInfo>(
-          future: PackageInfo.fromPlatform(),
+          future: _packageInfo,
           builder: (context, snapshot) {
             final info = snapshot.data;
             return Text(

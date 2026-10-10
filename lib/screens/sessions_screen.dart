@@ -175,8 +175,8 @@ class SessionCard extends StatelessWidget {
     final subStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
 
-    return StreamBuilder<int>(
-      stream: Stream.periodic(const Duration(seconds: 30), (i) => i),
+    return StreamBuilder<void>(
+      stream: phaseTicker,
       builder: (_, _) {
         final phase = s.phase;
         return Card(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +30,7 @@ class SessionDetailScreen extends StatefulWidget {
 
 class _SessionDetailScreenState extends State<SessionDetailScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _title;
+  final _title = TextEditingController();
   late String _savedTitle;
   bool _editingTitle = false;
   late bool _reminder;
@@ -36,24 +38,35 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   late DateTime _dropOffAt;
   late DateTime? _completedAt;
   late final Future<List<SessionItemView>> _items;
-  late final SessionPhase _phase;
+  late Session _session;
   late final String? _phone;
+  StreamSubscription<void>? _tick;
+  bool _gone = false;
   Future<void> _saveQueue = Future.value();
 
   @override
   void initState() {
     super.initState();
     final provider = context.read<SessionProvider>();
-    final s = provider.active
-        .firstWhere((e) => e.session.id == widget.sessionId)
-        .session;
-    _title = TextEditingController(text: s.title);
+    final entry = provider.active
+        .where((e) => e.session.id == widget.sessionId)
+        .firstOrNull;
+    if (entry == null) {
+      _gone = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).maybePop();
+      });
+      return;
+    }
+    final s = entry.session;
+    _session = s;
+    _title.text = s.title;
     _savedTitle = s.title;
     _reminder = s.reminderEnabled;
     _readyAt = s.estimatedReadyAt;
     _dropOffAt = s.dropOffDate;
     _completedAt = s.completedAt;
-    _phase = s.phase;
+    _tick = phaseTicker.listen((_) => setState(() {}));
     final phone = s.placePhone?.trim();
     _phone = (phone == null || phone.isEmpty) ? null : phone;
     _items = provider.items(widget.sessionId);
@@ -61,9 +74,13 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 
   @override
   void dispose() {
+    _tick?.cancel();
     _title.dispose();
     super.dispose();
   }
+
+  SessionPhase get _phase =>
+      _session.copyWith(estimatedReadyAt: _readyAt).phase;
 
   Future<void> _pickReadyAt() async {
     final l10n = AppLocalizations.of(context)!;
@@ -148,6 +165,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_gone) return const Scaffold();
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();

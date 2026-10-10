@@ -70,6 +70,7 @@
   "clearSearch": "Clear search",
   "deleteItemTitle": "Delete item?",
   "deleteItemMessage": "This item will be removed from your wardrobe.",
+  "photoFailed": "Couldn't get the photo. Check camera or gallery access",
   "saveFailed": "Couldn't save. Please try again",
   "selectCategory": "Please choose a category first",
   "itemInUse": "This item is still in an active session or has an unresolved missing report, so it can't be deleted yet",
