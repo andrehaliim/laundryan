@@ -12,6 +12,7 @@ import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
+import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 class _Draft {
@@ -84,6 +85,15 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final provider = context.read<SessionProvider>();
     final cats = context.read<CategoryProvider>().categories;
     final navigator = Navigator.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final confirm = await showConfirmDialog(
+      context,
+      title: l10n.finishVerificationTitle,
+      message: l10n.finishVerificationMessage,
+      confirmLabel: l10n.finishVerification,
+      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+    );
+    if (!confirm || !mounted) return;
     setState(() => _saving = true);
 
     final results = <ItemVerification>[];

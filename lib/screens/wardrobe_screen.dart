@@ -112,61 +112,63 @@ class WardrobeScreen extends StatelessWidget {
         ),
         actions: [const SettingsButton()],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_wardrobe',
-        tooltip: l10n.addWardrobe,
-        onPressed: () => _open(context),
-        child: const HugeIcon(
-          icon: HugeIcons.strokeRoundedPlusSign,
-          strokeWidth: 2,
-        ),
-      ),
+      floatingActionButton: wardrobe.isEmpty
+          ? null
+          : FloatingActionButton(
+              heroTag: 'fab_wardrobe',
+              tooltip: l10n.addWardrobe,
+              onPressed: () => _open(context),
+              child: const HugeIcon(
+                icon: HugeIcons.strokeRoundedPlusSign,
+                strokeWidth: 2,
+              ),
+            ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: context.read<WardrobeProvider>().setQuery,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchHint,
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedSearch01,
-                          size: 20,
-                          strokeWidth: 2,
+          if (!wardrobe.isEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: context.read<WardrobeProvider>().setQuery,
+                      decoration: InputDecoration(
+                        hintText: l10n.searchHint,
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSearch01,
+                            size: 20,
+                            strokeWidth: 2,
+                          ),
                         ),
-                      ),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(28)),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(28)),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: wardrobe.toggleSort,
-                  child: HugeIcon(
-                    icon: switch (wardrobe.sort) {
-                      WardrobeSort.alphabetDesc =>
-                        HugeIcons.strokeRoundedSortingZA01,
-                      WardrobeSort.alphabetAsc =>
-                        HugeIcons.strokeRoundedSortingAZ02,
-                    },
-                    size: 28,
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: wardrobe.toggleSort,
+                    child: HugeIcon(
+                      icon: switch (wardrobe.sort) {
+                        WardrobeSort.alphabetDesc =>
+                          HugeIcons.strokeRoundedSortingZA01,
+                        WardrobeSort.alphabetAsc =>
+                          HugeIcons.strokeRoundedSortingAZ02,
+                      },
+                      size: 28,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (!wardrobe.isEmpty)
             SizedBox(
               height: 40,
               child: ListView(
@@ -195,7 +197,8 @@ class WardrobeScreen extends StatelessWidget {
                 ],
               ),
             ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
           Expanded(child: body),
         ],
       ),

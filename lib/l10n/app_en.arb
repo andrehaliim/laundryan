@@ -480,5 +480,20 @@
         "type": "int"
       }
     }
-  }
+  },
+  "deleteCategoryTitle": "Delete category?",
+  "deleteCategoryMessage": "\"{name}\" will be removed from your category list.",
+  "@deleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "finishVerificationTitle": "Finish verification?",
+  "finishVerificationMessage": "Results will be saved and the session moves to history. This can't be changed later.",
+  "discardChangesTitle": "Discard changes?",
+  "discardChangesMessage": "Your unsaved changes will be lost.",
+  "discard": "Discard",
+  "keepEditing": "Keep editing"
 }

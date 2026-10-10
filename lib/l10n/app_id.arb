@@ -236,5 +236,13 @@
   "showOnboardingHint": "Putar ulang layar pembuka",
   "licenses": "Lisensi open source",
   "licensesHint": "Library yang dipakai di aplikasi ini",
-  "durationDays": "{count} hari"
+  "durationDays": "{count} hari",
+  "deleteCategoryTitle": "Hapus kategori?",
+  "deleteCategoryMessage": "\"{name}\" akan dihapus dari daftar kategori.",
+  "finishVerificationTitle": "Selesaikan verifikasi?",
+  "finishVerificationMessage": "Hasil akan disimpan dan sesi pindah ke riwayat. Tidak bisa diubah lagi.",
+  "discardChangesTitle": "Buang perubahan?",
+  "discardChangesMessage": "Perubahan yang belum disimpan akan hilang.",
+  "discard": "Buang",
+  "keepEditing": "Lanjut edit"
 }

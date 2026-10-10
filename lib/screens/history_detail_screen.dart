@@ -11,6 +11,7 @@ import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
+import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 class HistoryDetailScreen extends StatefulWidget {
@@ -49,24 +50,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     final provider = context.read<SessionProvider>();
 
     if (result == ItemStatus.hilangPermanen) {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.permanentLostTitle),
-          content: Text(l10n.permanentLostMessage(_lostQty(v.sessionItem))),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.confirm),
-            ),
-          ],
-        ),
+      final ok = await showConfirmDialog(
+        context,
+        title: l10n.permanentLostTitle,
+        message: l10n.permanentLostMessage(_lostQty(v.sessionItem)),
+        tone: ConfirmTone.danger,
       );
-      if (ok != true) return;
+      if (!ok) return;
     }
 
     await provider.resolveLost(v.sessionItem.id, result);

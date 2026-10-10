@@ -17,6 +17,10 @@ class WardrobeProvider extends ChangeNotifier {
   WardrobeProvider(this._repo) {
     _sub = _repo.watchAll().listen((data) {
       _all = data;
+      if (data.isEmpty) {
+        _query = '';
+        _categoryId = null;
+      }
       notifyListeners();
     });
   }

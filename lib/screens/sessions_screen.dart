@@ -28,8 +28,10 @@ class SessionsScreen extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final titleStyle = Theme.of(context).textTheme.titleMedium;
 
+    final isEmpty = sessions.active.isEmpty && sessions.history.isEmpty;
+
     Widget body;
-    if (sessions.active.isEmpty && sessions.history.isEmpty) {
+    if (isEmpty) {
       body = EmptyState(
         icon: HugeIcons.strokeRoundedWashingMachine,
         orbit: const [
@@ -136,16 +138,19 @@ class SessionsScreen extends StatelessWidget {
         ),
         actions: [const SettingsButton()],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_sessions',
-        tooltip: l10n.addSession,
-        onPressed: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => const AddSessionScreen())),
-        child: const HugeIcon(
-          icon: HugeIcons.strokeRoundedPlusSign,
-          strokeWidth: 2,
-        ),
-      ),
+      floatingActionButton: isEmpty
+          ? null
+          : FloatingActionButton(
+              heroTag: 'fab_sessions',
+              tooltip: l10n.addSession,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AddSessionScreen()),
+              ),
+              child: const HugeIcon(
+                icon: HugeIcons.strokeRoundedPlusSign,
+                strokeWidth: 2,
+              ),
+            ),
       body: body,
     );
   }

@@ -15,6 +15,7 @@ import 'package:laundryan/utils/session_phase.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:laundryan/widgets/pulse.dart';
+import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 class SessionDetailScreen extends StatefulWidget {
@@ -113,24 +114,16 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   Future<void> _cancelSession(AppLocalizations l10n) async {
     final provider = context.read<SessionProvider>();
     final navigator = Navigator.of(context);
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cancelSessionTitle),
-        content: Text(l10n.cancelSessionMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.keepSession),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.cancelSession),
-          ),
-        ],
-      ),
+    final confirm = await showConfirmDialog(
+      context,
+      title: l10n.cancelSessionTitle,
+      message: l10n.cancelSessionMessage,
+      confirmLabel: l10n.cancelSession,
+      cancelLabel: l10n.keepSession,
+      icon: HugeIcons.strokeRoundedCancelCircle,
+      tone: ConfirmTone.danger,
     );
-    if (confirm != true) return;
+    if (!confirm) return;
     await provider.cancel(widget.sessionId);
     navigator.pop();
   }

@@ -6,6 +6,7 @@ import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/screens/test_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
+import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showCategorySheet(BuildContext context) {
@@ -92,7 +93,21 @@ class _CategorySheetState extends State<CategorySheet> {
   }
 
   Future<void> _delete(Category c, AppLocalizations l10n) async {
-    final ok = await context.read<CategoryProvider>().delete(c);
+    final provider = context.read<CategoryProvider>();
+    if (context.read<WardrobeProvider>().countByCategory(c.id) > 0) {
+      setState(() => _listError = l10n.categoryInUse);
+      return;
+    }
+    final confirm = await showConfirmDialog(
+      context,
+      title: l10n.deleteCategoryTitle,
+      message: l10n.deleteCategoryMessage(categoryName(c, l10n)),
+      confirmLabel: l10n.delete,
+      icon: HugeIcons.strokeRoundedDelete02,
+      tone: ConfirmTone.danger,
+    );
+    if (!confirm) return;
+    final ok = await provider.delete(c);
     if (mounted) setState(() => _listError = ok ? null : l10n.categoryInUse);
   }
 
