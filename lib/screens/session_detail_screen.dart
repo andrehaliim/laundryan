@@ -302,12 +302,6 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                         ),
                       ),
                       Switch(
-                        trackColor: WidgetStatePropertyAll(
-                          Theme.of(context).colorScheme.primaryContainer,
-                        ),
-                        thumbColor: WidgetStatePropertyAll(
-                          Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
                         value: _reminder,
                         onChanged: (v) {
                           setState(() => _reminder = v);

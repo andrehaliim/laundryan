@@ -224,6 +224,154 @@ class AppTheme {
         shape: _shape(10),
       ),
       dividerTheme: DividerThemeData(color: s.outlineVariant),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? cardColor : s.outline,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected)
+              ? s.primary
+              : s.surfaceContainerHighest,
+        ),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.primary : inputBorder,
+        ),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: cardColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: _shape(20, BorderSide(color: s.outlineVariant)),
+        headerBackgroundColor: cardColor,
+        headerForegroundColor: s.onSurface,
+        headerHelpStyle: text.labelMedium?.copyWith(
+          color: s.onSurfaceVariant,
+          letterSpacing: 0.4,
+        ),
+        headerHeadlineStyle: text.headlineSmall,
+        dividerColor: s.outlineVariant,
+        weekdayStyle: text.labelMedium?.copyWith(
+          color: s.onSurfaceVariant,
+          fontWeight: FontWeight.w500,
+        ),
+        dayStyle: text.bodyMedium,
+        dayShape: WidgetStatePropertyAll(_shape(10)),
+        dayForegroundColor: WidgetStateProperty.resolveWith((st) {
+          if (st.contains(WidgetState.disabled)) {
+            return s.onSurface.withValues(alpha: 0.38);
+          }
+          return st.contains(WidgetState.selected) ? s.onPrimary : s.onSurface;
+        }),
+        dayBackgroundColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.primary : null,
+        ),
+        dayOverlayColor: WidgetStatePropertyAll(
+          s.primary.withValues(alpha: 0.12),
+        ),
+        todayForegroundColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.onPrimary : link,
+        ),
+        todayBackgroundColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.primary : null,
+        ),
+        todayBorder: BorderSide(color: s.primary, width: 1.5),
+        yearStyle: text.bodyMedium,
+        yearShape: WidgetStatePropertyAll(_shape(10)),
+        yearForegroundColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.onPrimary : s.onSurface,
+        ),
+        yearBackgroundColor: WidgetStateProperty.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.primary : null,
+        ),
+        cancelButtonStyle: _pickerCancel(s, text),
+        confirmButtonStyle: _pickerConfirm(s, text),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: cardColor,
+        elevation: 0,
+        shape: _shape(20, BorderSide(color: s.outlineVariant)),
+        helpTextStyle: text.labelMedium?.copyWith(
+          color: s.onSurfaceVariant,
+          letterSpacing: 0.4,
+        ),
+        hourMinuteShape: _shape(12),
+        hourMinuteColor: WidgetStateColor.resolveWith(
+          (st) => st.contains(WidgetState.selected)
+              ? s.primaryContainer
+              : s.surfaceContainerLow,
+        ),
+        hourMinuteTextColor: WidgetStateColor.resolveWith(
+          (st) => st.contains(WidgetState.selected)
+              ? s.onPrimaryContainer
+              : s.onSurface,
+        ),
+        dayPeriodShape: _shape(10),
+        dayPeriodBorderSide: BorderSide(color: inputBorder),
+        dayPeriodColor: WidgetStateColor.resolveWith(
+          (st) => st.contains(WidgetState.selected)
+              ? s.primaryContainer
+              : Colors.transparent,
+        ),
+        dayPeriodTextColor: WidgetStateColor.resolveWith(
+          (st) => st.contains(WidgetState.selected)
+              ? s.onPrimaryContainer
+              : s.onSurfaceVariant,
+        ),
+        dialBackgroundColor: s.surfaceContainerLow,
+        dialHandColor: s.primary,
+        dialTextColor: WidgetStateColor.resolveWith(
+          (st) => st.contains(WidgetState.selected) ? s.onPrimary : s.onSurface,
+        ),
+        entryModeIconColor: s.onSurfaceVariant,
+        cancelButtonStyle: _pickerCancel(s, text),
+        confirmButtonStyle: _pickerConfirm(s, text),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _FadePageTransitionsBuilder(),
+          TargetPlatform.iOS: _FadePageTransitionsBuilder(),
+        },
+      ),
+    );
+  }
+
+  static ButtonStyle _pickerCancel(ColorScheme s, TextTheme text) =>
+      TextButton.styleFrom(
+        foregroundColor: s.onSurfaceVariant,
+        minimumSize: const Size(64, 40),
+        shape: _shape(10),
+        textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+      );
+
+  static ButtonStyle _pickerConfirm(ColorScheme s, TextTheme text) =>
+      TextButton.styleFrom(
+        backgroundColor: s.primary,
+        foregroundColor: s.onPrimary,
+        minimumSize: const Size(64, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        shape: _shape(10),
+        textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+      );
+}
+
+/// Fade-only page transition (200ms ease-out) from design.md.
+class _FadePageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FadePageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 200);
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: child,
     );
   }
 }
