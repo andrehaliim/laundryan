@@ -182,12 +182,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                           ),
                   ),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text(l10n.done),
-                    ),
+                  SoftButton(
+                    label: l10n.done,
+                    icon: HugeIcons.strokeRoundedTick02,
+                    expanded: true,
+                    onPressed: () => Navigator.pop(ctx),
                   ),
                 ],
               ),
@@ -669,17 +668,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                           ],
                         ),
                         const Spacer(),
-                        TextButton.icon(
+                        SoftButton(
+                          label: l10n.wardrobe,
+                          icon: HugeIcons.strokeRoundedPlusSign,
+                          variant: SoftButtonVariant.secondary,
                           onPressed: _openPicker,
-                          icon: const HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlusSign,
-                            size: 18,
-                            strokeWidth: 2,
-                          ),
-                          label: Text(l10n.wardrobe),
-                          style: TextButton.styleFrom(
-                            backgroundColor: scheme.surfaceContainerHigh,
-                          ),
                         ),
                       ],
                     ),

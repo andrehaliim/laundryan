@@ -11,6 +11,7 @@ class WardrobeProvider extends ChangeNotifier {
   List<WardrobeEntry> _all = [];
   bool _loaded = false;
   String _query = '';
+  String get query => _query;
   List<WardrobeEntry> get allItems => _all;
   int? _categoryId;
   int? get categoryId => _categoryId;

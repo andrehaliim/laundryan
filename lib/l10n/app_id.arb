@@ -58,6 +58,8 @@
   "takePhoto": "Ambil foto",
   "chooseGallery": "Pilih dari galeri",
   "removePhoto": "Hapus foto",
+  "photo": "Foto",
+  "clearSearch": "Hapus pencarian",
   "deleteItemTitle": "Hapus item?",
   "deleteItemMessage": "Item ini akan dihapus dari lemari.",
   "itemInUse": "Item ini masih ada di sesi aktif atau laporan hilangnya belum selesai, jadi belum bisa dihapus",

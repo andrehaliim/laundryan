@@ -93,46 +93,99 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const HugeIcon(
-                icon: HugeIcons.strokeRoundedCamera01,
-                strokeWidth: 2,
-              ),
-              title: Text(l10n.takePhoto),
-              onTap: () {
-                Navigator.pop(ctx);
-                _pick(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const HugeIcon(
-                icon: HugeIcons.strokeRoundedImage02,
-                strokeWidth: 2,
-              ),
-              title: Text(l10n.chooseGallery),
-              onTap: () {
-                Navigator.pop(ctx);
-                _pick(ImageSource.gallery);
-              },
-            ),
-            if (_photo != null)
-              ListTile(
-                leading: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete01,
-                  strokeWidth: 2,
+      builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.photo, style: Theme.of(ctx).textTheme.titleLarge),
+                const SizedBox(height: 12),
+                _photoOption(
+                  icon: HugeIcons.strokeRoundedCamera01,
+                  label: l10n.takePhoto,
+                  bg: scheme.primaryContainer,
+                  fg: scheme.onPrimaryContainer,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pick(ImageSource.camera);
+                  },
                 ),
-                title: Text(l10n.removePhoto),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _removePhoto();
-                },
-              ),
-          ],
-        ),
+                const SizedBox(height: 8),
+                _photoOption(
+                  icon: HugeIcons.strokeRoundedImage02,
+                  label: l10n.chooseGallery,
+                  bg: scheme.tertiaryContainer,
+                  fg: scheme.onTertiaryContainer,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pick(ImageSource.gallery);
+                  },
+                ),
+                if (_photo != null) ...[
+                  const SizedBox(height: 8),
+                  _photoOption(
+                    icon: HugeIcons.strokeRoundedDelete01,
+                    label: l10n.removePhoto,
+                    bg: scheme.errorContainer,
+                    fg: scheme.onErrorContainer,
+                    labelColor: scheme.error,
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _removePhoto();
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _photoOption({
+    required List<List<dynamic>> icon,
+    required String label,
+    required Color bg,
+    required Color fg,
+    required VoidCallback onTap,
+    Color? labelColor,
+  }) {
+    final theme = Theme.of(context);
+    return SoftCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: HugeIcon(icon: icon, size: 20, strokeWidth: 2, color: fg),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.titleSmall?.copyWith(color: labelColor),
+            ),
+          ),
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowRight01,
+            size: 18,
+            strokeWidth: 2,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }
@@ -236,8 +289,8 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
           const SizedBox(height: 8),
           SoftButton(
             label: l10n.upload,
-            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-            onPressed: () => _pick(ImageSource.gallery),
+            icon: HugeIcons.strokeRoundedCamera01,
+            onPressed: () => _showPhotoOptions(l10n),
           ),
         ],
       ),
@@ -265,23 +318,32 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Center(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => _showPhotoOptions(l10n),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: MediaQuery.sizeOf(context).height / 4,
-                    child: SoftCard(
-                      child: file == null
-                          ? placeholder
-                          : Image.file(
+              SizedBox(
+                width: double.infinity,
+                height: MediaQuery.sizeOf(context).height / 4,
+                child: SoftCard(
+                  child: file == null
+                      ? placeholder
+                      : Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.file(
                               file,
                               fit: BoxFit.cover,
                               errorBuilder: (_, _, _) => placeholder,
                             ),
-                    ),
-                  ),
+                            Positioned(
+                              right: 12,
+                              bottom: 12,
+                              child: SoftButton(
+                                label: l10n.photo,
+                                icon: HugeIcons.strokeRoundedEdit02,
+                                variant: SoftButtonVariant.secondary,
+                                onPressed: () => _showPhotoOptions(l10n),
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
               const SizedBox(height: 16),

@@ -178,9 +178,10 @@ class _CategorySheetState extends State<CategorySheet> {
           ),
         ),
         const Spacer(),
-        TextButton(
+        SoftButton(
+          label: l10n.done,
+          variant: SoftButtonVariant.ghost,
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.done),
         ),
       ],
     );

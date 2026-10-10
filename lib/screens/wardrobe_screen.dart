@@ -13,8 +13,27 @@ import 'package:laundryan/widgets/settings_button.dart';
 import 'package:laundryan/widgets/empty_state.dart';
 import 'package:provider/provider.dart';
 
-class WardrobeScreen extends StatelessWidget {
+class WardrobeScreen extends StatefulWidget {
   const WardrobeScreen({super.key});
+
+  @override
+  State<WardrobeScreen> createState() => _WardrobeScreenState();
+}
+
+class _WardrobeScreenState extends State<WardrobeScreen> {
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _clearFilters(WardrobeProvider wardrobe) {
+    _search.clear();
+    wardrobe.setQuery('');
+    wardrobe.setCategory(null);
+  }
 
   void _open(BuildContext context, [WardrobeEntry? entry]) {
     Navigator.of(
@@ -63,6 +82,9 @@ class WardrobeScreen extends StatelessWidget {
         ],
         title: l10n.noResults,
         message: l10n.noResultsHint,
+        actionLabel: l10n.clearSearch,
+        actionIcon: HugeIcons.strokeRoundedCancel01,
+        onAction: () => _clearFilters(wardrobe),
       );
     } else {
       body = GridView.builder(
@@ -134,10 +156,12 @@ class WardrobeScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      onChanged: context.read<WardrobeProvider>().setQuery,
-                      decoration: InputDecoration(
-                        hintText: l10n.searchHint,
+                    child: ValueListenableBuilder(
+                      valueListenable: _search,
+                      builder: (context, value, _) => SoftTextField(
+                        controller: _search,
+                        hint: l10n.searchHint,
+                        onChanged: wardrobe.setQuery,
                         prefixIcon: const Padding(
                           padding: EdgeInsets.all(12),
                           child: HugeIcon(
@@ -146,26 +170,40 @@ class WardrobeScreen extends StatelessWidget {
                             strokeWidth: 2,
                           ),
                         ),
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(28)),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
+                        suffixIcon: value.text.isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: l10n.clearSearch,
+                                onPressed: () {
+                                  _search.clear();
+                                  wardrobe.setQuery('');
+                                },
+                                icon: const HugeIcon(
+                                  icon: HugeIcons.strokeRoundedCancelCircle,
+                                  size: 20,
+                                  strokeWidth: 2,
+                                ),
+                              ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: wardrobe.toggleSort,
-                    child: HugeIcon(
-                      icon: switch (wardrobe.sort) {
-                        WardrobeSort.alphabetDesc =>
-                          HugeIcons.strokeRoundedSortingZA01,
-                        WardrobeSort.alphabetAsc =>
-                          HugeIcons.strokeRoundedSortingAZ02,
-                      },
-                      size: 28,
+                  SizedBox.square(
+                    dimension: 48,
+                    child: SoftCard(
+                      onTap: wardrobe.toggleSort,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: switch (wardrobe.sort) {
+                            WardrobeSort.alphabetDesc =>
+                              HugeIcons.strokeRoundedSortingZA01,
+                            WardrobeSort.alphabetAsc =>
+                              HugeIcons.strokeRoundedSortingAZ02,
+                          },
+                          size: 22,
+                          strokeWidth: 2,
+                        ),
+                      ),
                     ),
                   ),
                 ],

@@ -65,6 +65,8 @@
   "takePhoto": "Take photo",
   "chooseGallery": "Choose from gallery",
   "removePhoto": "Remove photo",
+  "photo": "Photo",
+  "clearSearch": "Clear search",
   "deleteItemTitle": "Delete item?",
   "deleteItemMessage": "This item will be removed from your wardrobe.",
   "itemInUse": "This item is still in an active session or has an unresolved missing report, so it can't be deleted yet",
