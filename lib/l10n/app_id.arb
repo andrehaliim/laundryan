@@ -249,5 +249,11 @@
   "discardChangesTitle": "Buang perubahan?",
   "discardChangesMessage": "Perubahan yang belum disimpan akan hilang.",
   "discard": "Buang",
-  "keepEditing": "Lanjut edit"
+  "keepEditing": "Lanjut edit",
+  "dayToday": "Hari ini",
+  "dayTomorrow": "Besok",
+  "dayYesterday": "Kemarin",
+  "readyInMinutes": "dalam {count} menit",
+  "readyInHours": "dalam {count} jam",
+  "readyInDays": "dalam {count} hari"
 }

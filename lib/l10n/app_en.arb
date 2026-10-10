@@ -493,5 +493,32 @@
   "discardChangesTitle": "Discard changes?",
   "discardChangesMessage": "Your unsaved changes will be lost.",
   "discard": "Discard",
-  "keepEditing": "Keep editing"
+  "keepEditing": "Keep editing",
+  "dayToday": "Today",
+  "dayTomorrow": "Tomorrow",
+  "dayYesterday": "Yesterday",
+  "readyInMinutes": "{count, plural, =1{in 1 min} other{in {count} mins}}",
+  "@readyInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readyInHours": "{count, plural, =1{in 1 hour} other{in {count} hours}}",
+  "@readyInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readyInDays": "{count, plural, =1{in 1 day} other{in {count} days}}",
+  "@readyInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -171,14 +171,15 @@ class SessionCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).toString();
     final s = entry.session;
-    final dateTimeFmt = with12hTime(DateFormat.yMMMd(locale));
-    final subStyle = Theme.of(context).textTheme.bodySmall
+    final textTheme = Theme.of(context).textTheme;
+    final subStyle = textTheme.bodySmall
         ?.copyWith(color: scheme.onSurfaceVariant);
 
     return StreamBuilder<void>(
       stream: phaseTicker,
       builder: (_, _) {
         final phase = s.phase;
+        final timeLeft = formatTimeUntil(s.estimatedReadyAt, l10n);
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           clipBehavior: Clip.antiAlias,
@@ -271,67 +272,63 @@ class SessionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 SessionCategoryBadges(sessionId: s.id),
+                const SizedBox(height: 12),
+                _infoRow(
+                  context: context,
+                  icon: HugeIcons.strokeRoundedCalendar01,
+                  iconColor: scheme.onSurfaceVariant,
+                  label: l10n.dropOffDate,
+                  value: Text(
+                    formatSmartDateTime(s.dropOffDate, locale, l10n),
+                    textAlign: TextAlign.end,
+                    style: textTheme.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedCalendar01,
-                      color: scheme.primary,
-                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                      strokeWidth: 2,
-                    ),
-                    const SizedBox(width: 8),
-                    Text('${l10n.dropOffDate}: ', style: subStyle),
-                    const Spacer(),
-                    Text(
-                      dateTimeFmt.format(s.dropOffDate),
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedClock01,
-                      color: scheme.primary,
-                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                      strokeWidth: 2,
-                    ),
-                    const SizedBox(width: 8),
-                    Text('${l10n.estimatedReady}: ', style: subStyle),
-                    const Spacer(),
-                    Text(
-                      dateTimeFmt.format(s.estimatedReadyAt),
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedNotification01,
-                      color: scheme.primary,
-                      size: Theme.of(context).textTheme.titleLarge!.fontSize,
-                      strokeWidth: 2,
-                    ),
-                    const SizedBox(width: 8),
-                    Text('${l10n.notification}: ', style: subStyle),
-                    const Spacer(),
-                    Text(
-                      s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: s.reminderEnabled
-                            ? scheme.tertiary
-                            : scheme.error,
-                        fontWeight: FontWeight.w600,
+                _infoRow(
+                  context: context,
+                  icon: HugeIcons.strokeRoundedClock01,
+                  iconColor: scheme.onSurfaceVariant,
+                  label: l10n.estimatedReady,
+                  value: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        formatSmartDateTime(
+                          s.estimatedReadyAt,
+                          locale,
+                          l10n,
+                        ),
+                        textAlign: TextAlign.end,
+                        style: textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
+                      if (timeLeft != null)
+                        Text(
+                          timeLeft,
+                          textAlign: TextAlign.end,
+                          style: textTheme.labelSmall
+                              ?.copyWith(color: scheme.error),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _infoRow(
+                  context: context,
+                  icon: HugeIcons.strokeRoundedNotification01,
+                  iconColor: scheme.onSurfaceVariant,
+                  label: l10n.notification,
+                  value: Text(
+                    s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
+                    style: textTheme.titleSmall?.copyWith(
+                      color: s.reminderEnabled
+                          ? scheme.tertiary
+                          : scheme.error,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                  ),
                 ),
                 if (onViewDetails != null) ...[
                   const SizedBox(height: 8),
@@ -346,6 +343,41 @@ class SessionCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _infoRow({
+    required BuildContext context,
+    required List<List<dynamic>> icon,
+    required Color iconColor,
+    required String label,
+    required Widget value,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        HugeIcon(
+          icon: icon,
+          color: iconColor,
+          size: textTheme.titleLarge!.fontSize,
+          strokeWidth: 2,
+        ),
+        const SizedBox(width: 8),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            label,
+            style: textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Align(alignment: Alignment.centerRight, child: value),
+        ),
+      ],
     );
   }
 
