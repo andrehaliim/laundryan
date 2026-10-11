@@ -413,7 +413,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               ),
               const SizedBox(width: 4),
               Text(
-                l10n.piecesUnit,
+                l10n.piecesUnit(value),
                 style: textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

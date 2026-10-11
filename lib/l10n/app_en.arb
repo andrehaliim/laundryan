@@ -166,7 +166,7 @@
   "missingBody": "Contact the laundry so they can track down the missing pieces.",
   "verifiedItems": "Verified items",
   "wardrobeUpdated": "Wardrobe updated",
-  "wardrobeUpdatedBody": "{count} pcs are marked available in your wardrobe again.",
+  "wardrobeUpdatedBody": "{count, plural, =1{1 pc is marked available in your wardrobe again.} other{{count} pcs are marked available in your wardrobe again.}}",
   "@wardrobeUpdatedBody": {
     "placeholders": {
       "count": {
@@ -192,7 +192,7 @@
   "statusPermanentlyLost": "Permanently lost",
   "completedAt": "Completed",
   "confirm": "Confirm",
-  "resolveHint": "Applies to all {count} missing pieces",
+  "resolveHint": "{count, plural, =1{Applies to the 1 missing piece} other{Applies to all {count} missing pieces}}",
   "@resolveHint": {
     "placeholders": {
       "count": {
@@ -296,7 +296,7 @@
   "callPlace": "Call",
   "callSubtitle": "Direct line",
   "callFailed": "Can not make a call",
-  "itemsSummary": "{items} items • {pieces} pcs",
+  "itemsSummary": "{items, plural, =1{1 item} other{{items} items}} • {pieces, plural, =1{1 pc} other{{pieces} pcs}}",
   "@itemsSummary": {
     "placeholders": {
       "items": {
@@ -307,7 +307,7 @@
       }
     }
   },
-  "pieces": "{count} pcs",
+  "pieces": "{count, plural, =1{1 pc} other{{count} pcs}}",
   "@pieces": {
     "placeholders": {
       "count": {
@@ -316,7 +316,7 @@
     }
   },
   "verifyReturnedTitle": "Verify Returned Laundry",
-  "piecesVerified": "{done} of {total} pieces verified",
+  "piecesVerified": "{done} of {total, plural, =1{1 piece} other{{total} pieces}} verified",
   "@piecesVerified": {
     "placeholders": {
       "done": {
@@ -336,7 +336,7 @@
     }
   },
   "verifyInstruction": "Check each item carefully against your drop-off list as you unpack your laundry bag.",
-  "dropOffChecklist": "Drop-off checklist ({count} items)",
+  "dropOffChecklist": "Drop-off checklist ({count, plural, =1{1 item} other{{count} items}})",
   "@dropOffChecklist": {
     "placeholders": {
       "count": {
@@ -356,7 +356,7 @@
       }
     }
   },
-  "pendingBadge": "{count} pcs pending",
+  "pendingBadge": "{count, plural, =1{1 pc pending} other{{count} pcs pending}}",
   "@pendingBadge": {
     "placeholders": {
       "count": {
@@ -393,7 +393,7 @@
     }
   },
   "reportDiscrepancy": "Report discrepancy",
-  "discrepancyCount": "{count} discrepancies",
+  "discrepancyCount": "{count, plural, =1{1 discrepancy} other{{count} discrepancies}}",
   "@discrepancyCount": {
     "placeholders": {
       "count": {
@@ -403,7 +403,7 @@
   },
   "verificationInProgress": "Verification in progress",
   "verificationReady": "All items checked",
-  "itemsNeedAction": "{count} items need action",
+  "itemsNeedAction": "{count, plural, =1{1 item needs action} other{{count} items need action}}",
   "@itemsNeedAction": {
     "placeholders": {
       "count": {
@@ -416,7 +416,7 @@
   "inspectCase": "Item check",
   "reconcileItem": "Reconcile item",
   "expectedDropOff": "Expected drop-off",
-  "piecesDroppedOff": "{count} pcs dropped off",
+  "piecesDroppedOff": "{count, plural, =1{1 pc dropped off} other{{count} pcs dropped off}}",
   "@piecesDroppedOff": {
     "placeholders": {
       "count": {
@@ -434,7 +434,14 @@
   "statusResolved": "Resolved",
   "totalGarments": "Total garments",
   "discrepancyLog": "Discrepancy log",
-  "piecesUnit": "pcs",
+  "piecesUnit": "{count, plural, =1{pc} other{pcs}}",
+  "@piecesUnit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safeOnPickup": "{count} safe on pickup",
   "@safeOnPickup": {
     "placeholders": {
@@ -443,7 +450,7 @@
       }
     }
   },
-  "discrepancyResolved": "{count} pcs resolved",
+  "discrepancyResolved": "{count, plural, =1{1 pc resolved} other{{count} pcs resolved}}",
   "@discrepancyResolved": {
     "placeholders": {
       "count": {
@@ -455,7 +462,7 @@
   "inventoryAndStatus": "Inventory & status",
   "markFound": "Mark as found",
   "foundNote": "Recovered and back in your wardrobe.",
-  "permanentLostNote": "{count} pcs removed from your wardrobe.",
+  "permanentLostNote": "{count, plural, =1{1 pc removed from your wardrobe.} other{{count} pcs removed from your wardrobe.}}",
   "@permanentLostNote": {
     "placeholders": {
       "count": {
