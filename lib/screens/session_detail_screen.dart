@@ -171,7 +171,9 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     final locale = Localizations.localeOf(context).toString();
     final dateTimeFmt = with12hTime(DateFormat.yMMMMEEEEd(locale));
     final dateTimeFmtShort = with12hTime(DateFormat.MMMd(locale));
-    final hoursFromNow = _readyAt.difference(DateTime.now()).inHours;
+    final hoursFromNow = roundedHours(
+      _readyAt.difference(DateTime.now()),
+    );
     final noteStyle = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: scheme.onSurfaceVariant);
 
