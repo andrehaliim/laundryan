@@ -9,6 +9,10 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'laundryan'));
 
+  /// Opens the database on a custom executor, e.g. an in-memory one for
+  /// tests and store screenshots.
+  AppDatabase.forTesting(super.executor);
+
   @override
   int get schemaVersion => 3;
 

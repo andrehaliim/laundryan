@@ -21,10 +21,28 @@ Future<void> main() async {
   await PhotoStorage.init();
   await NotificationService.init();
   final settings = await SettingsProvider.load();
-  final db = AppDatabase();
 
   runApp(
-    MultiProvider(
+    AppScope(settings: settings, db: AppDatabase(), child: const MyApp()),
+  );
+}
+
+/// Provides the settings, database and feature providers to [child].
+class AppScope extends StatelessWidget {
+  final SettingsProvider settings;
+  final AppDatabase db;
+  final Widget child;
+
+  const AppScope({
+    super.key,
+    required this.settings,
+    required this.db,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: settings),
         Provider<AppDatabase>.value(value: db),
@@ -42,18 +60,26 @@ Future<void> main() async {
               SessionProvider(SessionRepository(db), () => settings.locale),
         ),
       ],
-      child: const MyApp(),
-    ),
-  );
+      child: child,
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Widget home;
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  const MyApp({
+    super.key,
+    this.home = const SplashScreen(),
+    this.navigatorKey,
+  });
 
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -75,7 +101,7 @@ class MyApp extends StatelessWidget {
           child: child!,
         );
       },
-      home: const SplashScreen(),
+      home: home,
     );
   }
 }

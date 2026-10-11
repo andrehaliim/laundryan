@@ -98,3 +98,6 @@ key.properties
 
 # Claude Code
 CLAUDE.md
+
+# Store screenshots (dibuat ulang lewat integration_test)
+/screenshots/
