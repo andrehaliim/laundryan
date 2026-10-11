@@ -154,6 +154,9 @@
   "notification": "Notifikasi",
   "statusOn": "AKTIF",
   "statusOff": "NONAKTIF",
+  "statusBlocked": "DIBLOKIR",
+  "notificationsBlocked": "Notifikasi diblokir, jadi pengingat ini tidak akan muncul",
+  "notificationsBlockedHint": "Diblokir di pengaturan HP. Ketuk untuk mengizinkan.",
   "finishedLabel": "Selesai",
   "swapMissing": "{count} tertukar/hilang",
   "@swapMissing": {

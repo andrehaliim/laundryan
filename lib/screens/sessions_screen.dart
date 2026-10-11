@@ -9,6 +9,7 @@ import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/history_detail_screen.dart';
 import 'package:laundryan/screens/history_list_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
+import 'package:laundryan/utils/notification_service.dart';
 import 'package:laundryan/utils/session_phase.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/empty_state.dart';
@@ -324,12 +325,24 @@ class SessionCard extends StatelessWidget {
                   icon: HugeIcons.strokeRoundedNotification01,
                   iconColor: scheme.onSurfaceVariant,
                   label: l10n.notification,
-                  value: Text(
-                    s.reminderEnabled ? l10n.statusOn : l10n.statusOff,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: s.reminderEnabled ? scheme.tertiary : scheme.error,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  value: ValueListenableBuilder<bool>(
+                    valueListenable: NotificationService.enabled,
+                    builder: (context, allowed, _) {
+                      final blocked = s.reminderEnabled && !allowed;
+                      return Text(
+                        blocked
+                            ? l10n.statusBlocked
+                            : s.reminderEnabled
+                            ? l10n.statusOn
+                            : l10n.statusOff,
+                        style: textTheme.titleSmall?.copyWith(
+                          color: s.reminderEnabled && !blocked
+                              ? scheme.tertiary
+                              : scheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 if (onViewDetails != null) ...[

@@ -10,6 +10,7 @@ import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/screens/wardrobe_item_screen.dart';
 import 'package:laundryan/utils/category_utils.dart';
+import 'package:laundryan/utils/notification_service.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
@@ -142,6 +143,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(SnackBar(content: Text(l10n.saveFailed)));
       return;
+    }
+    if (_reminder && !NotificationService.enabled.value) {
+      showNotificationsBlocked(messenger, l10n);
     }
     navigator.pop();
   }

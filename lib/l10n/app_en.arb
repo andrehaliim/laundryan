@@ -118,7 +118,7 @@
   "noHistory": "No history yet",
   "noHistoryHint": "Finished sessions will be kept here for you to look back on.",
   "dropOff": "Drop-off",
-  "totalItems": "{count} items",
+  "totalItems": "{count, plural, =1{1 item} other{{count} items}}",
   "@totalItems": {
     "placeholders": {
       "count": {
@@ -244,6 +244,9 @@
   "notification": "Notification",
   "statusOn": "ON",
   "statusOff": "OFF",
+  "statusBlocked": "BLOCKED",
+  "notificationsBlocked": "Notifications are blocked, so this reminder won't show",
+  "notificationsBlockedHint": "Blocked in system settings. Tap to allow.",
   "finishedLabel": "Finished",
   "swapMissing": "{count} swap/missing",
   "@swapMissing": {

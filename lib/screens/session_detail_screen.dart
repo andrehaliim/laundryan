@@ -12,6 +12,7 @@ import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/screens/checklist_screen.dart';
 import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
+import 'package:laundryan/utils/notification_service.dart';
 import 'package:laundryan/utils/phone_utils.dart';
 import 'package:laundryan/utils/session_phase.dart';
 import 'package:laundryan/utils/time_format.dart';
@@ -340,25 +341,44 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                                         .onPrimaryContainer,
                                   ),
                             ),
-                            Text(
-                              l10n.notificationReminderHint,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
-                                  ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            ValueListenableBuilder<bool>(
+                              valueListenable: NotificationService.enabled,
+                              builder: (context, allowed, _) {
+                                final scheme = Theme.of(context).colorScheme;
+                                final blocked = _reminder && !allowed;
+                                final hint = Text(
+                                  blocked
+                                      ? l10n.notificationsBlockedHint
+                                      : l10n.notificationReminderHint,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: blocked
+                                            ? scheme.error
+                                            : scheme.onPrimaryContainer,
+                                      ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                                if (!blocked) return hint;
+                                return GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: NotificationService.openSettings,
+                                  child: hint,
+                                );
+                              },
                             ),
                           ],
                         ),
                       ),
                       Switch(
                         value: _reminder,
-                        onChanged: (v) {
+                        onChanged: (v) async {
+                          final messenger = ScaffoldMessenger.of(context);
                           setState(() => _reminder = v);
-                          _save();
+                          await _save();
+                          if (v && !NotificationService.enabled.value) {
+                            showNotificationsBlocked(messenger, l10n);
+                          }
                         },
                       ),
                     ],
