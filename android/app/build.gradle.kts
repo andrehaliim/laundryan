@@ -33,24 +33,34 @@ android {
     }
 
     signingConfigs {
-    if (keystorePropertiesFile.exists()) {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-        }
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.findByName("release")
         }
+    }
+}
+
+// Release builds must be signed with the upload key, never the debug key.
+// Checked only when a release task runs, so debug builds work without it.
+gradle.taskGraph.whenReady {
+    val buildsRelease = allTasks.any {
+        it.project == project && it.name.contains("Release")
+    }
+    if (buildsRelease && !keystorePropertiesFile.exists()) {
+        throw GradleException(
+            "android/key.properties not found. Release builds need the " +
+                "upload keystore. See https://docs.flutter.dev/deployment/android#sign-the-app",
+        )
     }
 }
 
