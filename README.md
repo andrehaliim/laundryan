@@ -34,12 +34,16 @@ data is stored offline on the device.
 
 <table>
   <tr>
-    <td><img src="assets/docs/screenshots/01_sessions.png" width="220" alt="Sessions" /></td>
-    <td><img src="assets/docs/screenshots/02_session_detail.png" width="220" alt="Session detail" /></td>
-    <td><img src="assets/docs/screenshots/03_checklist.png" width="220" alt="Pickup checklist" /></td>
-    <td><img src="assets/docs/screenshots/04_history_detail.png" width="220" alt="History detail" /></td>
-    <td><img src="assets/docs/screenshots/05_wardrobe.png" width="220" alt="Wardrobe" /></td>
-    <td><img src="assets/docs/screenshots/06_sessions_dark.png" width="220" alt="Dark mode" /></td>
+    <td width="50%"><img src="assets/docs/screenshots/01_sessions.png" width="100%" alt="Sessions" /></td>
+    <td width="50%"><img src="assets/docs/screenshots/02_session_detail.png" width="100%" alt="Session detail" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/docs/screenshots/03_checklist.png" width="100%" alt="Pickup checklist" /></td>
+    <td width="50%"><img src="assets/docs/screenshots/04_history_detail.png" width="100%" alt="History detail" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/docs/screenshots/05_wardrobe.png" width="100%" alt="Wardrobe" /></td>
+    <td width="50%"><img src="assets/docs/screenshots/06_sessions_dark.png" width="100%" alt="Dark mode" /></td>
   </tr>
 </table>
 
