@@ -204,3 +204,7 @@ Framed images are written to `screenshots/<lang>/` and bare screens to
 ## Author
 
 **Andre Haliim**: [andrehaliim.vercel.app](https://andrehaliim.vercel.app)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
