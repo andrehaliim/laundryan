@@ -482,6 +482,9 @@
   "showOnboardingHint": "Replay the welcome screens",
   "licenses": "Open source licenses",
   "licensesHint": "Libraries used in this app",
+  "privacyPolicy": "Privacy policy",
+  "privacyPolicyHint": "How your data is handled",
+  "linkFailed": "Can not open the link",
   "appVersion": "Version {version}",
   "@appVersion": {
     "placeholders": {

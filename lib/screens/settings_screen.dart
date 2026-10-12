@@ -10,10 +10,15 @@ import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/widgets/category_sheet.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 typedef _Option<T> = ({T value, String label, List<List<dynamic>> icon});
 
 final _packageInfo = PackageInfo.fromPlatform();
+
+final _privacyPolicyUrl = Uri.parse(
+  'https://andrehaliim.vercel.app/projects/laundryan/privacy',
+);
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -139,6 +144,16 @@ class SettingsScreen extends StatelessWidget {
                 _divider(),
                 _tile(
                   context,
+                  icon: HugeIcons.strokeRoundedSecurityCheck,
+                  bg: scheme.surfaceContainerHigh,
+                  fg: scheme.onSurfaceVariant,
+                  title: l10n.privacyPolicy,
+                  subtitle: l10n.privacyPolicyHint,
+                  onTap: () => _openPrivacyPolicy(context),
+                ),
+                _divider(),
+                _tile(
+                  context,
                   icon: HugeIcons.strokeRoundedLegalDocument01,
                   bg: scheme.surfaceContainerHigh,
                   fg: scheme.onSurfaceVariant,
@@ -175,6 +190,21 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final message = AppLocalizations.of(context)!.linkFailed;
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        _privacyPolicyUrl,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {}
+    if (!opened) {
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   Widget _footer(BuildContext context) {
