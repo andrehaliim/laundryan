@@ -16,14 +16,15 @@ class DemoIds {
 }
 
 /// Category ids in the order `AppDatabase._seedCategories` inserts them.
-const _tshirt = 1;
-const _shirt = 2;
-const _outerwear = 3;
-const _longPants = 4;
-const _shorts = 5;
-const _skirt = 6;
-const _underwear = 7;
-const _socks = 8;
+const _shirt = 1;
+const _tshirt = 2;
+const _hoodie = 7;
+const _cardigan = 8;
+const _longPants = 11;
+const _shorts = 12;
+const _skirt = 13;
+const _underwear = 14;
+const _socks = 15;
 
 /// Fills [db] with realistic wardrobe items and sessions for store
 /// screenshots. Text follows [lang] (`en` or `id`); times are relative to
@@ -58,8 +59,8 @@ Future<DemoIds> seedDemoData(AppDatabase db, String lang) async {
   );
   final oxford = await item('Oxford Shirt', 'Kemeja Oxford Biru', _shirt, 2);
   final flannel = await item('Flannel Shirt', 'Kemeja Flanel', _shirt, 2);
-  await item('Denim Jacket', 'Jaket Denim', _outerwear, 1);
-  await item('Grey Hoodie', 'Hoodie Abu-abu', _outerwear, 1);
+  await item('Beige Cardigan', 'Kardigan Krem', _cardigan, 1);
+  await item('Grey Hoodie', 'Hoodie Abu-abu', _hoodie, 1);
   final chinos = await item(
     'Black Chinos',
     'Celana Chino Hitam',
