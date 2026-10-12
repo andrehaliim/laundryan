@@ -446,7 +446,7 @@ class _CategorySheetState extends State<CategorySheet> {
                                 color: key == _iconKey
                                     ? scheme.primary
                                     : Colors.transparent,
-                                width: key == _iconKey ? 2 : 1,
+                                width: 2,
                               ),
                             ),
                             child: HugeIcon(
