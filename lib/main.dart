@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:laundryan/utils/notification_service.dart';
 import 'package:provider/provider.dart';
 
@@ -18,13 +21,16 @@ import 'utils/photo_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
   await PhotoStorage.init();
   await NotificationService.init();
   final settings = await SettingsProvider.load();
 
-  runApp(
-    AppScope(settings: settings, db: AppDatabase(), child: const MyApp()),
-  );
+  runApp(AppScope(settings: settings, db: AppDatabase(), child: const MyApp()));
 }
 
 /// Provides the settings, database and feature providers to [child].
@@ -69,11 +75,7 @@ class MyApp extends StatelessWidget {
   final Widget home;
   final GlobalKey<NavigatorState>? navigatorKey;
 
-  const MyApp({
-    super.key,
-    this.home = const SplashScreen(),
-    this.navigatorKey,
-  });
+  const MyApp({super.key, this.home = const SplashScreen(), this.navigatorKey});
 
   @override
   Widget build(BuildContext context) {

@@ -45,11 +45,14 @@ flutter:
   assets:
     - assets/icon/
     - assets/splash/
+    - assets/google_fonts/
 
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#E1F3FA"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   remove_alpha_ios: true
 
 flutter_native_splash:
