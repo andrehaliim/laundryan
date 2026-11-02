@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon/icon.png" alt="Laundryan icon" width="120" />
+  <img src="assets/docs/banner.png" alt="Laundryan banner" width="100%" />
 </p>
 
 <h1 align="center">Laundryan</h1>
@@ -29,23 +29,6 @@ ready. At pickup, a checklist takes you through every piece so you can mark
 it as returned, lost or swapped. If anything is missing, the app writes a
 WhatsApp message to the laundry listing exactly what didn't come back. All
 data is stored offline on the device.
-
-## Screenshots
-
-<table>
-  <tr>
-    <td width="50%"><img src="assets/docs/screenshots/01_sessions.png" width="100%" alt="Sessions" /></td>
-    <td width="50%"><img src="assets/docs/screenshots/02_session_detail.png" width="100%" alt="Session detail" /></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="assets/docs/screenshots/03_checklist.png" width="100%" alt="Pickup checklist" /></td>
-    <td width="50%"><img src="assets/docs/screenshots/04_history_detail.png" width="100%" alt="History detail" /></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="assets/docs/screenshots/05_wardrobe.png" width="100%" alt="Wardrobe" /></td>
-    <td width="50%"><img src="assets/docs/screenshots/06_sessions_dark.png" width="100%" alt="Dark mode" /></td>
-  </tr>
-</table>
 
 ## Key Features
 
@@ -94,8 +77,8 @@ data is stored offline on the device.
 | [package_info_plus](https://pub.dev/packages/package_info_plus) | App version info |
 
 Dev tooling: `drift_dev` + `build_runner` (code generation),
-`flutter_launcher_icons`, `flutter_native_splash`, `integration_test`
-(store screenshots), and `drift_db_viewer` (debug database inspection).
+`flutter_launcher_icons`, `flutter_native_splash`, and `drift_db_viewer`
+(debug database inspection).
 
 ## Data Model
 
@@ -125,8 +108,7 @@ lib/
 ├── utils/         # Theme, notifications, photo storage, phone and time helpers
 ├── widgets/       # Reusable UI components
 └── main.dart      # App entry point and dependency setup
-integration_test/  # Framed Play Store screenshot generator
-test_driver/       # Host-side driver that saves screenshots
+store_screenshots/ # Framed Play Store screenshot and banner generator
 ```
 
 ## Getting Started
@@ -190,16 +172,16 @@ silently signing with the debug key. See the
 
 ## Store Screenshots
 
-Framed 1080×1920 Play Store screenshots for every supported language are
-generated with seeded demo data:
+Framed 1080×1920 Play Store screenshots and a 1920×1080 banner for every
+supported language are rendered from manual screenshots (see
+`store_screenshots/SHOTLIST.md`). Save the screenshots to
+`store_screenshots/raw/<lang>/`, then run (needs Chrome or Edge):
 
 ```bash
-fvm flutter drive --driver=test_driver/integration_test.dart \
-  --target=integration_test/screenshots_test.dart -d <device>
+python store_screenshots/generate.py
 ```
 
-Framed images are written to `screenshots/<lang>/` and bare screens to
-`screenshots/<lang>/raw/`.
+Output is written to `store_screenshots/framed/`.
 
 ## Author
 

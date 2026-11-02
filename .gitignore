@@ -95,8 +95,9 @@ key.properties
 # Claude Code
 CLAUDE.md
 
-# Store screenshots (dibuat ulang lewat integration_test)
-/screenshots/
-
 # FVM Version Cache
 .fvm/
+
+# Store screenshot generator (raw input and rendered output)
+/store_screenshots/raw/
+/store_screenshots/framed/

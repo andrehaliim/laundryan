@@ -1,0 +1,103 @@
+<!doctype html>
+<!--
+  Landscape banner (1920x1080): app icon and name, three phones.
+  Placeholders: theme, icon, app_name, crop,
+  source_width, chroma_key, and for each phone i = 1 (left),
+  2 (center), 3 (right): shot_i, kind_i and crop_i.
+  kind_i is "widget" for a shot with "layout": "widget": its green is
+  keyed out over the .widget wallpaper and rows crop_i are kept.
+  Otherwise it is "app" and crop trims the status bar.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+{{theme}}
+
+* { margin: 0; box-sizing: border-box; }
+
+html, body { width: 1920px; height: 1080px; overflow: hidden; }
+
+body {
+  position: relative;
+  font-family: var(--font-body);
+  background:
+    radial-gradient(1100px 700px at 50% 110%, var(--banner-glow-1), transparent 60%),
+    radial-gradient(900px 800px at 0% 0%, var(--glow-2), transparent 65%),
+    linear-gradient(160deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+}
+
+.brand {
+  position: absolute;
+  top: 56px;
+  left: 64px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 0 0 2px var(--icon-ring); }
+
+.brand span {
+  font-family: var(--font-brand);
+  font-style: var(--brand-style);
+  font-weight: var(--brand-weight);
+  font-size: 52px;
+  color: var(--title);
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone {
+  position: absolute;
+  padding: 16px;
+  border-radius: 64px;
+  background: var(--device);
+  box-shadow: 0 0 0 3px var(--device-edge), 0 50px 100px rgba(0, 0, 0, 0.45);
+}
+
+.phone.center { width: 440px; top: 120px; z-index: 2; }
+
+.phone.side { width: 380px; top: 190px; z-index: 1; }
+
+.phone.left { transform: translateX(-430px) rotate(-7deg); }
+
+.phone.right { transform: translateX(430px) rotate(7deg); }
+
+.screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 50px;
+  aspect-ratio: 1080 / 2240;
+}
+
+.screen.app img { display: block; width: 100%; margin-top: calc(-1 * {{crop}}%); }
+
+.screen.widget {
+  background:
+    radial-gradient(400px 500px at 80% 10%, var(--wallpaper-glow), transparent 70%),
+    linear-gradient(170deg, var(--wallpaper-start) 0%, var(--wallpaper-end) 100%);
+}
+
+.screen.widget img, .screen.widget canvas { display: block; width: 100%; }
+</style>
+</head>
+<body>
+  <div class="brand"><img src="{{icon}}"><span>{{app_name}}</span></div>
+  <div class="stage">
+    <div class="phone side left"><div class="screen {{kind_1}}"><img src="{{shot_1}}" data-crop="{{crop_1}}"></div></div>
+    <div class="phone center"><div class="screen {{kind_2}}"><img src="{{shot_2}}" data-crop="{{crop_2}}"></div></div>
+    <div class="phone side right"><div class="screen {{kind_3}}"><img src="{{shot_3}}" data-crop="{{crop_3}}"></div></div>
+  </div>
+<script>
+{{chroma_key}}
+keyAll('.screen.widget img', {{source_width}});
+</script>
+</body>
+</html>

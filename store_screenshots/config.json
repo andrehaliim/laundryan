@@ -1,0 +1,105 @@
+{
+  "locales": ["en", "id"],
+  "source_width": 1080,
+  "crop_top": 100,
+  "vars": {
+    "app_name": "Laundryan",
+    "tagline_1": {
+      "en": "Track your laundry,",
+      "id": "Lacak cucianmu,"
+    },
+    "tagline_2": {
+      "en": "lose nothing.",
+      "id": "tanpa ada yang hilang."
+    },
+    "tagline_sub": {
+      "en": "Catalog your clothes, log every drop-off, and check each piece back in on pickup.",
+      "id": "Catat isi lemari, setiap kali antar laundry, dan cek semua pakaian saat diambil."
+    }
+  },
+  "images": {
+    "icon": "../assets/icon/icon.png"
+  },
+  "fonts": [
+    { "family": "PlusJakartaSans", "weight": 700, "file": "../assets/google_fonts/PlusJakartaSans-Bold.ttf" },
+    { "family": "PlusJakartaSans", "weight": 500, "file": "../assets/google_fonts/PlusJakartaSans-Medium.ttf" }
+  ],
+  "theme": {
+    "font-body": "PlusJakartaSans, sans-serif",
+    "font-brand": "PlusJakartaSans, sans-serif",
+    "brand-style": "normal",
+    "brand-weight": "700",
+    "bg-start": "#E1F3FA",
+    "bg-mid": "#D0ECF7",
+    "bg-end": "#BFE4F4",
+    "accent": "#0C6780",
+    "blob-1": "rgba(12, 103, 128, 0.08)",
+    "blob-2": "rgba(12, 103, 128, 0.07)",
+    "glow-1": "rgba(255, 182, 193, 0.30)",
+    "glow-2": "rgba(12, 103, 128, 0.08)",
+    "banner-glow-1": "rgba(255, 182, 193, 0.28)",
+    "title": "#0F2A36",
+    "subtitle": "rgba(15, 42, 54, 0.7)",
+    "device": "#1E252D",
+    "device-edge": "#3A4652",
+    "icon-ring": "#0F2A36",
+    "wallpaper-glow": "rgba(255, 221, 226, 0.9)",
+    "wallpaper-start": "#D6EFFA",
+    "wallpaper-end": "#87CEEB"
+  },
+  "banner": {
+    "shots": ["02_checklist", "01_sessions"]
+  },
+  "captions": {
+    "01_sessions": {
+      "slot": 0,
+      "en": ["Never lose *laundry again*", "Every drop-off tracked, from washing to ready"],
+      "id": ["Cucian tak *hilang lagi*", "Pantau tiap cucian, dari dicuci sampai siap diambil"]
+    },
+    "02_checklist": {
+      "slot": 1,
+      "en": ["Check items *at pickup*", "Mark items returned, lost or swapped one by one"],
+      "id": ["Cek tiap item *saat diambil*", "Tandai kembali, hilang, atau tertukar per item"]
+    },
+    "03_summary_whatsapp": {
+      "slot": 2,
+      "en": ["Missing items? *One tap*", "WhatsApp the laundry a list of what's missing"],
+      "id": ["Kurang? *Lapor sekali tap*", "Kirim daftar barang hilang ke laundry lewat WhatsApp"]
+    },
+    "04_session_detail": {
+      "slot": 3,
+      "en": ["Know when *it's ready*", "Follow each step, from drop-off to pickup"],
+      "id": ["Tahu kapan *cucian siap*", "Ikuti tiap tahap, dari dititipkan sampai diambil"]
+    },
+    "05_report_missing": {
+      "slot": 4,
+      "en": ["Flag lost *or swapped*", "Mark what didn't come back and note what happened"],
+      "id": ["Catat barang *yang hilang*", "Tandai hilang atau tertukar, lalu jelaskan masalahnya"]
+    },
+    "06_wardrobe": {
+      "slot": 5,
+      "en": ["Your closet, *cataloged*", "Know what's at home, in the wash, or missing"],
+      "id": ["Isi lemari *tercatat rapi*", "Tahu mana di rumah, sedang dicuci, atau hilang"]
+    },
+    "07_add_item": {
+      "slot": 6,
+      "en": ["Add clothes *in seconds*", "Photo, category, quantity and notes"],
+      "id": ["Tambah baju *dalam detik*", "Foto, kategori, jumlah, dan catatan"]
+    },
+    "08_add_session": {
+      "slot": 7,
+      "en": ["Never miss *pickup time*", "Optional reminder 2 hours before pickup"],
+      "id": ["Diingatkan *sebelum siap*", "Pengingat opsional 2 jam sebelum diambil"]
+    },
+    "09_categories": {
+      "slot": 8,
+      "en": ["Categories *your way*", "Create your own with the icons you like"],
+      "id": ["Kategori *sesukamu*", "Buat sendiri dengan ikon pilihanmu"]
+    },
+    "10_sessions_dark": {
+      "slot": 9,
+      "en": ["Easy on the eyes *at night*", "A dark mode that looks just as good"],
+      "id": ["Nyaman di *malam hari*", "Mode gelap yang tetap enak dilihat"]
+    }
+  }
+}

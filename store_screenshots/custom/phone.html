@@ -1,0 +1,126 @@
+<!doctype html>
+<!--
+  Laundryan override of templates/phone.html, styled like
+  custom/banner.html: light vertical gradient, two-tone title and soft
+  bubbles that continue across neighbouring frames.
+  Placeholders: theme, shot, title, subtitle, crop, slot.
+  slot is the frame's position in store order (0, 1, 2, ...): all frames
+  share one wide strip of bubbles and each shows its own 1080 px slice,
+  so bubbles on a frame edge carry on into the next frame.
+  In the title, the part wrapped in *...* is the key line, shown on its
+  own line in --accent.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+{{theme}}
+
+* { margin: 0; box-sizing: border-box; }
+
+html, body { width: 1080px; height: 1920px; overflow: hidden; }
+
+body {
+  position: relative;
+  font-family: var(--font-body);
+  background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+  color: var(--title);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bubble { position: absolute; border-radius: 50%; background: var(--blob-1); }
+
+.bubble.soft { background: var(--blob-2); }
+
+.caption { position: relative; width: 100%; padding: 100px 60px 0; text-align: center; }
+
+h1 {
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  white-space: nowrap;
+}
+
+h1 .key { color: var(--accent); }
+
+p { margin-top: 22px; font-size: 34px; font-weight: 500; line-height: 1.4; color: var(--subtitle); }
+
+.stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0 60px;
+}
+
+.phone {
+  position: relative;
+  width: 720px;
+  padding: 22px;
+  border-radius: 92px;
+  background: var(--device);
+  box-shadow: 0 0 0 3px var(--device-edge), 0 50px 100px rgba(15, 42, 54, 0.25);
+}
+
+.screen { overflow: hidden; border-radius: 72px; }
+
+.screen img { display: block; width: 100%; margin-top: calc(-1 * {{crop}}%); }
+</style>
+</head>
+<body>
+  <div class="caption">
+    <h1>{{title}}</h1>
+    <p>{{subtitle}}</p>
+  </div>
+  <div class="stage">
+    <div class="phone">
+      <div class="screen"><img src="{{shot}}"></div>
+    </div>
+  </div>
+<script>
+const title = document.querySelector('h1');
+title.innerHTML = title.innerHTML.replace(/\*(.+?)\*/, '<span class="key">$1</span>');
+// Shrinks the title until it fits on one line.
+document.fonts.ready.then(() => {
+  const maxWidth = 1080 - 2 * 60;
+  let size = 72;
+  while (title.scrollWidth > maxWidth && size > 40) {
+    size -= 2;
+    title.style.fontSize = `${size}px`;
+  }
+});
+
+// One bubble on every frame edge (x = 1080 * k) plus a small one inside
+// each frame. Coordinates are in the shared strip; this frame shows
+// x = slot * 1080 .. (slot + 1) * 1080.
+const edgeY = [1320, 560, 1500, 700, 1260, 520, 1440, 660, 1340, 600, 1420];
+const edgeD = [620, 440, 700, 420, 640, 460, 680, 440, 600, 480, 620];
+const bubbles = [];
+edgeY.forEach((y, k) => {
+  bubbles.push({ x: 1080 * k, y, d: edgeD[k], soft: k % 2 === 1 });
+  bubbles.push({
+    x: 1080 * k + (k % 2 ? 930 : 150),
+    y: k % 2 ? 1760 : 1680,
+    d: k % 2 ? 110 : 150,
+    soft: k % 2 === 0,
+  });
+});
+const left = {{slot}} * 1080;
+for (const b of bubbles) {
+  const el = document.createElement('div');
+  el.className = b.soft ? 'bubble soft' : 'bubble';
+  Object.assign(el.style, {
+    width: `${b.d}px`,
+    height: `${b.d}px`,
+    left: `${b.x - left - b.d / 2}px`,
+    top: `${b.y - b.d / 2}px`,
+  });
+  document.body.prepend(el);
+}
+</script>
+</body>
+</html>
