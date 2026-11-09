@@ -154,22 +154,25 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               children: [
                 SizedBox(
                   height: 56,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AnimatedOpacity(
-                        opacity: isLast ? 0 : 1,
-                        duration: const Duration(milliseconds: 200),
-                        child: IgnorePointer(
-                          ignoring: isLast,
-                          child: SoftButton(
-                            label: l10n.skip,
-                            variant: SoftButtonVariant.ghost,
-                            onPressed: _finish,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const _LanguageSwitch(),
+                        AnimatedOpacity(
+                          opacity: isLast ? 0 : 1,
+                          duration: const Duration(milliseconds: 200),
+                          child: IgnorePointer(
+                            ignoring: isLast,
+                            child: SoftButton(
+                              label: l10n.skip,
+                              variant: SoftButtonVariant.ghost,
+                              onPressed: _finish,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
@@ -207,6 +210,100 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LanguageSwitch extends StatelessWidget {
+  const _LanguageSwitch();
+
+  static const _width = 84.0;
+  static const _height = 30.0;
+  static const _inset = 3.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final settings = context.watch<SettingsProvider>();
+    final isId = settings.locale.languageCode == 'id';
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 200);
+    final labelStyle = theme.textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+
+    Widget option(String code, bool selected) => Expanded(
+      child: Center(
+        child: AnimatedDefaultTextStyle(
+          duration: duration,
+          style: (labelStyle ?? const TextStyle()).copyWith(
+            color: selected ? scheme.onSurface : scheme.outline,
+          ),
+          child: Text(code.toUpperCase()),
+        ),
+      ),
+    );
+
+    void select(String code) {
+      if (code != settings.locale.languageCode) settings.setLanguage(code);
+    }
+
+    return Semantics(
+      label: l10n.language,
+      value: isId ? l10n.indonesian : l10n.english,
+      button: true,
+      onTap: () => select(isId ? 'en' : 'id'),
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapUp: (d) => select(d.localPosition.dx < _width / 2 ? 'en' : 'id'),
+        child: SizedBox(
+          width: _width,
+          height: kMinInteractiveDimension,
+          child: Center(
+            child: Container(
+              width: _width,
+              height: _height,
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(_height / 2),
+              ),
+              child: Stack(
+                children: [
+                  AnimatedAlign(
+                    duration: duration,
+                    curve: Curves.easeOut,
+                    alignment: isId
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(_inset),
+                      child: Container(
+                        width: _width / 2 - _inset,
+                        decoration: BoxDecoration(
+                          color: theme.cardTheme.color,
+                          borderRadius: BorderRadius.circular(
+                            (_height - _inset * 2) / 2,
+                          ),
+                          border: Border.all(color: scheme.outlineVariant),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Row(
+                      children: [option('en', !isId), option('id', isId)],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
