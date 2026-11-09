@@ -23,6 +23,9 @@ class EmptyState extends StatelessWidget {
   /// Compact only: wrap in a [SoftCard]. Use false inside another card.
   final bool framed;
 
+  /// Full layout only: wraps the action button, e.g. as a coach-mark target.
+  final Widget Function(Widget action)? wrapAction;
+
   const EmptyState({
     super.key,
     required this.icon,
@@ -35,6 +38,7 @@ class EmptyState extends StatelessWidget {
     this.onAction,
     this.compact = false,
     this.framed = true,
+    this.wrapAction,
   });
 
   (Color, Color) _colors(ColorScheme s) => switch (tone) {
@@ -42,6 +46,8 @@ class EmptyState extends StatelessWidget {
     EmptyStateTone.secondary => (s.secondaryContainer, s.onSecondaryContainer),
     EmptyStateTone.tertiary => (s.tertiaryContainer, s.onTertiaryContainer),
   };
+
+  Widget _wrapAction(Widget action) => wrapAction?.call(action) ?? action;
 
   @override
   Widget build(BuildContext context) {
@@ -96,12 +102,14 @@ class EmptyState extends StatelessWidget {
               ),
               if (hasAction) ...[
                 const SizedBox(height: 24),
-                FadeSlideIn(
-                  delay: const Duration(milliseconds: 240),
-                  child: SoftButton(
-                    label: actionLabel!,
-                    icon: actionIcon,
-                    onPressed: onAction,
+                _wrapAction(
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 240),
+                    child: SoftButton(
+                      label: actionLabel!,
+                      icon: actionIcon,
+                      onPressed: onAction,
+                    ),
                   ),
                 ),
               ],

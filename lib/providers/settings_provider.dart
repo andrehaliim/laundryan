@@ -36,4 +36,21 @@ class SettingsProvider extends ChangeNotifier {
     await _prefs.setBool(_kOnboarding, true);
     notifyListeners();
   }
+
+  static String _tourKey(String id) => 'tour_${id}_done';
+
+  bool isTourDone(String id) => _prefs.getBool(_tourKey(id)) ?? false;
+
+  Future<void> completeTour(String id) async {
+    await _prefs.setBool(_tourKey(id), true);
+  }
+
+  Future<void> resetTours() async {
+    final keys = _prefs.getKeys().where(
+      (k) => k.startsWith('tour_') && k.endsWith('_done'),
+    );
+    for (final k in keys.toList()) {
+      await _prefs.remove(k);
+    }
+  }
 }

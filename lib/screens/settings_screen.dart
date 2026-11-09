@@ -171,23 +171,49 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _sectionLabel(context, l10n.developer),
             SoftCard(
-              child: _tile(
-                context,
-                icon: HugeIcons.strokeRoundedDatabase,
-                bg: scheme.surfaceContainerHigh,
-                fg: scheme.onSurfaceVariant,
-                title: 'DB Viewer',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => DriftDbViewer(context.read<AppDatabase>()),
+              child: Column(
+                children: [
+                  _tile(
+                    context,
+                    icon: HugeIcons.strokeRoundedDatabase,
+                    bg: scheme.surfaceContainerHigh,
+                    fg: scheme.onSurfaceVariant,
+                    title: 'DB Viewer',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            DriftDbViewer(context.read<AppDatabase>()),
+                      ),
+                    ),
                   ),
-                ),
+                  _divider(),
+                  _tile(
+                    context,
+                    icon: HugeIcons.strokeRoundedRefresh,
+                    bg: scheme.surfaceContainerHigh,
+                    fg: scheme.onSurfaceVariant,
+                    title: 'Reset tour',
+                    subtitle: 'Show coach marks again after app restart',
+                    onTap: () => _resetTours(context),
+                  ),
+                ],
               ),
             ),
           ],
           const SizedBox(height: 32),
           _footer(context),
         ],
+      ),
+    );
+  }
+
+  /// Debug only: clears every "tour seen" flag so tours replay on next launch.
+  Future<void> _resetTours(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    await context.read<SettingsProvider>().resetTours();
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Tours reset. Restart the app to see them.'),
       ),
     );
   }

@@ -543,6 +543,28 @@
       }
     }
   },
+  "tourSessionsAddTitle": "Add a laundry session",
+  "tourSessionsAddDesc": "Tap + to log the clothes you send to the laundry.",
+  "tourWardrobeTabDesc": "Start here: save your clothes first. Laundry sessions are made by picking clothes from your wardrobe.",
+  "tourActiveStatusTitle": "Laundry status",
+  "tourActiveStatusDesc": "Stages update on their own from your schedule: dropped off, washing, ready for pickup, then verified once you check your clothes.",
+  "tourActiveDetailsTitle": "Session details",
+  "tourActiveDetailsDesc": "See the clothes list, message the laundromat on WhatsApp, and verify your clothes at pickup.",
+  "tourHistoryDesc": "Verified sessions move here. Tap one to see its check results.",
+  "tourCheckProgressTitle": "Verification progress",
+  "tourCheckProgressDesc": "Shows how many pieces are back and how much you've checked. Green means returned, pink means missing or swapped.",
+  "tourCheckItemTitle": "Inspect an item",
+  "tourCheckItemDesc": "Tap a card to set how many came back. If some are missing, mark them as lost or swapped and add a note.",
+  "tourCheckToggleTitle": "Mark as checked",
+  "tourCheckToggleDesc": "Tap this box once the item is back in full.",
+  "tourCheckFinishDesc": "Turns on once every item is checked. The session then moves to History.",
+  "tourWardrobeSearchTitle": "Find clothes fast",
+  "tourWardrobeSearchDesc": "Type a name to filter your wardrobe.",
+  "tourWardrobeSortTitle": "Sort A–Z",
+  "tourWardrobeSortDesc": "Tap to switch between A–Z and Z–A.",
+  "tourWardrobeCardTitle": "Your clothes",
+  "tourWardrobeCardDesc": "Each card shows how many are in your wardrobe, at the laundry, and missing. Tap a card to edit it. Next, head to Sessions to send them to the laundry.",
+  "tourOpenSessions": "Go to sessions",
   "readyInDays": "{count, plural, =1{in 1 day} other{in {count} days}}",
   "@readyInDays": {
     "placeholders": {
@@ -550,5 +572,25 @@
         "type": "int"
       }
     }
-  }
+  },
+  "tourSessionsTabDesc": "Track the laundry that's out being washed and see your past sessions here.",
+  "tourOpenWardrobe": "Open wardrobe",
+  "tourWardrobeEmptyTitle": "Add your first clothes",
+  "tourWardrobeEmptyDesc": "Save each piece with a photo and category. Once you have some, you can start a laundry session.",
+  "tourSessionsFirstTitle": "Start your first session",
+  "tourSessionsFirstDesc": "Your clothes are saved. Pick what goes to the laundry and set when it'll be ready.",
+  "tourItemPhotoTitle": "Photo",
+  "tourItemPhotoDesc": "Take or pick a photo so the piece is easy to recognize when it comes back.",
+  "tourItemCategoryTitle": "Category",
+  "tourItemCategoryDesc": "Choose the type of clothing. Tap \"+ Manage Categories\" to add your own.",
+  "tourItemQtyTitle": "How many you own",
+  "tourItemQtyDesc": "For identical pieces, like 3 of the same T-shirt. You can send up to this many in one session.",
+  "tourSessionPlaceTitle": "Laundromat info",
+  "tourSessionPlaceDesc": "Enter the laundromat's name. Address and phone are optional but handy at pickup.",
+  "tourSessionScheduleTitle": "Schedule and reminder",
+  "tourSessionScheduleDesc": "Set the drop-off time and when it'll be ready. Keep the reminder on to get notified before pickup.",
+  "tourSessionItemsTitle": "Pick clothes",
+  "tourSessionItemsDesc": "Choose clothes from your wardrobe and how many of each go to the laundry.",
+  "tourSessionStartTitle": "Start session",
+  "tourSessionStartDesc": "Saves the session. When the laundry comes back, tick off each piece to make sure nothing's missing."
 }

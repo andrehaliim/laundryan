@@ -6,12 +6,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:laundryan/data/wardrobe_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
+import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
+import 'package:laundryan/utils/app_tour.dart';
 import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/widgets/category_sheet.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
+import 'package:laundryan/widgets/tour_step.dart';
 import 'package:provider/provider.dart';
 
 class WardrobeItemScreen extends StatefulWidget {
@@ -34,6 +37,9 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
   bool _saving = false;
   late final int? _initialCategoryId;
 
+  /// Feature tour, only when adding a new item.
+  ScreenTour? _tour;
+
   bool get _isEdit => widget.entry != null;
   int get _minQty => max(1, widget.entry?.lockedQty ?? 0);
 
@@ -50,10 +56,39 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
         e?.item.categoryId ??
         context.read<CategoryProvider>().categories.firstOrNull?.id;
     _initialCategoryId = _categoryId;
+
+    if (!_isEdit) {
+      _tour = ScreenTour(
+        scope: AppTour.wardrobeItemScope,
+        id: AppTour.wardrobeItem,
+        settings: context.read<SettingsProvider>(),
+      )..startIfNew(AppTour.wardrobeItemSteps);
+    }
+  }
+
+  /// Wraps [child] as tour step [step] when adding a new item.
+  Widget _tourStep({
+    required GlobalKey key,
+    required int step,
+    required String title,
+    required String description,
+    required Widget child,
+  }) {
+    if (_tour == null) return child;
+    return TourStep(
+      scope: AppTour.wardrobeItemScope,
+      showcaseKey: key,
+      step: step,
+      total: AppTour.wardrobeItemSteps.length,
+      title: title,
+      description: description,
+      child: child,
+    );
   }
 
   @override
   void dispose() {
+    _tour?.dispose();
     if (!_done && _photo != _originalPhoto) PhotoStorage.delete(_photo);
     _name.dispose();
     _note.dispose();
@@ -347,32 +382,38 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              SizedBox(
-                width: double.infinity,
-                height: MediaQuery.sizeOf(context).height / 4,
-                child: SoftCard(
-                  child: file == null
-                      ? placeholder
-                      : Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.file(
-                              file,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => placeholder,
-                            ),
-                            Positioned(
-                              right: 12,
-                              bottom: 12,
-                              child: SoftButton(
-                                label: l10n.photo,
-                                icon: HugeIcons.strokeRoundedEdit02,
-                                variant: SoftButtonVariant.secondary,
-                                onPressed: () => _showPhotoOptions(l10n),
+              _tourStep(
+                key: AppTour.itemPhoto,
+                step: 1,
+                title: l10n.tourItemPhotoTitle,
+                description: l10n.tourItemPhotoDesc,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.sizeOf(context).height / 4,
+                  child: SoftCard(
+                    child: file == null
+                        ? placeholder
+                        : Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.file(
+                                file,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => placeholder,
                               ),
-                            ),
-                          ],
-                        ),
+                              Positioned(
+                                right: 12,
+                                bottom: 12,
+                                child: SoftButton(
+                                  label: l10n.photo,
+                                  icon: HugeIcons.strokeRoundedEdit02,
+                                  variant: SoftButtonVariant.secondary,
+                                  onPressed: () => _showPhotoOptions(l10n),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -398,118 +439,137 @@ class _WardrobeItemScreenState extends State<WardrobeItemScreen> {
                     (v == null || v.trim().isEmpty) ? l10n.nameRequired : null,
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Text(
-                    l10n.category,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(
-                    " *",
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(color: scheme.error),
-                  ),
-                  Spacer(),
-                  GestureDetector(
-                    onTap: () => showCategorySheet(context),
-                    child: CountBadge(
-                      label: '+ ${l10n.manageCategories}',
-                      horizontalPadding: 8,
-                      mode: CountBadgeMode.normal,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Expanded(
-                    child: SoftDropdown<int>(
-                      value: _categoryId,
-                      entries: [
-                        for (final c in categories)
-                          DropdownMenuEntry(
-                            value: c.id,
-                            label: categoryName(c, l10n),
-                            leadingIcon: HugeIcon(
-                              icon: iconFor(c.iconKey),
-                              size: 20,
-                              color: scheme.primary,
-                            ),
+              _tourStep(
+                key: AppTour.itemCategory,
+                step: 2,
+                title: l10n.tourItemCategoryTitle,
+                description: l10n.tourItemCategoryDesc,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          l10n.category,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          " *",
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: scheme.error),
+                        ),
+                        Spacer(),
+                        GestureDetector(
+                          onTap: () => showCategorySheet(context),
+                          child: CountBadge(
+                            label: '+ ${l10n.manageCategories}',
+                            horizontalPadding: 8,
+                            mode: CountBadgeMode.normal,
                           ),
+                        ),
                       ],
-                      onSelected: (v) => setState(() => _categoryId = v),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SoftDropdown<int>(
+                            value: _categoryId,
+                            entries: [
+                              for (final c in categories)
+                                DropdownMenuEntry(
+                                  value: c.id,
+                                  label: categoryName(c, l10n),
+                                  leadingIcon: HugeIcon(
+                                    icon: iconFor(c.iconKey),
+                                    size: 20,
+                                    color: scheme.primary,
+                                  ),
+                                ),
+                            ],
+                            onSelected: (v) => setState(() => _categoryId = v),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
-              SoftCard(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.totalOwnedQty,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      Text(
-                        l10n.totalOwnedQtyHint,
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            l10n.inventoryCount,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: scheme.onSurfaceVariant),
-                          ),
-                          Spacer(),
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: scheme.outlineVariant),
-                              borderRadius: BorderRadius.circular(12),
-                              color: scheme.surface,
+              _tourStep(
+                key: AppTour.itemQty,
+                step: 3,
+                title: l10n.tourItemQtyTitle,
+                description: l10n.tourItemQtyDesc,
+                child: SoftCard(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.totalOwnedQty,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          l10n.totalOwnedQtyHint,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              l10n.inventoryCount,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
                             ),
-                            child: Row(
-                              children: [
-                                IconButton.filledTonal(
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedMinusSign,
-                                    strokeWidth: 2,
-                                  ),
-                                  onPressed: _qty > _minQty
-                                      ? () => setState(() => _qty--)
-                                      : null,
+                            Spacer(),
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: scheme.outlineVariant,
                                 ),
-                                SizedBox(
-                                  width: 48,
-                                  child: Text(
-                                    '$_qty',
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge,
+                                borderRadius: BorderRadius.circular(12),
+                                color: scheme.surface,
+                              ),
+                              child: Row(
+                                children: [
+                                  IconButton.filledTonal(
+                                    icon: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedMinusSign,
+                                      strokeWidth: 2,
+                                    ),
+                                    onPressed: _qty > _minQty
+                                        ? () => setState(() => _qty--)
+                                        : null,
                                   ),
-                                ),
-                                IconButton.filledTonal(
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedPlusSign,
-                                    strokeWidth: 2,
+                                  SizedBox(
+                                    width: 48,
+                                    child: Text(
+                                      '$_qty',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
                                   ),
-                                  onPressed: () => setState(() => _qty++),
-                                ),
-                              ],
+                                  IconButton.filledTonal(
+                                    icon: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedPlusSign,
+                                      strokeWidth: 2,
+                                    ),
+                                    onPressed: () => setState(() => _qty++),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

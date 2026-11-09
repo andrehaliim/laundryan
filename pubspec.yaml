@@ -26,6 +26,7 @@ dependencies:
   path_provider: ^2.1.6
   provider: ^6.1.5+1
   shared_preferences: ^2.5.5
+  showcaseview: ^5.1.0
   timezone: ^0.11.1
   url_launcher: ^6.3.2
 

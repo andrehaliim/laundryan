@@ -7,13 +7,16 @@ import 'package:laundryan/data/session_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
+import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/screens/checklist_summary_screen.dart';
 import 'package:laundryan/widgets/soft.dart';
+import 'package:laundryan/utils/app_tour.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:laundryan/widgets/item_thumb.dart';
 import 'package:laundryan/widgets/skeleton.dart';
+import 'package:laundryan/widgets/tour_step.dart';
 import 'package:provider/provider.dart';
 
 class _Draft {
@@ -41,10 +44,44 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   String? _phone;
   bool _saving = false;
 
+  late final ScreenTour _tour;
+
   @override
   void initState() {
     super.initState();
+    _tour = ScreenTour(
+      scope: AppTour.checklistScope,
+      id: AppTour.checklist,
+      settings: context.read<SettingsProvider>(),
+    );
     _load();
+  }
+
+  @override
+  void dispose() {
+    _tour.dispose();
+    super.dispose();
+  }
+
+  /// Wraps [child] as step [step] of this screen's feature tour.
+  Widget _tourStep({
+    required GlobalKey key,
+    required int step,
+    required String title,
+    required String description,
+    required Widget child,
+    BorderRadius borderRadius = const BorderRadius.all(Radius.circular(12)),
+  }) {
+    return TourStep(
+      scope: AppTour.checklistScope,
+      showcaseKey: key,
+      step: step,
+      total: AppTour.checklistSteps.length,
+      title: title,
+      description: description,
+      targetBorderRadius: borderRadius,
+      child: child,
+    );
   }
 
   Future<void> _load() async {
@@ -65,6 +102,8 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         _drafts[v.sessionItem.id] = _Draft(v.sessionItem.quantity);
       }
     });
+    // Targets exist only once the items are loaded.
+    if (list.isNotEmpty) _tour.startIfNew(AppTour.checklistSteps);
   }
 
   bool get _allChecked =>
@@ -164,7 +203,13 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
             : ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _progressCard(context, items),
+                  _tourStep(
+                    key: AppTour.checkProgress,
+                    step: 1,
+                    title: l10n.tourCheckProgressTitle,
+                    description: l10n.tourCheckProgressDesc,
+                    child: _progressCard(context, items),
+                  ),
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -193,6 +238,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                       context,
                       v,
                       cats.where((c) => c.id == v.item.categoryId).firstOrNull,
+                      showTour: v == items.first,
                     ),
                     if (v != items.last) const SizedBox(height: 8),
                   ],
@@ -240,11 +286,17 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                     ],
                   ),
                 ),
-                SoftButton(
-                  label: l10n.finishVerification,
-                  icon: HugeIcons.strokeRoundedTaskDone01,
-                  onPressed: _allChecked && !_saving ? _finish : null,
-                  expanded: true,
+                _tourStep(
+                  key: AppTour.checkFinish,
+                  step: 4,
+                  title: l10n.finishVerification,
+                  description: l10n.tourCheckFinishDesc,
+                  child: SoftButton(
+                    label: l10n.finishVerification,
+                    icon: HugeIcons.strokeRoundedTaskDone01,
+                    onPressed: _allChecked && !_saving ? _finish : null,
+                    expanded: true,
+                  ),
                 ),
               ],
             ),
@@ -390,7 +442,12 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     );
   }
 
-  Widget _itemCard(BuildContext context, SessionItemView v, Category? cat) {
+  Widget _itemCard(
+    BuildContext context,
+    SessionItemView v,
+    Category? cat, {
+    bool showTour = false,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -454,7 +511,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
             scheme.onSecondaryContainer,
           );
 
-    return SoftCard(
+    final card = SoftCard(
       onTap: () => _openDetail(v, d),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -494,21 +551,32 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              Material(
-                color: toggleBg,
-                borderRadius: BorderRadius.circular(8),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () => setState(() => d.checked = !d.checked),
-                  child: SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: Center(
-                      child: HugeIcon(
-                        icon: toggleIcon,
-                        strokeWidth: 2,
-                        size: 20,
-                        color: toggleFg,
+              _maybeTour(
+                showTour,
+                (child) => _tourStep(
+                  key: AppTour.checkToggle,
+                  step: 3,
+                  title: l10n.tourCheckToggleTitle,
+                  description: l10n.tourCheckToggleDesc,
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  child: child,
+                ),
+                Material(
+                  color: toggleBg,
+                  borderRadius: BorderRadius.circular(8),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => setState(() => d.checked = !d.checked),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: toggleIcon,
+                          strokeWidth: 2,
+                          size: 20,
+                          color: toggleFg,
+                        ),
                       ),
                     ),
                   ),
@@ -552,7 +620,25 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         ],
       ),
     );
+    return _maybeTour(
+      showTour,
+      (child) => _tourStep(
+        key: AppTour.checkItem,
+        step: 2,
+        title: l10n.tourCheckItemTitle,
+        description: l10n.tourCheckItemDesc,
+        child: child,
+      ),
+      card,
+    );
   }
+
+  /// Applies [wrap] only to the first item card, which hosts the tour steps.
+  static Widget _maybeTour(
+    bool enabled,
+    Widget Function(Widget child) wrap,
+    Widget child,
+  ) => enabled ? wrap(child) : child;
 }
 
 class _StatusPill extends StatelessWidget {

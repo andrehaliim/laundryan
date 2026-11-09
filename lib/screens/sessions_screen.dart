@@ -9,6 +9,7 @@ import 'package:laundryan/screens/add_session_screen.dart';
 import 'package:laundryan/screens/history_detail_screen.dart';
 import 'package:laundryan/screens/history_list_screen.dart';
 import 'package:laundryan/screens/session_detail_screen.dart';
+import 'package:laundryan/utils/app_tour.dart';
 import 'package:laundryan/utils/notification_service.dart';
 import 'package:laundryan/utils/session_phase.dart';
 import 'package:laundryan/utils/time_format.dart';
@@ -17,6 +18,7 @@ import 'package:laundryan/widgets/pulse.dart';
 import 'package:laundryan/widgets/session_category_badges.dart';
 import 'package:laundryan/widgets/settings_button.dart';
 import 'package:laundryan/widgets/soft.dart';
+import 'package:laundryan/widgets/tour_step.dart';
 import 'package:provider/provider.dart';
 
 class SessionsScreen extends StatelessWidget {
@@ -47,6 +49,15 @@ class SessionsScreen extends StatelessWidget {
         actionIcon: HugeIcons.strokeRoundedPlusSign,
         onAction: () => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const AddSessionScreen())),
+        wrapAction: (action) => TourStep(
+          scope: AppTour.homeScope,
+          showcaseKey: AppTour.sessionsEmptyAdd,
+          step: 1,
+          total: 1,
+          title: l10n.tourSessionsFirstTitle,
+          description: l10n.tourSessionsFirstDesc,
+          child: action,
+        ),
       );
     } else {
       body = ListView(
@@ -62,10 +73,11 @@ class SessionsScreen extends StatelessWidget {
               title: l10n.noActiveSessions,
               message: l10n.noActiveSessionsHint,
             ),
-          for (final e in sessions.active)
+          for (final (i, e) in sessions.active.indexed)
             SessionCard(
               key: ValueKey(e.session.id),
               entry: e,
+              showTour: i == 0,
               onViewDetails: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => SessionDetailScreen(sessionId: e.session.id),
@@ -73,45 +85,59 @@ class SessionsScreen extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: Text(l10n.history, style: titleStyle)),
-              if (sessions.history.isNotEmpty)
-                InkWell(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const HistoryListScreen(),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      l10n.viewAllHistory(sessions.history.length),
-                      style: Theme.of(context).textTheme.bodySmall
-                          ?.copyWith(color: scheme.onSurface),
-                    ),
-                  ),
+          TourStep(
+            scope: AppTour.homeScope,
+            showcaseKey: AppTour.sessionsHistory,
+            step: 3,
+            total: AppTour.activeSessionSteps.length,
+            title: l10n.history,
+            description: l10n.tourHistoryDesc,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text(l10n.history, style: titleStyle)),
+                    if (sessions.history.isNotEmpty)
+                      InkWell(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const HistoryListScreen(),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            l10n.viewAllHistory(sessions.history.length),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurface),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-            ],
+                const SizedBox(height: 8),
+                if (sessions.history.isEmpty)
+                  EmptyState(
+                    compact: true,
+                    tone: EmptyStateTone.secondary,
+                    icon: HugeIcons.strokeRoundedArchive02,
+                    title: l10n.noHistory,
+                    message: l10n.noHistoryHint,
+                  ),
+                for (final e in sessions.history.take(3))
+                  HistoryCard(
+                    entry: e,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            HistoryDetailScreen(sessionId: e.session.id),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          if (sessions.history.isEmpty)
-            EmptyState(
-              compact: true,
-              tone: EmptyStateTone.secondary,
-              icon: HugeIcons.strokeRoundedArchive02,
-              title: l10n.noHistory,
-              message: l10n.noHistoryHint,
-            ),
-          for (final e in sessions.history.take(3))
-            HistoryCard(
-              entry: e,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => HistoryDetailScreen(sessionId: e.session.id),
-                ),
-              ),
-            ),
         ],
       );
     }
@@ -144,15 +170,24 @@ class SessionsScreen extends StatelessWidget {
       ),
       floatingActionButton: isEmpty
           ? null
-          : FloatingActionButton(
-              heroTag: 'fab_sessions',
-              tooltip: l10n.addSession,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AddSessionScreen()),
-              ),
-              child: const HugeIcon(
-                icon: HugeIcons.strokeRoundedPlusSign,
-                strokeWidth: 2,
+          : TourStep(
+              scope: AppTour.homeScope,
+              showcaseKey: AppTour.sessionsAdd,
+              step: 1,
+              total: AppTour.sessionsStepCount,
+              title: l10n.tourSessionsAddTitle,
+              description: l10n.tourSessionsAddDesc,
+              circle: true,
+              child: FloatingActionButton(
+                heroTag: 'fab_sessions',
+                tooltip: l10n.addSession,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AddSessionScreen()),
+                ),
+                child: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedPlusSign,
+                  strokeWidth: 2,
+                ),
               ),
             ),
       body: body,
@@ -164,7 +199,35 @@ class SessionCard extends StatelessWidget {
   final SessionEntry entry;
   final VoidCallback? onViewDetails;
 
-  const SessionCard({super.key, required this.entry, this.onViewDetails});
+  /// Makes this card's status tracker and details button steps of the
+  /// active-session tour (set on the first active card only).
+  final bool showTour;
+
+  const SessionCard({
+    super.key,
+    required this.entry,
+    this.onViewDetails,
+    this.showTour = false,
+  });
+
+  Widget _tourStep({
+    required GlobalKey key,
+    required int step,
+    required String title,
+    required String description,
+    required Widget child,
+  }) {
+    if (!showTour) return child;
+    return TourStep(
+      scope: AppTour.homeScope,
+      showcaseKey: key,
+      step: step,
+      total: AppTour.activeSessionSteps.length,
+      title: title,
+      description: description,
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -221,40 +284,46 @@ class SessionCard extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
-                SoftCardOutline(
-                  padding: EdgeInsets.all(8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _statusIndicator(
-                        context: context,
-                        title: phaseLabel(SessionPhase.dropped, l10n),
-                        icon: HugeIcons.strokeRoundedPackageMoving,
-                        status: SessionPhase.dropped,
-                        current: s.phase,
-                      ),
-                      _statusIndicator(
-                        context: context,
-                        title: phaseLabel(SessionPhase.washing, l10n),
-                        icon: HugeIcons.strokeRoundedWashingMachine,
-                        status: SessionPhase.washing,
-                        current: s.phase,
-                      ),
-                      _statusIndicator(
-                        context: context,
-                        title: phaseLabel(SessionPhase.pickup, l10n),
-                        icon: HugeIcons.strokeRoundedShoppingBag02,
-                        status: SessionPhase.pickup,
-                        current: s.phase,
-                      ),
-                      _statusIndicator(
-                        context: context,
-                        title: phaseLabel(SessionPhase.verified, l10n),
-                        icon: HugeIcons.strokeRoundedTaskDone01,
-                        status: SessionPhase.verified,
-                        current: s.phase,
-                      ),
-                    ],
+                _tourStep(
+                  key: AppTour.activeStatus,
+                  step: 1,
+                  title: l10n.tourActiveStatusTitle,
+                  description: l10n.tourActiveStatusDesc,
+                  child: SoftCardOutline(
+                    padding: EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.dropped, l10n),
+                          icon: HugeIcons.strokeRoundedPackageMoving,
+                          status: SessionPhase.dropped,
+                          current: s.phase,
+                        ),
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.washing, l10n),
+                          icon: HugeIcons.strokeRoundedWashingMachine,
+                          status: SessionPhase.washing,
+                          current: s.phase,
+                        ),
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.pickup, l10n),
+                          icon: HugeIcons.strokeRoundedShoppingBag02,
+                          status: SessionPhase.pickup,
+                          current: s.phase,
+                        ),
+                        _statusIndicator(
+                          context: context,
+                          title: phaseLabel(SessionPhase.verified, l10n),
+                          icon: HugeIcons.strokeRoundedTaskDone01,
+                          status: SessionPhase.verified,
+                          current: s.phase,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -347,10 +416,16 @@ class SessionCard extends StatelessWidget {
                 ),
                 if (onViewDetails != null) ...[
                   const SizedBox(height: 8),
-                  SoftButton(
-                    label: l10n.viewDetails,
-                    onPressed: onViewDetails,
-                    expanded: true,
+                  _tourStep(
+                    key: AppTour.activeDetails,
+                    step: 2,
+                    title: l10n.tourActiveDetailsTitle,
+                    description: l10n.tourActiveDetailsDesc,
+                    child: SoftButton(
+                      label: l10n.viewDetails,
+                      onPressed: onViewDetails,
+                      expanded: true,
+                    ),
                   ),
                 ],
               ],

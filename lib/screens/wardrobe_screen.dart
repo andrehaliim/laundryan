@@ -7,14 +7,19 @@ import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/screens/wardrobe_item_screen.dart';
+import 'package:laundryan/utils/app_tour.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/photo_storage.dart';
 import 'package:laundryan/widgets/settings_button.dart';
 import 'package:laundryan/widgets/empty_state.dart';
+import 'package:laundryan/widgets/tour_step.dart';
 import 'package:provider/provider.dart';
 
 class WardrobeScreen extends StatefulWidget {
-  const WardrobeScreen({super.key});
+  /// Switches Home to the Sessions tab (used by the tour's last step).
+  final VoidCallback? onOpenSessions;
+
+  const WardrobeScreen({super.key, this.onOpenSessions});
 
   @override
   State<WardrobeScreen> createState() => _WardrobeScreenState();
@@ -71,6 +76,15 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
         actionLabel: l10n.addWardrobe,
         actionIcon: HugeIcons.strokeRoundedPlusSign,
         onAction: () => _open(context),
+        wrapAction: (action) => TourStep(
+          scope: AppTour.homeScope,
+          showcaseKey: AppTour.wardrobeEmptyAdd,
+          step: 1,
+          total: 1,
+          title: l10n.tourWardrobeEmptyTitle,
+          description: l10n.tourWardrobeEmptyDesc,
+          child: action,
+        ),
       );
     } else if (items.isEmpty) {
       body = EmptyState(
@@ -101,10 +115,22 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
           final Category? cat = categories
               .where((c) => c.id == entry.item.categoryId)
               .firstOrNull;
-          return _ItemCard(
+          final card = _ItemCard(
             entry: entry,
             category: cat,
             onTap: () => _open(context, entry),
+          );
+          if (i != 0) return card;
+          return TourStep(
+            scope: AppTour.homeScope,
+            showcaseKey: AppTour.wardrobeItemCard,
+            step: 3,
+            total: AppTour.wardrobeSteps.length,
+            title: l10n.tourWardrobeCardTitle,
+            description: l10n.tourWardrobeCardDesc,
+            finishLabel: l10n.tourOpenSessions,
+            onFinish: widget.onOpenSessions,
+            child: card,
           );
         },
       );
@@ -156,52 +182,68 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: ValueListenableBuilder(
-                      valueListenable: _search,
-                      builder: (context, value, _) => SoftTextField(
-                        controller: _search,
-                        hint: l10n.searchHint,
-                        onChanged: wardrobe.setQuery,
-                        prefixIcon: const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedSearch01,
-                            size: 20,
-                            strokeWidth: 2,
+                    child: TourStep(
+                      scope: AppTour.homeScope,
+                      showcaseKey: AppTour.wardrobeSearch,
+                      step: 1,
+                      total: AppTour.wardrobeSteps.length,
+                      title: l10n.tourWardrobeSearchTitle,
+                      description: l10n.tourWardrobeSearchDesc,
+                      child: ValueListenableBuilder(
+                        valueListenable: _search,
+                        builder: (context, value, _) => SoftTextField(
+                          controller: _search,
+                          hint: l10n.searchHint,
+                          onChanged: wardrobe.setQuery,
+                          prefixIcon: const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedSearch01,
+                              size: 20,
+                              strokeWidth: 2,
+                            ),
                           ),
-                        ),
-                        suffixIcon: value.text.isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: l10n.clearSearch,
-                                onPressed: () {
-                                  _search.clear();
-                                  wardrobe.setQuery('');
-                                },
-                                icon: const HugeIcon(
-                                  icon: HugeIcons.strokeRoundedCancelCircle,
-                                  size: 20,
-                                  strokeWidth: 2,
+                          suffixIcon: value.text.isEmpty
+                              ? null
+                              : IconButton(
+                                  tooltip: l10n.clearSearch,
+                                  onPressed: () {
+                                    _search.clear();
+                                    wardrobe.setQuery('');
+                                  },
+                                  icon: const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCancelCircle,
+                                    size: 20,
+                                    strokeWidth: 2,
+                                  ),
                                 ),
-                              ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  SizedBox.square(
-                    dimension: 48,
-                    child: SoftCard(
-                      onTap: wardrobe.toggleSort,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: switch (wardrobe.sort) {
-                            WardrobeSort.alphabetDesc =>
-                              HugeIcons.strokeRoundedSortingZA01,
-                            WardrobeSort.alphabetAsc =>
-                              HugeIcons.strokeRoundedSortingAZ02,
-                          },
-                          size: 22,
-                          strokeWidth: 2,
+                  TourStep(
+                    scope: AppTour.homeScope,
+                    showcaseKey: AppTour.wardrobeSort,
+                    step: 2,
+                    total: AppTour.wardrobeSteps.length,
+                    title: l10n.tourWardrobeSortTitle,
+                    description: l10n.tourWardrobeSortDesc,
+                    child: SizedBox.square(
+                      dimension: 48,
+                      child: SoftCard(
+                        onTap: wardrobe.toggleSort,
+                        child: Center(
+                          child: HugeIcon(
+                            icon: switch (wardrobe.sort) {
+                              WardrobeSort.alphabetDesc =>
+                                HugeIcons.strokeRoundedSortingZA01,
+                              WardrobeSort.alphabetAsc =>
+                                HugeIcons.strokeRoundedSortingAZ02,
+                            },
+                            size: 22,
+                            strokeWidth: 2,
+                          ),
                         ),
                       ),
                     ),

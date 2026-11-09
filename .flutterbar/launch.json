@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "configurations": [
+    {
+      "name": "Laundryan (debug)",
+      "program": "lib/main.dart",
+      "mode": "debug",
+      "args": []
+    },
+    {
+      "name": "Laundryan (profile)",
+      "program": "lib/main.dart",
+      "mode": "profile",
+      "args": []
+    },
+    {
+      "name": "Laundryan (release)",
+      "program": "lib/main.dart",
+      "mode": "release",
+      "args": []
+    }
+  ]
+}

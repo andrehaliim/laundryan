@@ -7,8 +7,10 @@ import 'package:laundryan/data/wardrobe_repository.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
 import 'package:laundryan/providers/category_provider.dart';
 import 'package:laundryan/providers/session_provider.dart';
+import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/providers/wardrobe_provider.dart';
 import 'package:laundryan/screens/wardrobe_item_screen.dart';
+import 'package:laundryan/utils/app_tour.dart';
 import 'package:laundryan/utils/category_utils.dart';
 import 'package:laundryan/utils/notification_service.dart';
 import 'package:laundryan/utils/photo_storage.dart';
@@ -16,6 +18,7 @@ import 'package:laundryan/utils/time_format.dart';
 import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:laundryan/widgets/empty_state.dart';
 import 'package:laundryan/widgets/soft.dart';
+import 'package:laundryan/widgets/tour_step.dart';
 import 'package:provider/provider.dart';
 
 class AddSessionScreen extends StatefulWidget {
@@ -39,16 +42,58 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   /// itemId -> qty to wash (in selection order)
   final Map<int, int> _selected = {};
 
+  late final ScreenTour _tour;
+  final _scroll = ScrollController();
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _dropOff = DateTime(now.year, now.month, now.day, now.hour, now.minute);
     _ready = DateTime(now.year, now.month, now.day + 2, 17);
+    _tour = ScreenTour(
+      scope: AppTour.addSessionScope,
+      id: AppTour.addSession,
+      settings: context.read<SettingsProvider>(),
+    )..startIfNew(AppTour.addSessionSteps);
+  }
+
+  /// Wraps [child] as step [step] of this screen's feature tour.
+  Widget _tourStep({
+    required GlobalKey key,
+    required int step,
+    required String title,
+    required String description,
+    required Widget child,
+    VoidCallback? onFinish,
+  }) {
+    return TourStep(
+      scope: AppTour.addSessionScope,
+      showcaseKey: key,
+      step: step,
+      total: AppTour.addSessionSteps.length,
+      title: title,
+      description: description,
+      onFinish: onFinish,
+      child: child,
+    );
+  }
+
+  /// After the tour's last step, bring the laundromat info back into view so
+  /// the user can start filling the form right away.
+  void _scrollToTop() {
+    if (!_scroll.hasClients) return;
+    _scroll.animateTo(
+      0,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
   void dispose() {
+    _tour.dispose();
+    _scroll.dispose();
     _title.dispose();
     _place.dispose();
     _address.dispose();
@@ -135,8 +180,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         estimatedReadyAt: _ready,
         reminderEnabled: _reminder,
         items: [
-          for (final e in _selected.entries)
-            SessionItemInput(e.key, e.value),
+          for (final e in _selected.entries) SessionItemInput(e.key, e.value),
         ],
       );
     } catch (_) {
@@ -496,180 +540,193 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         body: Form(
           key: _formKey,
           child: ListView(
+            controller: _scroll,
             padding: const EdgeInsets.all(16),
             children: [
-              SoftCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: scheme.primaryContainer.withValues(
-                              alpha: 0.4,
+              _tourStep(
+                key: AppTour.sessionPlace,
+                step: 1,
+                title: l10n.tourSessionPlaceTitle,
+                description: l10n.tourSessionPlaceDesc,
+                child: SoftCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: scheme.primaryContainer.withValues(
+                                alpha: 0.4,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedWashingMachine,
-                            color: scheme.onPrimaryContainer,
-                            size: 20,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(l10n.laundromatInfo, style: titleStyle),
-                            Text(
-                              l10n.laundromatInfoSubtitle,
-                              style: subtitleStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedWashingMachine,
+                              color: scheme.onPrimaryContainer,
+                              size: 20,
+                              strokeWidth: 2,
                             ),
-                          ],
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l10n.laundromatInfo, style: titleStyle),
+                              Text(
+                                l10n.laundromatInfoSubtitle,
+                                style: subtitleStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text(l10n.laundryServiceName, style: subtitleStyle),
+                          SizedBox(width: 4),
+                          Text('*', style: TextStyle(color: scheme.error)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SoftTextFieldOutline(
+                        controller: _place,
+                        textCapitalization: TextCapitalization.words,
+                        prefixIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedStore01,
+                          size: 20,
+                          strokeWidth: 2,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Text(l10n.laundryServiceName, style: subtitleStyle),
-                        SizedBox(width: 4),
-                        Text('*', style: TextStyle(color: scheme.error)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    SoftTextFieldOutline(
-                      controller: _place,
-                      textCapitalization: TextCapitalization.words,
-                      prefixIcon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedStore01,
-                        size: 20,
-                        strokeWidth: 2,
+                        validator: required,
                       ),
-                      validator: required,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(l10n.dropOffAddress, style: subtitleStyle),
-                    const SizedBox(height: 8),
-                    SoftTextFieldOutline(
-                      controller: _address,
-                      textCapitalization: TextCapitalization.sentences,
-                      prefixIcon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedLocation01,
-                        size: 20,
-                        strokeWidth: 2,
+                      const SizedBox(height: 16),
+                      Text(l10n.dropOffAddress, style: subtitleStyle),
+                      const SizedBox(height: 8),
+                      SoftTextFieldOutline(
+                        controller: _address,
+                        textCapitalization: TextCapitalization.sentences,
+                        prefixIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedLocation01,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(l10n.contactPhone, style: subtitleStyle),
-                    const SizedBox(height: 8),
-                    SoftTextFieldOutline(
-                      controller: _phone,
-                      keyboardType: TextInputType.phone,
-                      prefixIcon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCall02,
-                        size: 20,
-                        strokeWidth: 2,
+                      const SizedBox(height: 16),
+                      Text(l10n.contactPhone, style: subtitleStyle),
+                      const SizedBox(height: 8),
+                      SoftTextFieldOutline(
+                        controller: _phone,
+                        keyboardType: TextInputType.phone,
+                        prefixIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCall02,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '${l10n.sessionTitleLabel} ${l10n.optional}',
-                      style: subtitleStyle,
-                    ),
-                    const SizedBox(height: 8),
-                    SoftTextFieldOutline(
-                      controller: _title,
-                      hint: l10n.sessionNoteHint,
-                      textCapitalization: TextCapitalization.sentences,
-                      prefixIcon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedNote,
-                        size: 20,
-                        strokeWidth: 2,
+                      const SizedBox(height: 16),
+                      Text(
+                        '${l10n.sessionTitleLabel} ${l10n.optional}',
+                        style: subtitleStyle,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      SoftTextFieldOutline(
+                        controller: _title,
+                        hint: l10n.sessionNoteHint,
+                        textCapitalization: TextCapitalization.sentences,
+                        prefixIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedNote,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              SoftCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: scheme.primaryContainer.withValues(
-                              alpha: 0.4,
+              _tourStep(
+                key: AppTour.sessionSchedule,
+                step: 2,
+                title: l10n.tourSessionScheduleTitle,
+                description: l10n.tourSessionScheduleDesc,
+                child: SoftCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: scheme.primaryContainer.withValues(
+                                alpha: 0.4,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedTimeSchedule,
-                            color: scheme.onPrimaryContainer,
-                            size: 20,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(l10n.scheduleAndTiming, style: titleStyle),
-                            Text(
-                              l10n.scheduleAndTimingSubtitle,
-                              style: subtitleStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedTimeSchedule,
+                              color: scheme.onPrimaryContainer,
+                              size: 20,
+                              strokeWidth: 2,
                             ),
-                          ],
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l10n.scheduleAndTiming, style: titleStyle),
+                              Text(
+                                l10n.scheduleAndTimingSubtitle,
+                                style: subtitleStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(l10n.dropOffDate, style: subtitleStyle),
+                      const SizedBox(height: 8),
+                      _dateField(
+                        '',
+                        dateTimeText(_dropOff),
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedDateTime,
+                          size: 20,
+                          strokeWidth: 2,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(l10n.dropOffDate, style: subtitleStyle),
-                    const SizedBox(height: 8),
-                    _dateField(
-                      '',
-                      dateTimeText(_dropOff),
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedDateTime,
-                        size: 20,
-                        strokeWidth: 2,
+                        _pickDropOff,
                       ),
-                      _pickDropOff,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(l10n.estimatedReady, style: subtitleStyle),
-                    const SizedBox(height: 8),
-                    _dateField(
-                      '',
-                      dateTimeText(_ready),
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedClock01,
-                        size: 20,
-                        strokeWidth: 2,
+                      const SizedBox(height: 16),
+                      Text(l10n.estimatedReady, style: subtitleStyle),
+                      const SizedBox(height: 8),
+                      _dateField(
+                        '',
+                        dateTimeText(_ready),
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedClock01,
+                          size: 20,
+                          strokeWidth: 2,
+                        ),
+                        _pickReady,
                       ),
-                      _pickReady,
-                    ),
-                    const SizedBox(height: 16),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.reminder, style: titleStyle),
-                      subtitle: Text(l10n.reminderHint, style: subtitleStyle),
-                      value: _reminder,
-                      onChanged: (v) => setState(() => _reminder = v),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.reminder, style: titleStyle),
+                        subtitle: Text(l10n.reminderHint, style: subtitleStyle),
+                        value: _reminder,
+                        onChanged: (v) => setState(() => _reminder = v),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -708,12 +765,18 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                           ],
                         ),
                         const Spacer(),
-                        SoftButton(
-                          label: l10n.wardrobe,
-                          icon: HugeIcons.strokeRoundedPlusSign,
-                          variant: SoftButtonVariant.primary,
-                          onPressed: _openPicker,
-                          isSmall: true,
+                        _tourStep(
+                          key: AppTour.sessionItems,
+                          step: 3,
+                          title: l10n.tourSessionItemsTitle,
+                          description: l10n.tourSessionItemsDesc,
+                          child: SoftButton(
+                            label: l10n.wardrobe,
+                            icon: HugeIcons.strokeRoundedPlusSign,
+                            variant: SoftButtonVariant.primary,
+                            onPressed: _openPicker,
+                            isSmall: true,
+                          ),
                         ),
                       ],
                     ),
@@ -740,12 +803,19 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              SoftButton(
-                label: l10n.startSession,
-                icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                onPressed: _selected.isEmpty || _saving
-                    ? null
-                    : () => _save(l10n),
+              _tourStep(
+                key: AppTour.sessionStart,
+                step: 4,
+                title: l10n.tourSessionStartTitle,
+                description: l10n.tourSessionStartDesc,
+                onFinish: _scrollToTop,
+                child: SoftButton(
+                  label: l10n.startSession,
+                  icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                  onPressed: _selected.isEmpty || _saving
+                      ? null
+                      : () => _save(l10n),
+                ),
               ),
             ],
           ),
