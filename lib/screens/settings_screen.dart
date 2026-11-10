@@ -121,21 +121,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          _sectionLabel(context, l10n.general),
-          SoftCard(
-            child: _tile(
-              context,
-              icon: HugeIcons.strokeRoundedBookOpen01,
-              bg: scheme.primaryContainer,
-              fg: scheme.onPrimaryContainer,
-              title: l10n.showOnboarding,
-              subtitle: l10n.showOnboardingHint,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
           _sectionLabel(context, l10n.about),
           SoftCard(
             child: Column(
@@ -195,6 +180,20 @@ class SettingsScreen extends StatelessWidget {
                     title: 'Reset tour',
                     subtitle: 'Show coach marks again after app restart',
                     onTap: () => _resetTours(context),
+                  ),
+                  _divider(),
+                  _tile(
+                    context,
+                    icon: HugeIcons.strokeRoundedBookOpen01,
+                    bg: scheme.surfaceContainerHigh,
+                    fg: scheme.onSurfaceVariant,
+                    title: l10n.showOnboarding,
+                    subtitle: l10n.showOnboardingHint,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const OnboardingScreen(),
+                      ),
+                    ),
                   ),
                 ],
               ),
