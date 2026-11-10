@@ -3,9 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:laundryan/data/app_database.dart';
+import 'package:laundryan/data/demo_data.dart';
 import 'package:laundryan/l10n/app_localizations.dart';
+import 'package:laundryan/providers/session_provider.dart';
 import 'package:laundryan/providers/settings_provider.dart';
 import 'package:laundryan/screens/onboarding_screen.dart';
+import 'package:laundryan/utils/notification_service.dart';
+import 'package:laundryan/widgets/confirm_dialog.dart';
 import 'package:laundryan/widgets/soft.dart';
 import 'package:laundryan/widgets/category_sheet.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -17,7 +21,7 @@ typedef _Option<T> = ({T value, String label, List<List<dynamic>> icon});
 final _packageInfo = PackageInfo.fromPlatform();
 
 final _privacyPolicyUrl = Uri.parse(
-  'https://andrehaliim.vercel.app/projects/laundryan/privacy',
+  'https://andrehaliim.com/projects/laundryan/privacy',
 );
 
 class SettingsScreen extends StatelessWidget {
@@ -174,6 +178,16 @@ class SettingsScreen extends StatelessWidget {
                   _divider(),
                   _tile(
                     context,
+                    icon: HugeIcons.strokeRoundedDatabaseAdd,
+                    bg: scheme.surfaceContainerHigh,
+                    fg: scheme.onSurfaceVariant,
+                    title: 'Seed demo data',
+                    subtitle: 'Replace all data with store screenshot data',
+                    onTap: () => _seedDemoData(context),
+                  ),
+                  _divider(),
+                  _tile(
+                    context,
                     icon: HugeIcons.strokeRoundedRefresh,
                     bg: scheme.surfaceContainerHigh,
                     fg: scheme.onSurfaceVariant,
@@ -204,6 +218,42 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Debug only: replaces the wardrobe, sessions and custom categories with
+  /// demo data for store screenshots, in the current app language.
+  Future<void> _seedDemoData(BuildContext context) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: 'Seed demo data?',
+      message:
+          'All wardrobe items, sessions and custom categories on this '
+          'device will be replaced with demo data.',
+      confirmLabel: 'Replace data',
+      tone: ConfirmTone.danger,
+    );
+    if (!ok || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final db = context.read<AppDatabase>();
+    final lang = context.read<SettingsProvider>().locale.languageCode;
+    final activeIds = context
+        .read<SessionProvider>()
+        .active
+        .map((e) => e.session.id)
+        .toList();
+    try {
+      for (final id in activeIds) {
+        await NotificationService.cancel(id);
+      }
+      await seedDemoData(db, lang);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Demo data seeded.')),
+      );
+    } catch (e) {
+      debugPrint('Seeding demo data failed: $e');
+      messenger.showSnackBar(SnackBar(content: Text('Seeding failed: $e')));
+    }
   }
 
   /// Debug only: clears every "tour seen" flag so tours replay on next launch.

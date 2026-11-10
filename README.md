@@ -185,7 +185,7 @@ Output is written to `store_screenshots/framed/`.
 
 ## Author
 
-**Andre Haliim**: [andrehaliim.vercel.app](https://andrehaliim.vercel.app)
+**Andre Haliim**: [andrehaliim.com](https://andrehaliim.com)
 
 ## License
 
